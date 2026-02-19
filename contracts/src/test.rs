@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use soroban_sdk::{Address, Env, Symbol};
+    use soroban_sdk::{Address, Bytes, Env};
     use crate::{VerinodeContract, VerinodeContractClient};
 
     #[test]
@@ -27,8 +27,8 @@ mod tests {
         client.initialize(&admin);
         
         let issuer = Address::generate(&env);
-        let event_data = b"test event data".to_vec();
-        let hash = b"test hash".to_vec();
+        let event_data = Bytes::from_slice(&env, b"test event data");
+        let hash = Bytes::from_slice(&env, b"test hash");
         
         let proof_id = client.issue_proof(&issuer, &event_data, &hash);
         assert_eq!(proof_id, 1);
@@ -49,8 +49,8 @@ mod tests {
         client.initialize(&admin);
         
         let issuer = Address::generate(&env);
-        let event_data = b"test event data".to_vec();
-        let hash = b"test hash".to_vec();
+        let event_data = Bytes::from_slice(&env, b"test event data");
+        let hash = Bytes::from_slice(&env, b"test hash");
         
         let proof_id = client.issue_proof(&issuer, &event_data, &hash);
         
@@ -74,8 +74,8 @@ mod tests {
         let issuer1 = Address::generate(&env);
         let issuer2 = Address::generate(&env);
         
-        let event_data = b"test event data".to_vec();
-        let hash = b"test hash".to_vec();
+        let event_data = Bytes::from_slice(&env, b"test event data");
+        let hash = Bytes::from_slice(&env, b"test hash");
         
         // Issue proofs for both issuers
         client.issue_proof(&issuer1, &event_data, &hash);

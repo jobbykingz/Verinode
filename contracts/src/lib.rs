@@ -39,8 +39,8 @@ impl VerinodeContract {
     pub fn issue_proof(
         env: Env,
         issuer: Address,
-        event_data: Vec<u8>,
-        hash: Vec<u8>,
+        event_data: Bytes,
+        hash: Bytes,
     ) -> u64 {
         issuer.require_auth();
         
@@ -110,5 +110,51 @@ impl VerinodeContract {
     /// Get total proof count
     pub fn get_proof_count(env: Env) -> u64 {
         env.storage().instance().get(&DataKey::ProofCount).unwrap_or(0)
+    }
+
+    // Add a new version to a proof
+    pub fn add_version(
+        env: Env, 
+        proof_id: String, 
+        hash: String, 
+        uri: String, 
+        author: Address,
+        message: String,
+        branch: String
+    ) -> u32 {
+        author.require_auth();
+        
+        let mut versions: Vec<ProofVersion> = env.storage().persistent().get(&proof_id).unwrap_or(Vec::new(&env));
+        let new_version_num = versions.len() + 1;
+        
+        let version = ProofVersion {
+            version: new_version_num,
+            hash,
+            uri,
+            timestamp: env.ledger().timestamp(),
+            author,
+            message,
+            branch,
+        };
+        
+        versions.push_back(version);
+        env.storage().persistent().set(&proof_id, &versions);
+        
+        new_version_num
+    }
+
+    // Get the full history of a proof
+    pub fn get_history(env: Env, proof_id: String) -> Vec<ProofVersion> {
+        env.storage().persistent().get(&proof_id).unwrap_or(Vec::new(&env))
+    }
+
+    // Get a specific version
+    pub fn get_version(env: Env, proof_id: String, version: u32) -> Option<ProofVersion> {
+        let versions: Vec<ProofVersion> = env.storage().persistent().get(&proof_id).unwrap_or(Vec::new(&env));
+        if version == 0 || version > versions.len() {
+            None
+        } else {
+            Some(versions.get(version - 1).unwrap())
+        }
     }
 }
