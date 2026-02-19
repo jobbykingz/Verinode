@@ -19,14 +19,14 @@ jobs:
         sudo mv soroban /usr/local/bin/
     
     - name: Setup Rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: stable
+        targets: wasm32-unknown-unknown
     
     - name: Build contracts
       run: |
         cd contracts
-        cargo build --release
+        cargo build --target wasm32-unknown-unknown --release
     
     - name: Test contracts
       run: |
