@@ -8,6 +8,7 @@ import IssueProof from './pages/IssueProof';
 import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
+import Search from './pages/Search';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ function App() {
               <Route path="/verify" element={<VerifyProof />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/search" element={<Search />} />
             </Routes>
           </main>
           <Toaster position="top-right" />

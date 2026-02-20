@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, FileText, CheckCircle, BarChart3, ShoppingBag } from 'lucide-react';
+import { Shield, FileText, CheckCircle, BarChart3, ShoppingBag, Search } from 'lucide-react';
 
 const Navbar = () => {
   return (
@@ -47,6 +47,13 @@ const Navbar = () => {
             >
               <ShoppingBag className="h-4 w-4" />
               <span>Marketplace</span>
+            </Link>
+            <Link
+              to="/search"
+              className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search</span>
             </Link>
           </div>
         </div>
