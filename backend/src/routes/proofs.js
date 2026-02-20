@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const StellarSDK = require('@stellar/stellar-sdk');
+const { ClientEncryptionService } = require('../security/clientEncryption');
+const { PrivacyControlsService } = require('../security/privacyControls');
 
 // Mock storage - replace with database
 let proofs = [];
@@ -18,16 +20,31 @@ router.post('/issue', [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { eventData, hash, issuerAddress } = req.body;
+    const { eventData, hash, issuerAddress, encryptionPassword, privacySettings } = req.body;
+    
+    // Handle encryption if requested
+    let processedEventData = eventData;
+    let encrypted = false;
+    
+    if (encryptionPassword) {
+      processedEventData = ClientEncryptionService.encrypt(eventData, encryptionPassword);
+      encrypted = true;
+    }
+    
+    // Set privacy controls
+    const privacyService = new PrivacyControlsService();
+    const finalPrivacySettings = privacyService.createPrivacySettings(privacySettings || {});
     
     const proof = {
       id: proofIdCounter++,
       issuer: issuerAddress,
-      eventData,
+      eventData: processedEventData,
       hash,
       timestamp: new Date().toISOString(),
       verified: false,
-      stellarTxId: null
+      stellarTxId: null,
+      encrypted,
+      privacySettings: finalPrivacySettings
     };
 
     proofs.push(proof);
@@ -48,7 +65,22 @@ router.get('/:id', (req, res) => {
   if (!proof) {
     return res.status(404).json({ error: 'Proof not found' });
   }
-  res.json({ proof });
+  
+  // Apply privacy controls
+  const privacyService = new PrivacyControlsService();
+  const userAddress = req.query.userAddress || 'anonymous'; // In real implementation, this would come from auth
+  const requestedActions = req.query.actions ? req.query.actions.split(',') : ['view'];
+  
+  const canAccess = privacyService.canAccess(proof.privacySettings, userAddress, requestedActions);
+  
+  if (!canAccess.allowed) {
+    return res.status(403).json({ error: canAccess.reason });
+  }
+  
+  // Apply privacy filter to the proof data
+  const filteredProof = privacyService.applyPrivacyFilter(proof, proof.privacySettings, userAddress);
+  
+  res.json({ proof: filteredProof });
 });
 
 // Get all proofs
@@ -74,16 +106,59 @@ router.post('/verify/:id', async (req, res) => {
     if (!proof) {
       return res.status(404).json({ error: 'Proof not found' });
     }
-
-    // Mock verification - implement actual Stellar transaction
-    proof.verified = true;
-    proof.verifiedAt = new Date().toISOString();
     
-    res.json({
-      success: true,
-      proof,
-      message: 'Proof verified successfully'
-    });
+    // Apply privacy controls for verification
+    const privacyService = new PrivacyControlsService();
+    const userAddress = req.body.verifierAddress || 'anonymous'; // In real implementation, this would come from auth
+    const requestedActions = ['verify'];
+    
+    const canAccess = privacyService.canAccess(proof.privacySettings, userAddress, requestedActions);
+    
+    if (!canAccess.allowed) {
+      return res.status(403).json({ error: canAccess.reason });
+    }
+    
+    // Check if selective disclosure is needed
+    const selectiveFields = req.body.selectiveFields || [];
+    
+    if (selectiveFields.length > 0) {
+      // Apply selective disclosure
+      const disclosureService = new SelectiveDisclosureService();
+      
+      // Create a temporary policy for verification
+      const policy = await disclosureService.createDisclosurePolicy(
+        proof,
+        selectiveFields,
+        'Verification request',
+        userAddress,
+        'temp-key' // In real implementation, use proper key
+      );
+      
+      const selectiveData = disclosureService.generateSelectiveDisclosure(
+        proof,
+        policy
+      );
+      
+      // Mock verification on the selectively disclosed data
+      proof.verified = true;
+      proof.verifiedAt = new Date().toISOString();
+      
+      res.json({
+        success: true,
+        proof: selectiveData.disclosedData, // Return only selectively disclosed data
+        message: 'Proof verified successfully with selective disclosure'
+      });
+    } else {
+      // Standard verification
+      proof.verified = true;
+      proof.verifiedAt = new Date().toISOString();
+      
+      res.json({
+        success: true,
+        proof,
+        message: 'Proof verified successfully'
+      });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

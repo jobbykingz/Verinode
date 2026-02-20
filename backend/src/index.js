@@ -9,6 +9,9 @@ const authRoutes = require('./routes/auth');
 const stellarRoutes = require('./routes/stellar');
 const marketplaceRoutes = require('./routes/marketplace');
 const searchRoutes = require('./routes/search');
+const securityRoutes = require('./routes/security');
+const sharingRoutes = require('./routes/sharing');
+const complianceRoutes = require('./routes/compliance');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +34,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stellar', stellarRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/sharing', sharingRoutes);
+app.use('/api/compliance', complianceRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

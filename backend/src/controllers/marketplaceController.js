@@ -1,5 +1,6 @@
 const { templateService } = require('../services/templateService');
 const { paymentService } = require('../services/paymentService');
+const AuditLogger = require('../compliance/auditLogger');
 
 // Get all templates with filtering and pagination
 const getTemplates = async (req, res) => {
@@ -92,6 +93,28 @@ const createTemplate = async (req, res) => {
     const templateData = req.body;
     
     const template = await templateService.createTemplate(templateData, userId);
+
+    // Log compliance event for template creation
+    await AuditLogger.logProofEvent(
+      'TEMPLATE_CREATED',
+      {
+        id: template._id,
+        name: template.name,
+        category: template.category,
+        price: template.price,
+        sensitive: template.category === 'financial' || template.category === 'healthcare'
+      },
+      {
+        id: userId,
+        name: req.user?.name || 'Unknown User',
+        ipAddress: req.ip || req.connection?.remoteAddress,
+        userAgent: req.get('User-Agent')
+      },
+      {
+        purpose: 'marketplace_template_creation',
+        templateTags: template.tags
+      }
+    );
 
     res.status(201).json({
       success: true,
@@ -232,11 +255,57 @@ const purchaseTemplate = async (req, res) => {
     });
 
     if (!paymentResult.success) {
+      // Log failed payment attempt
+      await AuditLogger.logAccessEvent(
+        'PAYMENT_FAILED',
+        {
+          resourceId: id,
+          resourceType: 'TEMPLATE',
+          resourceName: 'Template Purchase',
+          requestedActions: ['PURCHASE'],
+          grantedActions: [],
+          reason: 'payment_processing_failed'
+        },
+        {
+          id: userId,
+          name: req.user?.name || 'Unknown User',
+          ipAddress: req.ip || req.connection?.remoteAddress
+        },
+        {
+          status: 'FAILURE',
+          error: paymentResult.message,
+          amount: amount
+        }
+      );
+
       return res.status(400).json({
         success: false,
         message: paymentResult.message
       });
     }
+
+    // Log successful payment and template access
+    await AuditLogger.logAccessEvent(
+      'TEMPLATE_PURCHASED',
+      {
+        resourceId: id,
+        resourceType: 'TEMPLATE',
+        resourceName: paymentResult.template.name,
+        requestedActions: ['PURCHASE', 'ACCESS'],
+        grantedActions: ['PURCHASE', 'ACCESS'],
+        reason: 'template_purchase_completed'
+      },
+      {
+        id: userId,
+        name: req.user?.name || 'Unknown User',
+        ipAddress: req.ip || req.connection?.remoteAddress
+      },
+      {
+        amount: amount,
+        transactionId: paymentResult.transactionId,
+        paymentMethod: paymentMethod
+      }
+    );
 
     res.status(200).json({
       success: true,

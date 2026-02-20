@@ -1,6 +1,7 @@
 #![no_std]
 #[cfg(test)]
 mod test;
+mod privacyVerification;
 
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec};
 
