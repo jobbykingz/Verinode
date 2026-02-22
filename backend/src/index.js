@@ -4,6 +4,17 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Import monitoring components
+const { monitoringService } = require('./services/monitoringService');
+const { metricsCollector } = require('./utils/metricsCollector');
+const { 
+  requestLogger, 
+  errorLogger, 
+  securityLogger, 
+  performanceLogger, 
+  complianceLogger 
+} = require('./middleware/logging');
+
 const proofRoutes = require('./routes/proofs');
 const authRoutes = require('./routes/auth');
 const stellarRoutes = require('./routes/stellar');
@@ -22,12 +33,30 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
+// Logging middleware
+app.use(requestLogger());
+app.use(securityLogger());
+app.use(performanceLogger(1000)); // Log requests taking > 1 second
+app.use(complianceLogger());
+
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+
+// Metrics endpoint for Prometheus
+app.get('/metrics', async (req, res) => {
+  try {
+    const metrics = await metricsCollector.getMetrics();
+    res.set('Content-Type', metricsCollector.getRegistry().contentType);
+    res.end(metrics);
+  } catch (error) {
+    console.error('Error collecting metrics:', error);
+    res.status(500).send('Error collecting metrics');
+  }
+});
 
 // Routes
 app.use('/api/proofs', proofRoutes);
@@ -42,11 +71,51 @@ app.use('/api/analytics', analyticsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
 });
 
-app.listen(PORT, () => {
+// Error handling middleware
+app.use(errorLogger());
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Start server
+const server = app.listen(PORT, () => {
   console.log(`Verinode backend running on port ${PORT}`);
+  console.log(`Metrics available at http://localhost:${PORT}/metrics`);
+  console.log(`Health check at http://localhost:${PORT}/health`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Shutting down gracefully...');
+  server.close(() => {
+    monitoringService.shutdown();
+    console.log('Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGTERM', () => {
+  console.log('Shutting down gracefully...');
+  server.close(() => {
+    monitoringService.shutdown();
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
 module.exports = app;

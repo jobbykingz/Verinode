@@ -1,0 +1,159 @@
+# Smart Contract Monitoring Configuration
+
+# Contract definitions
+contracts:
+  - address: "CA3D5KRYM6CB7OWQ6TWYRR3Z4T7GNZLKERYNZGGA5SOAOPIFY6YQGAXE"
+    name: "proof-verification-contract"
+    description: "Main proof verification smart contract"
+    abi: "./contracts/proof-verification.abi"
+    monitoring:
+      enabled: true
+      events:
+        - name: "ProofVerified"
+          description: "Event emitted when a proof is successfully verified"
+          alert_on: true
+          severity: "medium"
+        - name: "ProofVerificationFailed"
+          description: "Event emitted when proof verification fails"
+          alert_on: true
+          severity: "high"
+      metrics:
+        - name: "verification_count"
+          type: "counter"
+          description: "Total number of proof verifications"
+        - name: "verification_success_rate"
+          type: "gauge"
+          description: "Success rate percentage of verifications"
+        - name: "average_verification_time"
+          type: "histogram"
+          description: "Time taken for proof verification"
+          buckets: [0.1, 0.5, 1.0, 2.0, 5.0]
+
+  - address: "CB64D3G7SM2RTH6JYX3F5CVGJW24T4RMYG2Q3M32FBH37S6ZCR5ZQK2P"
+    name: "template-registry-contract"
+    description: "Template registry and management contract"
+    abi: "./contracts/template-registry.abi"
+    monitoring:
+      enabled: true
+      events:
+        - name: "TemplateCreated"
+          description: "Event emitted when a new template is created"
+          alert_on: false
+          severity: "low"
+        - name: "TemplateUpdated"
+          description: "Event emitted when a template is updated"
+          alert_on: false
+          severity: "low"
+        - name: "TemplateDeleted"
+          description: "Event emitted when a template is deleted"
+          alert_on: true
+          severity: "medium"
+      metrics:
+        - name: "template_count"
+          type: "gauge"
+          description: "Current number of registered templates"
+        - name: "template_operations"
+          type: "counter"
+          description: "Total template operations (create/update/delete)"
+
+  - address: "CC77JXQ4WZ52K43HQ4A7ZJ5FG2Q3M32FBH37S6ZCR5ZQK2PABCDEF"
+    name: "governance-contract"
+    description: "Governance and voting contract"
+    abi: "./contracts/governance.abi"
+    monitoring:
+      enabled: true
+      events:
+        - name: "ProposalCreated"
+          description: "Event emitted when a new proposal is created"
+          alert_on: true
+          severity: "medium"
+        - name: "ProposalExecuted"
+          description: "Event emitted when a proposal is executed"
+          alert_on: true
+          severity: "high"
+        - name: "VoteCast"
+          description: "Event emitted when a vote is cast"
+          alert_on: false
+          severity: "low"
+      metrics:
+        - name: "active_proposals"
+          type: "gauge"
+          description: "Number of currently active proposals"
+        - name: "total_proposals"
+          type: "counter"
+          description: "Total number of proposals created"
+        - name: "total_votes"
+          type: "counter"
+          description: "Total number of votes cast"
+
+# Monitoring settings
+monitoring:
+  # Polling interval in milliseconds
+  polling_interval: 5000
+  
+  # Ledger lookback window (number of ledgers to check)
+  lookback_window: 100
+  
+  # Event processing settings
+  event_processing:
+    batch_size: 50
+    max_concurrent: 5
+    
+  # Alerting configuration
+  alerts:
+    enabled: true
+    # Minimum severity level to trigger alerts
+    min_severity: "medium"
+    # Alert cooldown period in seconds
+    cooldown_period: 300
+    
+  # Metrics collection
+  metrics:
+    enabled: true
+    # Metrics output format
+    format: "prometheus"
+    # Output file path
+    output_file: "./monitoring/contract-metrics.prom"
+    # Metrics retention in days
+    retention_days: 30
+
+# Network configuration
+network:
+  # Stellar network to monitor
+  horizon_url: "https://horizon-testnet.stellar.org"
+  # For mainnet, use: "https://horizon.stellar.org"
+  
+  # Timeout for API requests in milliseconds
+  request_timeout: 10000
+  
+  # Retry configuration
+  retry:
+    max_attempts: 3
+    delay: 1000
+    backoff_multiplier: 2
+
+# Logging configuration
+logging:
+  level: "info"
+  format: "json"
+  outputs:
+    - type: "file"
+      path: "./logs/contract-monitor.log"
+      max_size: "100MB"
+      max_files: 5
+    - type: "console"
+      enabled: true
+
+# Security settings
+security:
+  # Enable authentication for metrics endpoint
+  metrics_auth_required: false
+  
+  # Rate limiting
+  rate_limit:
+    requests_per_minute: 1000
+    
+  # Whitelist of allowed contract addresses
+  contract_whitelist:
+    enabled: false
+    addresses: []
