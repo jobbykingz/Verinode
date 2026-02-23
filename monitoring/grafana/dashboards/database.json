@@ -1,0 +1,203 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Verinode - Database Monitoring",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "tags": ["database", "mongodb", "performance", "verinode"],
+    "panels": [
+      {
+        "type": "stat",
+        "id": 1,
+        "title": "Database Status",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "mongodb_up",
+            "legendFormat": "MongoDB Status"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value"
+        }
+      },
+      {
+        "type": "stat",
+        "id": 2,
+        "title": "Active Connections",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "mongodb_connections",
+            "legendFormat": "Connections"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 3,
+        "title": "Average Query Time",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(mongodb_query_time_seconds_sum[5m]) / rate(mongodb_query_time_seconds_count[5m])",
+            "legendFormat": "Query Time (s)"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 4,
+        "title": "Database Size",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "mongodb_dbstats_data_size",
+            "legendFormat": "Data Size (bytes)"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          }
+        }
+      },
+      {
+        "type": "timeseries",
+        "id": 5,
+        "title": "Database Connections",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "mongodb_connections",
+            "legendFormat": "Active Connections"
+          },
+          {
+            "expr": "mongodb_connections_available",
+            "legendFormat": "Available Connections"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 6,
+        "title": "Query Performance",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(mongodb_query_time_seconds_sum[5m]) / rate(mongodb_query_time_seconds_count[5m])",
+            "legendFormat": "Average Query Time"
+          },
+          {
+            "expr": "rate(mongodb_query_time_seconds_bucket[5m])",
+            "legendFormat": "Query Time Distribution"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 7,
+        "title": "Database Operations",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"insert\"}[5m])",
+            "legendFormat": "Inserts"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"query\"}[5m])",
+            "legendFormat": "Queries"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"update\"}[5m])",
+            "legendFormat": "Updates"
+          },
+          {
+            "expr": "rate(mongodb_op_counters_total{type=\"delete\"}[5m])",
+            "legendFormat": "Deletes"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 8,
+        "title": "Database Network Activity",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(mongodb_network_bytes_in_total[5m])",
+            "legendFormat": "Bytes In"
+          },
+          {
+            "expr": "rate(mongodb_network_bytes_out_total[5m])",
+            "legendFormat": "Bytes Out"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 9,
+        "title": "Collection Statistics",
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "mongodb_dbstats_collections",
+            "legendFormat": "Collections"
+          },
+          {
+            "expr": "mongodb_dbstats_objects",
+            "legendFormat": "Objects"
+          }
+        ]
+      },
+      {
+        "type": "gauge",
+        "id": 10,
+        "title": "Database Cache Usage",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 20},
+        "targets": [
+          {
+            "expr": "(mongodb_cache_bytes_read_into / mongodb_cache_bytes_total) * 100",
+            "legendFormat": "Cache Hit Rate %"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "id": 11,
+        "title": "Database Replication Status",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 20},
+        "targets": [
+          {
+            "expr": "mongodb_replset_my_state",
+            "legendFormat": "Replica Set State"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 12,
+        "title": "Database Index Usage",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
+        "targets": [
+          {
+            "expr": "rate(mongodb_index_accesses_ops_total[5m])",
+            "legendFormat": "Index Accesses"
+          },
+          {
+            "expr": "mongodb_index_size",
+            "legendFormat": "Index Size"
+          }
+        ]
+      }
+    ]
+  }
+}

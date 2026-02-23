@@ -1,0 +1,434 @@
+# Verinode Streaming Configuration
+# Configuration for real-time video/audio streaming
+
+streaming:
+  # Enable/disable streaming
+  enabled: true
+  
+  # Maximum concurrent streams
+  maxConcurrentStreams: 100
+  
+  # Maximum stream duration (in minutes, 0 = unlimited)
+  maxStreamDuration: 480
+  
+  # Stream protocols
+  protocols:
+    # HLS (HTTP Live Streaming)
+    hls:
+      enabled: true
+      segmentDuration: 6
+      playlistLength: 5
+      allowCache: true
+      
+    # DASH (Dynamic Adaptive Streaming)
+    dash:
+      enabled: true
+      segmentDuration: 6
+      minBufferTime: 2
+      
+    # WebRTC (Real-time communication)
+    webrtc:
+      enabled: true
+      iceServers:
+        - urls: 
+            - stun:stun.l.google.com:19302
+            - stun:stun1.l.google.com:19302
+      
+    # RTMP (Real-Time Messaging Protocol)
+    rtmp:
+      enabled: true
+      port: 1935
+      chunkSize: 4096
+      
+    # RTMPS (RTMP over TLS)
+    rtmps:
+      enabled: true
+      port: 443
+      cert: ${RTMP_SSL_CERT_PATH}
+      key: ${RTMP_SSL_KEY_PATH}
+
+# Transcoding settings
+transcoding:
+  enabled: true
+  
+  # Hardware acceleration
+  hardwareAcceleration:
+    enabled: true
+    encoder: ${HW_ENCODER:-nvenc}  # Options: nvenc, vaapi, qsv, none
+    decoder: ${HW_DECODER:-cuda}   # Options: cuda, vaapi, qsv, none
+  
+  # Quality ladders
+  ladders:
+    # 1080p60
+    - name: 1080p60
+      resolution: 1920x1080
+      videoBitrate: 6000000
+      audioBitrate: 160000
+      fps: 60
+      
+    # 1080p30
+    - name: 1080p30
+      resolution: 1920x1080
+      videoBitrate: 4500000
+      audioBitrate: 160000
+      fps: 30
+      
+    # 720p60
+    - name: 720p60
+      resolution: 1280x720
+      videoBitrate: 4500000
+      audioBitrate: 128000
+      fps: 60
+      
+    # 720p30
+    - name: 720p30
+      resolution: 1280x720
+      videoBitrate: 3000000
+      audioBitrate: 128000
+      fps: 30
+      
+    # 480p30
+    - name: 480p30
+      resolution: 854x480
+      videoBitrate: 1500000
+      audioBitrate: 128000
+      fps: 30
+      
+    # 360p30
+    - name: 360p30
+      resolution: 640x360
+      videoBitrate: 800000
+      audioBitrate: 96000
+      fps: 30
+      
+    # 240p30
+    - name: 240p30
+      resolution: 426x240
+      videoBitrate: 400000
+      audioBitrate: 64000
+      fps: 30
+  
+  # Audio transcoding
+  audio:
+    codec: AAC
+    sampleRate: 48000
+    channels: 2
+
+# Ingest settings
+ingest:
+  # RTMP ingest
+  rtmp:
+    enabled: true
+    bind: 0.0.0.0:1935
+    
+    # Authentication
+    auth:
+      enabled: true
+      type: token
+      secret: ${STREAM_AUTH_SECRET}
+      tokenExpiration: 3600
+    
+    # Stream key format
+    streamKeyFormat: '{userId}_{random}'
+  
+  # SRT ingest (Secure Reliable Transport)
+  srt:
+    enabled: false
+    bind: 0.0.0.0:10000
+    latency: 120
+    
+  # WHIP ingest (WebRTC-HTTP Ingestion Protocol)
+  whip:
+    enabled: true
+    endpoint: /whip
+    
+  # WHEP playback (WebRTC-HTTP Egress Protocol)
+  whep:
+    enabled: true
+    endpoint: /whep
+
+# Egress settings
+egress:
+  # HLS playback
+  hls:
+    enabled: true
+    path: /hls
+    cors:
+      enabled: true
+      origins:
+        - '*'
+    
+  # DASH playback
+  dash:
+    enabled: true
+    path: /dash
+    cors:
+      enabled: true
+      origins:
+        - '*'
+  
+  # WebRTC playback
+  webrtc:
+    enabled: true
+    path: /webrtc
+    
+  # Recording
+  recording:
+    enabled: true
+    format: MP4
+    path: ${STREAM_RECORDINGS_PATH:-./recordings}
+    segmentation:
+      enabled: true
+      duration: 3600  # Split every hour
+    
+    # Recording retention
+    retention:
+      days: 30
+
+# CDN configuration
+cdn:
+  enabled: ${STREAMING_CDN_ENABLED:-false}
+  
+  # Multi-CDN setup
+  providers:
+    primary:
+      name: ${PRIMARY_CDN:-cloudfront}
+      domain: ${PRIMARY_CDN_DOMAIN}
+    
+    backup:
+      name: ${BACKUP_CDN:-cloudflare}
+      domain: ${BACKUP_CDN_DOMAIN}
+  
+  # Origin shield
+  originShield:
+    enabled: true
+    region: ${ORIGIN_SHIELD_REGION:-us-east-1}
+  
+  # Edge caching
+  edgeCaching:
+    enabled: true
+    ttl: 86400
+
+# Adaptive Bitrate (ABR)
+adaptiveBitrate:
+  enabled: true
+  
+  # Bandwidth estimation
+  bandwidth:
+    estimator: throughput
+    smoothing: 0.8
+    
+  # Switching rules
+  switching:
+    upSwitchThreshold: 1.2
+    downSwitchThreshold: 0.8
+    minSwitchInterval: 5
+    
+  # Buffer settings
+  buffer:
+    initial: 3
+    min: 2
+    max: 30
+
+# Low Latency settings
+lowLatency:
+  enabled: true
+  
+  # LL-HLS
+  llHls:
+    enabled: true
+    partDuration: 0.5
+    playlistUpdateInterval: 1
+    
+  # CMAF (Common Media Application Format)
+  cmaf:
+    enabled: true
+    chunkDuration: 2
+
+# Analytics
+analytics:
+  enabled: true
+  
+  # Metrics to collect
+  metrics:
+    - concurrentViewers
+    - totalViews
+    - averageBitrate
+    - rebufferRatio
+    - startupTime
+    - errorRate
+    - geographicDistribution
+    - deviceTypes
+  
+  # Real-time analytics
+  realtime:
+    enabled: true
+    updateInterval: 10
+  
+  # Historical analytics
+  historical:
+    enabled: true
+    retentionDays: 90
+
+# Chat integration
+chat:
+  enabled: true
+  
+  # WebSocket settings
+  websocket:
+    enabled: true
+    path: /chat
+    maxConnections: 10000
+    messageRateLimit: 10
+    
+  # Message moderation
+  moderation:
+    enabled: true
+    
+    # Auto-moderation
+    autoMod:
+      enabled: true
+      filterProfanity: true
+      filterSpam: true
+      maxMessageLength: 500
+      
+    # Manual moderation
+    manualMod:
+      enabled: true
+      roles:
+        - moderator
+        - admin
+  
+  # Chat features
+  features:
+    emotes: true
+    badges: true
+    slowMode: true
+    slowModeDelay: 5
+    subscriberOnly: false
+    followerOnly: false
+
+# Security
+security:
+  # DRM (Digital Rights Management)
+  drm:
+    enabled: false
+    providers:
+      widevine:
+        enabled: false
+        licenseServer: ${WIDEVINE_LICENSE_SERVER}
+      
+      playready:
+        enabled: false
+        licenseServer: ${PLAYREADY_LICENSE_SERVER}
+      
+      fairplay:
+        enabled: false
+        licenseServer: ${FAIRPLAY_LICENSE_SERVER}
+        certificate: ${FAIRPLAY_CERTIFICATE}
+  
+  # Token authentication
+  tokenAuth:
+    enabled: true
+    type: JWT
+    secret: ${STREAM_TOKEN_SECRET}
+    expiration: 3600
+  
+  # Geo-blocking
+  geoBlocking:
+    enabled: false
+    mode: blacklist
+    countries: []
+  
+  # Referer restriction
+  referer:
+    enabled: false
+    allowed: []
+  
+  # DDoS protection
+  ddos:
+    enabled: true
+    rateLimit:
+      requestsPerSecond: 100
+      burst: 200
+
+# Monitoring
+monitoring:
+  # Health checks
+  healthCheck:
+    enabled: true
+    interval: 30
+    timeout: 10
+    
+  # Metrics
+  metrics:
+    enabled: true
+    interval: 60
+    
+  # Alerts
+  alerts:
+    enabled: true
+    conditions:
+      - name: highErrorRate
+        threshold: 5
+        duration: 300
+      
+      - name: lowBitrate
+        threshold: 500000
+        duration: 60
+      
+      - name: highRebufferRatio
+        threshold: 0.05
+        duration: 300
+  
+  # Logging
+  logging:
+    level: info
+    format: json
+    output: stdout
+
+# Scaling
+scaling:
+  # Horizontal scaling
+  horizontal:
+    enabled: true
+    minInstances: 2
+    maxInstances: 20
+    
+  # Auto-scaling triggers
+  triggers:
+    cpu:
+      enabled: true
+      target: 70
+    
+    memory:
+      enabled: true
+      target: 80
+    
+    connections:
+      enabled: true
+      target: 1000
+  
+  # Load balancing
+  loadBalancer:
+    algorithm: least_connections
+    healthCheck:
+      interval: 10
+      timeout: 5
+
+# Backup streams
+backup:
+  enabled: true
+  
+  # Redundant ingest
+  redundantIngest:
+    enabled: true
+    endpoints:
+      - primary
+      - backup
+  
+  # Failover
+  failover:
+    enabled: true
+    detectionTimeout: 10
+    switchDelay: 5
