@@ -1,6 +1,45 @@
 version: '3.8'
 
 services:
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: verinode-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      - REDIS_MAXMEMORY=${REDIS_MAXMEMORY:-256mb}
+      - REDIS_MAXMEMORY_POLICY=${REDIS_MAXMEMORY_POLICY:-allkeys-lru}
+    restart: unless-stopped
+    networks:
+      - verinode-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Redis Commander - Redis management UI
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: verinode-redis-commander
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+    restart: unless-stopped
+    networks:
+      - verinode-network
+    depends_on:
+      - redis
+
   # IPFS Node
   ipfs:
     image: ipfs/go-ipfs:latest
@@ -211,6 +250,9 @@ services:
       - IPFS_PROTOCOL=http
       - IPFS_GATEWAY_PORT=8080
       - IPFS_GATEWAY_HOST=0.0.0.0
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
     volumes:
       - ./backend/logs:/app/logs
       - ./monitoring:/app/monitoring
@@ -224,6 +266,7 @@ services:
       - prometheus
       - loki
       - ipfs
+      - redis
 
   # MongoDB
   mongodb:
@@ -320,6 +363,8 @@ volumes:
   alertmanager_data:
     driver: local
   mongodb_data:
+    driver: local
+  redis_data:
     driver: local
   ipfs_data:
     driver: local

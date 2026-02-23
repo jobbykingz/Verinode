@@ -11,6 +11,7 @@ import {
   ReportFilter
 } from '../models/BusinessMetrics';
 import { WinstonLogger } from '../utils/logger';
+import { cacheService } from './cacheService';
 
 export class AnalyticsService {
   private logger: WinstonLogger;
@@ -21,6 +22,12 @@ export class AnalyticsService {
 
   async getUsageTrends(timeframe: string, granularity: string): Promise<UsageTrend[]> {
     try {
+      const cacheKey = `usage-trends:${timeframe}:${granularity}`;
+      
+      // Check cache first
+      const cached = await cacheService.get<UsageTrend[]>(cacheKey);
+      if (cached) return cached;
+
       // Implementation would query database for usage data
       // For now, return mock data
       const trends: UsageTrend[] = [];
@@ -40,6 +47,8 @@ export class AnalyticsService {
         });
       }
       
+      // Cache for 5 minutes
+      await cacheService.set(cacheKey, trends, { ttl: 300 });
       return trends;
     } catch (error) {
       this.logger.error('Error fetching usage trends:', error);
