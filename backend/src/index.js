@@ -15,7 +15,7 @@ const complianceRoutes = require('./routes/compliance');
 const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Security middleware
 app.use(helmet());
