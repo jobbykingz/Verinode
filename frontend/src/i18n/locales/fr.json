@@ -1,0 +1,102 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "submit": "Soumettre",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "issueProof": "Émettre Preuve",
+    "verify": "Vérifier",
+    "dashboard": "Tableau de bord",
+    "marketplace": "Marché",
+    "search": "Rechercher",
+    "billing": "Facturation",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "profile": "Profil"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bon retour",
+    "recentActivity": "Activité récente",
+    "quickActions": "Actions rapides",
+    "statistics": "Statistiques"
+  },
+  "analytics": {
+    "title": "Analytique",
+    "overview": "Aperçu",
+    "reports": "Rapports",
+    "metrics": "Métriques",
+    "performance": "Performance"
+  },
+  "team": {
+    "title": "Équipe",
+    "members": "Membres",
+    "roles": "Rôles",
+    "permissions": "Autorisations",
+    "invite": "Inviter un membre",
+    "manage": "Gérer l'équipe"
+  },
+  "billing": {
+    "title": "Facturation",
+    "overview": "Aperçu",
+    "invoices": "Factures",
+    "paymentMethods": "Méthodes de paiement",
+    "subscription": "Abonnement",
+    "usage": "Utilisation"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "general": "Général",
+    "security": "Sécurité",
+    "notifications": "Notifications",
+    "language": "Langue",
+    "appearance": "Apparence"
+  },
+  "errors": {
+    "notFound": "Page non trouvée",
+    "serverError": "Erreur serveur",
+    "networkError": "Erreur réseau",
+    "unauthorized": "Accès non autorisé",
+    "forbidden": "Accès interdit"
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Adresse email invalide",
+    "minLength": "Doit contenir au moins {{count}} caractères",
+    "maxLength": "Ne doit pas dépasser {{count}} caractères",
+    "passwordMismatch": "Les mots de passe ne correspondent pas"
+  },
+  "dateTime": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "tomorrow": "Demain",
+    "thisWeek": "Cette semaine",
+    "lastWeek": "La semaine dernière",
+    "thisMonth": "Ce mois",
+    "lastMonth": "Le mois dernier"
+  },
+  "currency": {
+    "usd": "Dollar américain",
+    "eur": "Euro",
+    "gbp": "Livre sterling",
+    "jpy": "Yen japonais",
+    "cny": "Yuan chinois"
+  }
+}
