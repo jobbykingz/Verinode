@@ -1,10 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, FileText, CheckCircle, BarChart3, ShoppingBag, Search } from 'lucide-react';
-import { useTranslation } from '../hooks/useTranslation';
 
 const Navbar = () => {
-  const { t } = useTranslation();
   return (
     <nav className="bg-white shadow-lg">
       <div className="container mx-auto px-4">
@@ -20,42 +18,42 @@ const Navbar = () => {
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <FileText className="h-4 w-4" />
-              <span>{t('navigation.home')}</span>
+              <span>Home</span>
             </Link>
             <Link
               to="/issue"
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <Shield className="h-4 w-4" />
-              <span>{t('navigation.issueProof')}</span>
+              <span>Issue Proof</span>
             </Link>
             <Link
               to="/verify"
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <CheckCircle className="h-4 w-4" />
-              <span>{t('navigation.verify')}</span>
+              <span>Verify</span>
             </Link>
             <Link
               to="/dashboard"
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <BarChart3 className="h-4 w-4" />
-              <span>{t('navigation.dashboard')}</span>
+              <span>Dashboard</span>
             </Link>
             <Link
               to="/marketplace"
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <ShoppingBag className="h-4 w-4" />
-              <span>{t('navigation.marketplace')}</span>
+              <span>Marketplace</span>
             </Link>
             <Link
               to="/search"
               className="flex items-center space-x-1 text-gray-600 hover:text-blue-600 transition-colors"
             >
               <Search className="h-4 w-4" />
-              <span>{t('navigation.search')}</span>
+              <span>Search</span>
             </Link>
           </div>
         </div>

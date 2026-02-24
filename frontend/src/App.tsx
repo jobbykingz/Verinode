@@ -2,8 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
-import './i18n';
-import './styles/rtl.css';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import IssueProof from './pages/IssueProof';
@@ -11,7 +9,6 @@ import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
-import LanguageSwitcher from './components/UI/LanguageSwitcher';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -21,10 +18,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen bg-gray-50">
-          <div className="flex justify-between items-center px-4 py-2 bg-white border-b">
-            <Navbar />
-            <LanguageSwitcher />
-          </div>
+          <Navbar />
           <main className="container mx-auto px-4 py-8">
             <Routes>
               <Route path="/" element={<Home />} />
