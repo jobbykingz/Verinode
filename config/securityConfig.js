@@ -217,5 +217,180 @@ module.exports = {
     isProduction: process.env.NODE_ENV === 'production',
     isDevelopment: process.env.NODE_ENV === 'development',
     isTest: process.env.NODE_ENV === 'test'
+  },
+
+  // Enhanced security configurations
+  enhancedSecurity: {
+    // IP blocking configuration
+    ipBlocking: {
+      enabled: true,
+      maxViolations: 5,
+      blockDuration: 60 * 60 * 1000, // 1 hour
+      suspiciousCountries: ['CN', 'RU', 'KP', 'IR'], // Configurable based on needs
+      whitelist: [], // Whitelisted IPs that bypass security checks
+      blacklist: [] // Permanently blocked IPs
+    },
+
+    // Attack detection patterns
+    attackPatterns: {
+      sqlInjection: [
+        /(\%27)|(\')|(\-\-)|(\%23)|(#)/i,
+        /((\%3D)|(=))[^\n]*((\%27)|(\')|(\-\-)|(\%3B)|(;))/i,
+        /\w*((\%27)|(\'))((\%6F)|o|(\%4F))((\%72)|r|(\%52))/i,
+        /union.*select/i,
+        /insert.*into/i,
+        /delete.*from/i,
+        /drop.*table/i
+      ],
+      xss: [
+        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+        /javascript:/gi,
+        /on\w+\s*=/gi,
+        /<iframe/gi,
+        /<object/gi,
+        /<embed/gi
+      ],
+      pathTraversal: [
+        /\.\.\//g,
+        /\.\.\\/g,
+        /%2e%2e%2f/gi,
+        /%2e%2e%5c/gi
+      ],
+      commandInjection: [
+        /;\s*rm\s+/i,
+        /;\s*cat\s+/i,
+        /;\s*ls\s+/i,
+        /;\s*pwd\s+/i,
+        /\|\s*nc\s+/i,
+        /&&\s*rm\s+/i
+      ],
+      suspiciousUserAgents: [
+        /sqlmap/i,
+        /nmap/i,
+        /nikto/i,
+        /dirb/i,
+        /gobuster/i,
+        /burp/i,
+        /metasploit/i,
+        /python-requests/i
+      ]
+    },
+
+    // Content Security Policy
+    csp: {
+      enabled: true,
+      reportOnly: process.env.NODE_ENV === 'development',
+      directives: {
+        'default-src': ["'self'"],
+        'base-uri': ["'self'"],
+        'font-src': ["'self'", 'https:', 'data:'],
+        'form-action': ["'self'"],
+        'frame-ancestors': ["'none'"],
+        'img-src': ["'self'", 'data:', 'https:'],
+        'script-src': [
+          "'self'",
+          ...(process.env.NODE_ENV === 'development' ? ["'unsafe-eval'", "'unsafe-inline'"] : [])
+        ],
+        'style-src': [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        'connect-src': [
+          "'self'",
+          ...(process.env.NODE_ENV === 'development' ? ['ws:', 'wss:'] : ['wss:']),
+          'https://api.stellar.org',
+          'https://horizon.stellar.org'
+        ],
+        'object-src': ["'none'"],
+        'media-src': ["'self'"],
+        'worker-src': ["'self'"],
+        'manifest-src': ["'self'"],
+        'upgrade-insecure-requests': []
+      }
+    },
+
+    // Rate limiting tiers
+    rateLimitTiers: {
+      anonymous: {
+        windowMs: 15 * 60 * 1000,
+        max: 100,
+        message: 'Rate limit exceeded for anonymous users'
+      },
+      authenticated: {
+        windowMs: 15 * 60 * 1000,
+        max: 500,
+        message: 'Rate limit exceeded for authenticated users'
+      },
+      premium: {
+        windowMs: 15 * 60 * 1000,
+        max: 2000,
+        message: 'Rate limit exceeded for premium users'
+      },
+      admin: {
+        windowMs: 15 * 60 * 1000,
+        max: 5000,
+        message: 'Rate limit exceeded for admin users'
+      }
+    },
+
+    // Input sanitization rules
+    sanitization: {
+      maxStringLength: 10000,
+      allowedHtmlTags: ['b', 'i', 'em', 'strong', 'p', 'br', 'span', 'ul', 'ol', 'li'],
+      allowedAttributes: ['class', 'id'],
+      encodeAllCharacters: false,
+      removeNullBytes: true,
+      removeControlCharacters: true
+    },
+
+    // Monitoring and alerting
+    monitoring: {
+      enableRealTimeAlerts: true,
+      alertEndpoints: [
+        process.env.SECURITY_WEBHOOK_URL,
+        process.env.ADMIN_EMAIL
+      ],
+      logRetentionDays: 90,
+      metricsCollection: true,
+      enableSecurityDashboard: true
+    },
+
+    // File upload security
+    fileUpload: {
+      maxFileSize: 10 * 1024 * 1024, // 10MB
+      allowedMimeTypes: [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'application/pdf',
+        'text/plain'
+      ],
+      allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif', '.pdf', '.txt'],
+      scanForMalware: true,
+      quarantineSuspicious: true,
+      generateSafeFileName: true
+    },
+
+    // API key security
+    apiKeys: {
+      enableApiKeyAuth: true,
+      keyLength: 32,
+      keyExpiration: 30 * 24 * 60 * 60 * 1000, // 30 days
+      maxKeysPerUser: 5,
+      rateLimitPerKey: 1000,
+      enableKeyRotation: true
+    },
+
+    // Bot detection
+    botDetection: {
+      enabled: true,
+      checkUserAgent: true,
+      checkRequestPattern: true,
+      checkHeaders: true,
+      blockKnownBots: false, // Set to true to block all bots
+      allowGoodBots: ['googlebot', 'bingbot', 'slurp', 'duckduckbot'],
+      suspiciousThreshold: 10,
+      blockDuration: 24 * 60 * 60 * 1000 // 24 hours
+    }
   }
 };

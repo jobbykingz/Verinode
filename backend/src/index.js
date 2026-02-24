@@ -15,6 +15,34 @@ const {
   complianceLogger,
 } = require("./middleware/logging");
 
+// Import new security middleware
+const {
+  dynamicLimiter,
+  authLimiter,
+  sensitiveLimiter,
+  uploadLimiter
+} = require("./middleware/rateLimiter");
+const {
+  conditionalCors,
+  corsErrorHandler
+} = require("./middleware/corsConfig");
+const {
+  securityHeaders,
+  conditionalSecurityHeaders,
+  securityHeadersValidator
+} = require("./middleware/securityHeaders");
+const {
+  securityRequestLogger,
+  attackPatternLogger,
+  geoLocationLogger
+} = require("./middleware/requestLogger");
+const {
+  sanitizeInput
+} = require("./middleware/inputValidation");
+const {
+  xssProtectionMiddleware
+} = require("./utils/xssProtection");
+
 const proofRoutes = require("./routes/proofs");
 const authRoutes = require("./routes/auth");
 const stellarRoutes = require("./routes/stellar");
@@ -30,23 +58,76 @@ const performanceRoutes = require("./routes/performance");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+// ============================================================================
+// SECURITY MIDDLEWARE STACK
+// ============================================================================
 
-// Logging middleware
+// 1. Security headers and validation (first line of defense)
+app.use(securityHeaders());
+app.use(securityHeadersValidator());
+
+// 2. CORS configuration
+app.use(conditionalCors());
+app.use(corsErrorHandler());
+
+// 3. Request parsing and sanitization
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(sanitizeInput());
+
+// 4. XSS protection
+app.use(xssProtectionMiddleware());
+
+// 5. Security logging and monitoring
+app.use(securityRequestLogger());
+app.use(attackPatternLogger());
+app.use(geoLocationLogger());
+
+// 6. Legacy logging middleware (for compatibility)
 app.use(requestLogger());
 app.use(securityLogger());
 app.use(performanceLogger(1000)); // Log requests taking > 1 second
 app.use(complianceLogger());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// 7. Rate limiting (apply after initial security checks)
+app.use(dynamicLimiter());
+
+// 8. Additional security headers for API endpoints
+app.use(conditionalSecurityHeaders());
+
+// ============================================================================
+// ROUTE-SPECIFIC SECURITY
+// ============================================================================
+
+// Apply stricter rate limiting to sensitive endpoints
+app.use("/api/auth", authLimiter());
+app.use("/api/user", authLimiter());
+app.use("/api/admin", authLimiter());
+
+// Apply sensitive operation rate limiting
+app.use("/api/proofs", sensitiveLimiter());
+app.use("/api/upload", uploadLimiter());
+app.use("/api/ipfs", uploadLimiter());
+
+// ============================================================================
+// ROUTES
+// ============================================================================
+
+app.use("/api/proofs", proofRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/stellar", stellarRoutes);
+app.use("/api/marketplace", marketplaceRoutes);
+app.use("/api/search", searchRoutes);
+app.use("/api/security", securityRoutes);
+app.use("/api/sharing", sharingRoutes);
+app.use("/api/compliance", complianceRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/ipfs", ipfsRoutes);
+app.use("/api/performance", performanceRoutes);
+
+// ============================================================================
+// SYSTEM ENDPOINTS
+// ============================================================================
 
 // Metrics endpoint for Prometheus
 app.get("/metrics", async (req, res) => {
@@ -60,47 +141,80 @@ app.get("/metrics", async (req, res) => {
   }
 });
 
-// Routes
-app.use("/api/proofs", proofRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/stellar", stellarRoutes);
-app.use("/api/marketplace", marketplaceRoutes);
-app.use("/api/search", searchRoutes);
-app.use("/api/security", securityRoutes);
-app.use("/api/sharing", sharingRoutes);
-app.use("/api/compliance", complianceRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/ipfs", ipfsRoutes);
-app.use("/api/performance", performanceRoutes);
-
 // Health check
 app.get("/health", (req, res) => {
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    security: {
+      rateLimiting: "active",
+      cors: "active",
+      headers: "active",
+      sanitization: "active",
+      xssProtection: "active"
+    }
   });
 });
+
+// Security status endpoint
+app.get("/security-status", (req, res) => {
+  res.json({
+    status: "Security Active",
+    timestamp: new Date().toISOString(),
+    features: {
+      rateLimiting: "enabled",
+      cors: "enabled",
+      securityHeaders: "enabled",
+      inputValidation: "enabled",
+      xssProtection: "enabled",
+      requestLogging: "enabled",
+      attackDetection: "enabled",
+      geoLocationTracking: "enabled"
+    }
+  });
+});
+
+// ============================================================================
+// ERROR HANDLING
+// ============================================================================
 
 // Error handling middleware
 app.use(errorLogger());
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
+  res.status(404).json({ 
+    error: "Route not found",
+    path: req.path,
+    method: req.method
+  });
 });
 
 // Global error handler
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error" });
+  
+  // Don't expose error details in production
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  
+  res.status(500).json({ 
+    error: "Internal server error",
+    ...(isDevelopment && { details: err.message, stack: err.stack })
+  });
 });
+
+// ============================================================================
+// SERVER STARTUP
+// ============================================================================
 
 // Start server
 const server = app.listen(PORT, () => {
-  console.log(`Verinode backend running on port ${PORT}`);
-  console.log(`Metrics available at http://localhost:${PORT}/metrics`);
-  console.log(`Health check at http://localhost:${PORT}/health`);
+  console.log(`🚀 Verinode backend running on port ${PORT}`);
+  console.log(`📊 Metrics available at http://localhost:${PORT}/metrics`);
+  console.log(`💚 Health check at http://localhost:${PORT}/health`);
+  console.log(`🔒 Security status at http://localhost:${PORT}/security-status`);
+  console.log(`🛡️ Security middleware stack is active`);
 });
 
 // Graceful shutdown

@@ -185,6 +185,26 @@ class SecurityAudit {
         pattern: /console\.log/,
         message: 'Console.log statement detected (should be removed in production)',
         severity: 'low'
+      },
+      {
+        pattern: /process\.env\.[A-Z_]+\s*==\s*['"][^'"]*['"]/,
+        message: 'Environment variable compared to default value',
+        severity: 'high'
+      },
+      {
+        pattern: /password\s*=\s*['"][^'"]*['"]/,
+        message: 'Hardcoded password detected',
+        severity: 'critical'
+      },
+      {
+        pattern: /secret\s*=\s*['"][^'"]*['"]/,
+        message: 'Hardcoded secret detected',
+        severity: 'critical'
+      },
+      {
+        pattern: /api[_-]?key\s*=\s*['"][^'"]*['"]/,
+        message: 'Hardcoded API key detected',
+        severity: 'critical'
       }
     ];
 
@@ -206,6 +226,52 @@ class SecurityAudit {
         }
       } catch (error) {
         this.warnings.push(`Could not scan file ${file}: ${error.message}`);
+      }
+    }
+
+    // Check for security middleware files
+    await this.checkSecurityMiddleware();
+  }
+
+  async checkSecurityMiddleware() {
+    console.log('🛡️ Checking security middleware...');
+    
+    const requiredMiddleware = [
+      'src/middleware/rateLimiter.js',
+      'src/middleware/inputValidation.js',
+      'src/middleware/corsConfig.js',
+      'src/middleware/securityHeaders.js',
+      'src/middleware/requestLogger.js'
+    ];
+
+    const requiredUtils = [
+      'src/utils/inputSanitization.js',
+      'src/utils/xssProtection.js'
+    ];
+
+    for (const middleware of requiredMiddleware) {
+      const filePath = path.join(__dirname, '..', middleware);
+      if (fs.existsSync(filePath)) {
+        this.passed.push(`Security middleware found: ${middleware}`);
+      } else {
+        this.issues.push({
+          type: 'missing_middleware',
+          message: `Required security middleware missing: ${middleware}`,
+          severity: 'high'
+        });
+      }
+    }
+
+    for (const util of requiredUtils) {
+      const filePath = path.join(__dirname, '..', util);
+      if (fs.existsSync(filePath)) {
+        this.passed.push(`Security utility found: ${util}`);
+      } else {
+        this.issues.push({
+          type: 'missing_utility',
+          message: `Required security utility missing: ${util}`,
+          severity: 'high'
+        });
       }
     }
   }
@@ -243,6 +309,32 @@ class SecurityAudit {
     // Check JWT configuration
     if (this.config.jwt.expiresIn > '24h') {
       this.warnings.push('JWT expiration time is longer than 24 hours');
+    }
+
+    // Check enhanced security configuration
+    if (this.config.enhancedSecurity) {
+      // Check IP blocking
+      if (this.config.enhancedSecurity.ipBlocking.enabled) {
+        this.passed.push('IP blocking is enabled');
+      } else {
+        this.warnings.push('IP blocking is disabled');
+      }
+
+      // Check CSP
+      if (this.config.enhancedSecurity.csp.enabled) {
+        this.passed.push('Content Security Policy is enabled');
+      } else {
+        this.warnings.push('Content Security Policy is disabled');
+      }
+
+      // Check monitoring
+      if (this.config.enhancedSecurity.monitoring.enableRealTimeAlerts) {
+        this.passed.push('Real-time security alerts are enabled');
+      } else {
+        this.warnings.push('Real-time security alerts are disabled');
+      }
+    } else {
+      this.warnings.push('Enhanced security configuration not found');
     }
 
     this.passed.push('Security configuration checked');
