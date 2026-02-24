@@ -1,0 +1,6 @@
+{
+  "title": "chore: Move hardcoded server port to .env file",
+  "head": "feature/env-port-config",
+  "base": "main",
+  "body": "## Description\n\nOur Express server currently starts on a hardcoded port. We need to load this from an environment variable to support different deployment environments smoothly.\n\n## Changes Made\n\n- ✅ **dotenv was already installed** - Found in package.json (version 16.3.1)\n- ✅ **Created .env.example file** - Added PORT=3000 to backend/.env.example\n- ✅ **Updated server file** - Modified src/index.js to use process.env.PORT || 3000\n\n## Requirements Fulfilled\n\n- [x] Add dotenv to the project if it isn't already installed\n- [x] Create a .env.example file including PORT=3000\n- [x] Update the main server file to use process.env.PORT || 3000\n\n## Benefits\n\n- **Deployment Flexibility**: Different environments can easily override the port by setting the PORT environment variable\n- **Best Practices**: Follows the 12-factor app methodology for configuration\n- **Developer Experience**: Clear .env.example file for easy setup\n\n## How to Use\n\nDevelopers can now:\n1. Copy .env.example to .env\n2. Modify the PORT value as needed\n3. The server will use the PORT from .env or default to 3000\n\nCloses #BETAIL-BOYS/TradeFlow-Core"
+}
