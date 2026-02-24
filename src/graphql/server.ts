@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import { typeDefs } from './schema';
 import { userResolvers } from './resolvers/userResolver';
 import { proofResolvers } from './resolvers/proofResolver';
+import { crossChainResolvers } from './resolvers/crossChainResolver';
 import { proofSubscriptions, publishProofUpdated, publishProofCreated, publishProofStatusChanged } from './subscriptions/proofSubscription';
 import { createAuthContext } from './middleware/auth';
 import { applyRateLimit } from './middleware/rateLimit';
@@ -38,13 +39,16 @@ const resolvers = {
   Query: {
     ...userResolvers.Query,
     ...proofResolvers.Query,
+    ...crossChainResolvers.Query,
   },
   Mutation: {
     ...userResolvers.Mutation,
     ...proofResolvers.Mutation,
+    ...crossChainResolvers.Mutation,
   },
   Subscription: {
     ...proofSubscriptions,
+    ...crossChainResolvers.Subscription,
   },
 };
 
