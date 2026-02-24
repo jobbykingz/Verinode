@@ -53,6 +53,7 @@ const sharingRoutes = require("./routes/sharing");
 const complianceRoutes = require("./routes/compliance");
 const analyticsRoutes = require("./routes/analytics");
 const ipfsRoutes = require("./routes/ipfs");
+const performanceRoutes = require("./routes/performance");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -122,6 +123,7 @@ app.use("/api/sharing", sharingRoutes);
 app.use("/api/compliance", complianceRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ipfs", ipfsRoutes);
+app.use("/api/performance", performanceRoutes);
 
 // ============================================================================
 // SYSTEM ENDPOINTS
