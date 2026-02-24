@@ -1,0 +1,102 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "issueProof": "Issue Proof",
+    "verify": "Verify",
+    "dashboard": "Dashboard",
+    "marketplace": "Marketplace",
+    "search": "Search",
+    "billing": "Billing",
+    "settings": "Settings",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "statistics": "Statistics"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "overview": "Overview",
+    "reports": "Reports",
+    "metrics": "Metrics",
+    "performance": "Performance"
+  },
+  "team": {
+    "title": "Team",
+    "members": "Members",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "invite": "Invite Member",
+    "manage": "Manage Team"
+  },
+  "billing": {
+    "title": "Billing",
+    "overview": "Overview",
+    "invoices": "Invoices",
+    "paymentMethods": "Payment Methods",
+    "subscription": "Subscription",
+    "usage": "Usage"
+  },
+  "settings": {
+    "title": "Settings",
+    "general": "General",
+    "security": "Security",
+    "notifications": "Notifications",
+    "language": "Language",
+    "appearance": "Appearance"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "serverError": "Server error",
+    "networkError": "Network error",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden"
+  },
+  "validation": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "minLength": "Must be at least {{count}} characters",
+    "maxLength": "Must be no more than {{count}} characters",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "dateTime": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This week",
+    "lastWeek": "Last week",
+    "thisMonth": "This month",
+    "lastMonth": "Last month"
+  },
+  "currency": {
+    "usd": "US Dollar",
+    "eur": "Euro",
+    "gbp": "British Pound",
+    "jpy": "Japanese Yen",
+    "cny": "Chinese Yuan"
+  }
+}
