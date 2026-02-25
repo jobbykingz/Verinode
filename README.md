@@ -38,6 +38,18 @@ npm run dev
 
 The server will start on `http://localhost:4000`
 
+### Docker Deployment
+
+You can also run the application using Docker:
+
+```bash
+# Build and start the containers
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
 ## API Endpoints
 
 ### GraphQL API
