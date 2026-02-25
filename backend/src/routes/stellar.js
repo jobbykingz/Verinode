@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const StellarSDK = require('@stellar/stellar-sdk');
+const config = require('../config/appConfig');
 
-// Initialize Stellar server
-const server = new StellarSDK.Horizon.Server(
-  process.env.STELLAR_NETWORK === 'mainnet' 
-    ? 'https://horizon.stellar.org' 
-    : 'https://horizon-testnet.stellar.org'
-);
+// Initialize Stellar server — URL derived from STELLAR_NETWORK / STELLAR_HORIZON_URL
+const server = new StellarSDK.Horizon.Server(config.stellar.horizonUrl);
 
 // Get account info
 router.get('/account/:address', async (req, res) => {

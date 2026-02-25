@@ -1,5 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
+import { config } from '../config';
 
 interface RateLimitOptions {
   windowMs: number;
@@ -23,10 +24,10 @@ const createRateLimiter = (options: RateLimitOptions) => {
     standardHeaders: options.standardHeaders !== false,
     legacyHeaders: options.legacyHeaders !== false,
     keyGenerator: options.keyGenerator || ((req: Request) => {
-      return req.ip || 
-             req.headers['x-forwarded-for'] as string || 
-             req.headers['x-real-ip'] as string || 
-             'unknown';
+      return req.ip ||
+        req.headers['x-forwarded-for'] as string ||
+        req.headers['x-real-ip'] as string ||
+        'unknown';
     }),
     skip: options.skip,
     handler: (req: Request, res: Response) => {
@@ -43,25 +44,25 @@ const createRateLimiter = (options: RateLimitOptions) => {
 
 export const strictRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per 15 minutes
+  max: config.rateLimits.strict,
   message: 'Rate limit exceeded. Please try again in 15 minutes.'
 });
 
 export const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per 15 minutes
+  max: config.rateLimits.auth,
   message: 'Too many authentication attempts. Please try again in 15 minutes.'
 });
 
 export const apiRateLimiter = createRateLimiter({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 60, // 60 requests per minute
+  max: config.rateLimits.api,
   message: 'API rate limit exceeded. Please try again in 1 minute.'
 });
 
 export const uploadRateLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 uploads per hour
+  max: config.rateLimits.upload,
   message: 'Upload limit exceeded. Please try again in 1 hour.'
 });
 
