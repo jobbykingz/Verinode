@@ -10,32 +10,39 @@ import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
+import RouteChangeTracker from './analytics/RouteChangeTracker';
 import './App.css';
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
-    <PWAProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <main className="container mx-auto px-4 py-8">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/issue" element={<IssueProof />} />
-                <Route path="/verify" element={<VerifyProof />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/search" element={<Search />} />
-              </Routes>
-            </main>
-            <Toaster position="top-right" />
-          </div>
-        </Router>
-      </QueryClientProvider>
-    </PWAProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <RouteChangeTracker />
+        <div className="min-h-screen bg-gray-50">
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <Navbar />
+          <main
+            id="main-content"
+            className="container mx-auto px-4 py-8"
+            aria-label="Main content"
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/issue" element={<IssueProof />} />
+              <Route path="/verify" element={<VerifyProof />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/search" element={<Search />} />
+            </Routes>
+          </main>
+          <Toaster position="top-right" />
+        </div>
+      </Router>
+    </QueryClientProvider>
   );
 }
 
