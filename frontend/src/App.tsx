@@ -18,8 +18,15 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen bg-gray-50">
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
           <Navbar />
-          <main className="container mx-auto px-4 py-8">
+          <main
+            id="main-content"
+            className="container mx-auto px-4 py-8"
+            aria-label="Main content"
+          >
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/issue" element={<IssueProof />} />
