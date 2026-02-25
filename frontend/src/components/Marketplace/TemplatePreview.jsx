@@ -71,15 +71,29 @@ const TemplatePreview = ({
     return stars;
   };
 
+  const overviewPanelId = 'template-preview-overview-panel';
+  const contentPanelId = 'template-preview-content-panel';
+  const detailsPanelId = 'template-preview-details-panel';
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div
+        className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="template-preview-title"
+      >
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+                <h2
+                  id="template-preview-title"
+                  className="text-2xl font-bold text-gray-900"
+                >
+                  {title}
+                </h2>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(category)}`}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </span>
@@ -119,6 +133,7 @@ const TemplatePreview = ({
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close template preview"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -129,7 +144,7 @@ const TemplatePreview = ({
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex space-x-8 px-6" role="tablist" aria-label="Template preview sections">
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'content', label: 'Template Content' },
@@ -143,6 +158,16 @@ const TemplatePreview = ({
                     ? 'border-blue-500 text-blue-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={
+                  tab.id === 'overview'
+                    ? overviewPanelId
+                    : tab.id === 'content'
+                    ? contentPanelId
+                    : detailsPanelId
+                }
+                id={`template-preview-tab-${tab.id}`}
               >
                 {tab.label}
               </button>
@@ -153,7 +178,12 @@ const TemplatePreview = ({
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[50vh]">
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div
+              className="space-y-6"
+              role="tabpanel"
+              id={overviewPanelId}
+              aria-labelledby="template-preview-tab-overview"
+            >
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
                 <p className="text-gray-700 leading-relaxed">{description}</p>
@@ -178,7 +208,11 @@ const TemplatePreview = ({
           )}
 
           {activeTab === 'content' && (
-            <div>
+            <div
+              role="tabpanel"
+              id={contentPanelId}
+              aria-labelledby="template-preview-tab-content"
+            >
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Template Content</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">
@@ -192,7 +226,12 @@ const TemplatePreview = ({
           )}
 
           {activeTab === 'details' && (
-            <div className="space-y-4">
+            <div
+              className="space-y-4"
+              role="tabpanel"
+              id={detailsPanelId}
+              aria-labelledby="template-preview-tab-details"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Template Information</h4>
