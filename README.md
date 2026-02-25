@@ -48,10 +48,87 @@ The server will start on `http://localhost:4000`
 
 ### REST API
 
-- **Base URL**: `http://localhost:4000/api`
-- **Authentication**: `/api/auth/login`, `/api/auth/register`
-- **Users**: `/api/users/*`
-- **Proofs**: `/api/proofs/*`
+**Base URL**: `http://localhost:4000/api`
+
+#### Authentication
+
+**Register**
+- **Endpoint**: `POST /api/auth/register`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "username": "user",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "token": "eyJhbG...",
+    "user": { "id": "1", "email": "user@example.com" }
+  }
+  ```
+
+**Login**
+- **Endpoint**: `POST /api/auth/login`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+
+#### Proofs
+
+**Get All Proofs**
+- **Endpoint**: `GET /api/proofs`
+- **Query Params**: `page` (int), `limit` (int)
+- **Response**:
+  ```json
+  {
+    "data": [{ "id": "1", "title": "My Proof", "status": "VERIFIED" }],
+    "total": 1
+  }
+  ```
+
+**Create Proof**
+- **Endpoint**: `POST /api/proofs`
+- **Headers**: `Authorization: Bearer <token>`
+- **Body**:
+  ```json
+  {
+    "title": "Document Verification",
+    "description": "Verify identity document",
+    "metadata": { "type": "passport" }
+  }
+  ```
+
+**Get Proof by ID**
+- **Endpoint**: `GET /api/proofs/:id`
+
+**Update Proof**
+- **Endpoint**: `PUT /api/proofs/:id`
+
+**Delete Proof**
+- **Endpoint**: `DELETE /api/proofs/:id`
+
+### Troubleshooting
+
+Common issues and solutions:
+
+1. **401 Unauthorized**
+   - **Cause**: Missing or invalid JWT token.
+   - **Solution**: Ensure the `Authorization` header is set to `Bearer <your-token>`.
+
+2. **429 Too Many Requests**
+   - **Cause**: Rate limit exceeded.
+   - **Solution**: Wait for the window to reset (check `X-RateLimit-Reset` header).
+
+3. **Connection Refused**
+   - **Cause**: Server is not running.
+   - **Solution**: Run `npm run dev` or `npm start`.
 
 ## GraphQL Schema
 
