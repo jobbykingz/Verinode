@@ -9,6 +9,7 @@ import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
+import RouteChangeTracker from './analytics/RouteChangeTracker';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -17,6 +18,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
+        <RouteChangeTracker />
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <main className="container mx-auto px-4 py-8">
