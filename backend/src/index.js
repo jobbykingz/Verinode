@@ -43,7 +43,7 @@ const {
   xssProtectionMiddleware
 } = require("./utils/xssProtection");
 
-const proofRoutes = require("./routes/proofs");
+const proofRoutes = require("./routes/proofRoutes");
 const authRoutes = require("./routes/auth");
 const stellarRoutes = require("./routes/stellar");
 const marketplaceRoutes = require("./routes/marketplace");
