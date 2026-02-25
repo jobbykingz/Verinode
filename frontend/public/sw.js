@@ -13,7 +13,10 @@ const STATIC_ASSETS = [
   '/static/js/main.js',
   // Add icons
   '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/icons/icon-512x512.png',
+  '/logo192.png',
+  '/logo512.png',
+  '/favicon.ico'
 ];
 
 // API endpoints that should be cached
