@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
+import PWAProvider from './components/PWA/PWAProvider';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import IssueProof from './pages/IssueProof';
