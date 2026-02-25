@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { trackEvent } from '../analytics/ga';
 
 const IssueProof = () => {
   const [eventData, setEventData] = useState('');
@@ -9,6 +10,12 @@ const IssueProof = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    trackEvent({
+      action: 'form_submit',
+      category: 'IssueProof',
+      label: 'issue_proof',
+    });
 
     try {
       // Mock API call - replace with actual Stellar integration
@@ -23,13 +30,28 @@ const IssueProof = () => {
       });
 
       if (response.ok) {
+        trackEvent({
+          action: 'form_submit_success',
+          category: 'IssueProof',
+          label: 'issue_proof',
+        });
         toast.success('Proof issued successfully!');
         setEventData('');
         setHash('');
       } else {
+        trackEvent({
+          action: 'form_submit_error',
+          category: 'IssueProof',
+          label: `issue_proof_http_${response.status}`,
+        });
         toast.error('Failed to issue proof');
       }
-    } catch (error) {
+    } catch {
+      trackEvent({
+        action: 'form_submit_error',
+        category: 'IssueProof',
+        label: 'issue_proof_exception',
+      });
       toast.error('Error issuing proof');
     } finally {
       setIsSubmitting(false);

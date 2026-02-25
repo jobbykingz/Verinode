@@ -248,6 +248,54 @@ JWT_EXPIRES_IN=7d
 DATABASE_URL=your-database-url
 ```
 
+## Website Analytics (Frontend GA4)
+
+MVP website analytics is integrated in the React SPA under `frontend/src/analytics`.
+
+### Configure GA Measurement ID
+
+Create `frontend/.env` (or `frontend/.env.local`) and set your GA4 measurement ID:
+
+```bash
+REACT_APP_GA_ID=G-XXXXXXXXXX
+```
+
+Analytics is disabled by default in local development unless this ID is explicitly configured.
+
+### Where Events Are Fired
+
+- `frontend/src/analytics/ga.ts`
+  - Loads Google `gtag.js` once
+  - Initializes GA4
+  - Exposes `trackEvent({ action, category, label, value })`
+  - Exposes auth helpers `trackLogin()` and `trackSignup()`
+- `frontend/src/analytics/RouteChangeTracker.tsx`
+  - Sends SPA `page_view` events on route changes
+- `frontend/src/pages/Home.tsx`
+  - Tracks homepage CTA clicks (`Issue Proof`, `Verify Proof`)
+- `frontend/src/components/Navbar.tsx`
+  - Tracks top navigation clicks
+- `frontend/src/pages/IssueProof.tsx`
+  - Tracks proof issue form submits/success/errors
+- `frontend/src/pages/VerifyProof.tsx`
+  - Tracks proof search submits/success/errors and on-chain verify CTA
+- `frontend/src/pages/Marketplace.jsx`
+  - Tracks create template CTA and key submit actions (create/purchase/rating)
+- `frontend/src/analytics/webVitals.ts`
+  - Captures LCP, CLS, INP, FID, and TTFB and forwards as GA events
+
+### Verify In GA DebugView
+
+1. Start the frontend with `REACT_APP_GA_ID` set.
+2. Open the app and navigate across pages.
+3. Trigger key actions (CTA clicks, form submits, verify on-chain, etc.).
+4. In GA4, open `Admin -> DebugView`.
+5. Confirm events such as `page_view`, `cta_click`, `form_submit`, and `web_vital_*`.
+
+### Auth Event Note
+
+The current frontend routes do not expose login/signup UI yet. When those screens are added, call `trackLogin()` and `trackSignup()` (or `trackEvent(...)` directly) in their submit handlers.
+
 ## Production Deployment
 
 1. Set environment variables
