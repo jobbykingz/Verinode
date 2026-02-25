@@ -176,9 +176,24 @@ export class CacheService {
 
   private async removeTags(key: string): Promise<void> {
     try {
-      const pattern = 'tag:*';
-      // This would require a more sophisticated implementation in production
-      // For now, we'll skip tag removal to keep it simple
+      // Retrieve all tag keys via the redis client directly
+      const { redis } = await import('../config/redisConfig');
+      const tagKeys = await redis.keys('tag:*');
+      if (tagKeys.length === 0) return;
+
+      await Promise.all(
+        tagKeys.map(async (tagKey) => {
+          const raw = await redis.get(tagKey);
+          if (!raw) return;
+          const keys: string[] = JSON.parse(raw);
+          const updated = keys.filter((k) => k !== key);
+          if (updated.length === 0) {
+            await redis.del(tagKey);
+          } else {
+            await redis.set(tagKey, JSON.stringify(updated), 'EX', 86400);
+          }
+        })
+      );
     } catch (error) {
       console.error('Tag removal error:', error);
     }

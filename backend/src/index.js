@@ -54,6 +54,8 @@ const complianceRoutes = require("./routes/compliance");
 const analyticsRoutes = require("./routes/analytics");
 const ipfsRoutes = require("./routes/ipfs");
 const performanceRoutes = require("./routes/performance");
+const cacheRoutes = require("./routes/cache");
+const { redisService } = require("./services/redisService");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -124,6 +126,7 @@ app.use("/api/compliance", complianceRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ipfs", ipfsRoutes);
 app.use("/api/performance", performanceRoutes);
+app.use("/api/cache", cacheRoutes);
 
 // ============================================================================
 // SYSTEM ENDPOINTS
@@ -142,11 +145,16 @@ app.get("/metrics", async (req, res) => {
 });
 
 // Health check
-app.get("/health", (req, res) => {
+app.get("/health", async (req, res) => {
+  const redisConnected = await redisService.healthCheck().catch(() => false);
   res.json({
     status: "OK",
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    cache: {
+      redis: redisConnected ? "connected" : "disconnected",
+      metricsEndpoint: "/api/cache/metrics"
+    },
     security: {
       rateLimiting: "active",
       cors: "active",
@@ -218,22 +226,17 @@ const server = app.listen(PORT, () => {
 });
 
 // Graceful shutdown
-process.on("SIGINT", () => {
+const shutdown = () => {
   console.log("Shutting down gracefully...");
-  server.close(() => {
+  server.close(async () => {
     monitoringService.shutdown();
+    await redisService.disconnect().catch(() => {});
     console.log("Server closed");
     process.exit(0);
   });
-});
+};
 
-process.on("SIGTERM", () => {
-  console.log("Shutting down gracefully...");
-  server.close(() => {
-    monitoringService.shutdown();
-    console.log("Server closed");
-    process.exit(0);
-  });
-});
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 module.exports = app;
