@@ -10,6 +10,7 @@ import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
+import WalletDemo from './pages/WalletDemo';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import './App.css';
 
@@ -37,6 +38,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/wallet-demo" element={<WalletDemo />} />
             </Routes>
           </main>
           <Toaster position="top-right" />
