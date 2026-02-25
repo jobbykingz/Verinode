@@ -6,6 +6,9 @@ mod crossChainBridge;
 mod chainVerifier;
 mod atomicSwap;
 mod messagePassing;
+mod grantTreasury;
+
+pub mod proof_verifier;
 
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec};
 

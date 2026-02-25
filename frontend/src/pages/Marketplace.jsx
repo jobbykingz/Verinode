@@ -5,6 +5,7 @@ import TemplateBrowser from '../components/Marketplace/TemplateBrowser';
 import TemplateCreator from '../components/Marketplace/TemplateCreator';
 import TemplatePreview from '../components/Marketplace/TemplatePreview';
 import RatingSystem from '../components/Marketplace/RatingSystem';
+import { trackEvent } from '../analytics/ga';
 
 const Marketplace = () => {
   const [view, setView] = useState('browse'); // 'browse', 'create', 'preview', 'rate'
@@ -205,8 +206,18 @@ const Marketplace = () => {
 
   const handleTemplatePurchase = (template) => {
     if (view === 'preview') {
+      trackEvent({
+        action: 'form_submit',
+        category: 'Marketplace',
+        label: 'purchase_template',
+      });
       purchaseTemplateMutation.mutate(template._id);
     } else {
+      trackEvent({
+        action: 'cta_click',
+        category: 'Marketplace',
+        label: 'preview_template',
+      });
       setSelectedTemplate(template);
       setView('preview');
     }
@@ -218,11 +229,21 @@ const Marketplace = () => {
   };
 
   const handleCreateTemplate = (templateData) => {
+    trackEvent({
+      action: 'form_submit',
+      category: 'Marketplace',
+      label: 'create_template',
+    });
     createTemplateMutation.mutate(templateData);
   };
 
   const handleSubmitRating = (ratingData) => {
     if (selectedTemplate) {
+      trackEvent({
+        action: 'form_submit',
+        category: 'Marketplace',
+        label: 'submit_template_rating',
+      });
       rateTemplateMutation.mutate({
         templateId: selectedTemplate._id,
         ...ratingData
@@ -297,7 +318,14 @@ const Marketplace = () => {
                 <p className="text-gray-600">Browse and manage proof templates</p>
               </div>
               <button
-                onClick={() => setView('create')}
+                onClick={() => {
+                  trackEvent({
+                    action: 'cta_click',
+                    category: 'Marketplace',
+                    label: 'open_create_template',
+                  });
+                  setView('create');
+                }}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
               >
                 Create Template

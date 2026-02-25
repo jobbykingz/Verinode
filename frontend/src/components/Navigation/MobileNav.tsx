@@ -74,15 +74,24 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
           <div
             ref={menuRef}
             className="fixed top-0 left-0 bottom-0 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-menu-title"
             style={{ transform: isOpen ? 'translateX(0)' : 'translateX(-100%)' }}
           >
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+                <h2
+                  id="mobile-menu-title"
+                  className="text-lg font-semibold text-gray-900"
+                >
+                  Menu
+                </h2>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  aria-label="Close navigation menu"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

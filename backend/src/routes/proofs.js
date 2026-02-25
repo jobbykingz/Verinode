@@ -10,6 +10,7 @@ const { IPNSService } = require("../services/ipnsService");
 const { ContentVerification } = require("../utils/contentVerification");
 const IPFSContent = require("../models/IPFSContent");
 const ipfsConfig = require("../../config/ipfsConfig");
+const { cacheMiddleware, invalidateCacheMiddleware } = require("../middleware/cacheMiddleware");
 
 // Initialize IPFS services
 const ipfsService = new IPFSService();
@@ -21,9 +22,10 @@ const contentVerification = new ContentVerification();
 let proofs = [];
 let proofIdCounter = 1;
 
-// Issue a new proof
+// Issue a new proof - invalidate proof list cache on success
 router.post(
   "/issue",
+  invalidateCacheMiddleware({ tags: ["proof-data"] }),
   [
     body("eventData").notEmpty().withMessage("Event data is required"),
     body("hash")
@@ -179,8 +181,13 @@ router.post(
   },
 );
 
-// Get proof by ID
-router.get("/:id", async (req, res) => {
+// Get proof by ID - cache 30 min
+router.get("/:id", cacheMiddleware({
+  ttl: 1800,
+  keyPrefix: "proof",
+  keyGenerator: (req) => `id:${req.params.id}:user:${req.query.userAddress || "anonymous"}`,
+  tags: ["proof-data"]
+}), async (req, res) => {
   try {
     const proof = proofs.find((p) => p.id === parseInt(req.params.id));
     if (!proof) {
@@ -229,8 +236,13 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Get all proofs
-router.get("/", (req, res) => {
+// Get all proofs - cache 5 min
+router.get("/", cacheMiddleware({
+  ttl: 300,
+  keyPrefix: "proof",
+  keyGenerator: (req) => `list:${JSON.stringify(req.query)}`,
+  tags: ["proof-data"]
+}), (req, res) => {
   const { issuer, verified } = req.query;
   let filteredProofs = proofs;
 
@@ -247,8 +259,10 @@ router.get("/", (req, res) => {
   res.json({ proofs: filteredProofs });
 });
 
-// Verify a proof
-router.post("/verify/:id", async (req, res) => {
+// Verify a proof - invalidate proof cache after verification changes state
+router.post("/verify/:id", invalidateCacheMiddleware({
+  tags: ["proof-data", "proof-verification"]
+}), async (req, res) => {
   try {
     const proof = proofs.find((p) => p.id === parseInt(req.params.id));
     if (!proof) {

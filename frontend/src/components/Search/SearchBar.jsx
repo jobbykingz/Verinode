@@ -124,6 +124,7 @@ const SearchBar = ({
             <button
               onClick={handleFilterToggle}
               className="ml-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+              aria-label="Open advanced search filters"
               title="Advanced Filters"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,13 +144,17 @@ const SearchBar = ({
 
       {/* Auto-complete Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
+        <div
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+          aria-label="Search suggestions"
+        >
           <div className="py-1">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => handleSuggestionClick(suggestion)}
                 className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                aria-label={`Use suggestion ${suggestion}`}
               >
                 {suggestion}
               </button>

@@ -38,6 +38,18 @@ npm run dev
 
 The server will start on `http://localhost:4000`
 
+### Docker Deployment
+
+You can also run the application using Docker:
+
+```bash
+# Build and start the containers
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+```
+
 ## API Endpoints
 
 ### GraphQL API
@@ -48,10 +60,87 @@ The server will start on `http://localhost:4000`
 
 ### REST API
 
-- **Base URL**: `http://localhost:4000/api`
-- **Authentication**: `/api/auth/login`, `/api/auth/register`
-- **Users**: `/api/users/*`
-- **Proofs**: `/api/proofs/*`
+**Base URL**: `http://localhost:4000/api`
+
+#### Authentication
+
+**Register**
+- **Endpoint**: `POST /api/auth/register`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "username": "user",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "token": "eyJhbG...",
+    "user": { "id": "1", "email": "user@example.com" }
+  }
+  ```
+
+**Login**
+- **Endpoint**: `POST /api/auth/login`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+
+#### Proofs
+
+**Get All Proofs**
+- **Endpoint**: `GET /api/proofs`
+- **Query Params**: `page` (int), `limit` (int)
+- **Response**:
+  ```json
+  {
+    "data": [{ "id": "1", "title": "My Proof", "status": "VERIFIED" }],
+    "total": 1
+  }
+  ```
+
+**Create Proof**
+- **Endpoint**: `POST /api/proofs`
+- **Headers**: `Authorization: Bearer <token>`
+- **Body**:
+  ```json
+  {
+    "title": "Document Verification",
+    "description": "Verify identity document",
+    "metadata": { "type": "passport" }
+  }
+  ```
+
+**Get Proof by ID**
+- **Endpoint**: `GET /api/proofs/:id`
+
+**Update Proof**
+- **Endpoint**: `PUT /api/proofs/:id`
+
+**Delete Proof**
+- **Endpoint**: `DELETE /api/proofs/:id`
+
+### Troubleshooting
+
+Common issues and solutions:
+
+1. **401 Unauthorized**
+   - **Cause**: Missing or invalid JWT token.
+   - **Solution**: Ensure the `Authorization` header is set to `Bearer <your-token>`.
+
+2. **429 Too Many Requests**
+   - **Cause**: Rate limit exceeded.
+   - **Solution**: Wait for the window to reset (check `X-RateLimit-Reset` header).
+
+3. **Connection Refused**
+   - **Cause**: Server is not running.
+   - **Solution**: Run `npm run dev` or `npm start`.
 
 ## GraphQL Schema
 
@@ -247,6 +336,54 @@ JWT_EXPIRES_IN=7d
 # Database configuration (for production)
 DATABASE_URL=your-database-url
 ```
+
+## Website Analytics (Frontend GA4)
+
+MVP website analytics is integrated in the React SPA under `frontend/src/analytics`.
+
+### Configure GA Measurement ID
+
+Create `frontend/.env` (or `frontend/.env.local`) and set your GA4 measurement ID:
+
+```bash
+REACT_APP_GA_ID=G-XXXXXXXXXX
+```
+
+Analytics is disabled by default in local development unless this ID is explicitly configured.
+
+### Where Events Are Fired
+
+- `frontend/src/analytics/ga.ts`
+  - Loads Google `gtag.js` once
+  - Initializes GA4
+  - Exposes `trackEvent({ action, category, label, value })`
+  - Exposes auth helpers `trackLogin()` and `trackSignup()`
+- `frontend/src/analytics/RouteChangeTracker.tsx`
+  - Sends SPA `page_view` events on route changes
+- `frontend/src/pages/Home.tsx`
+  - Tracks homepage CTA clicks (`Issue Proof`, `Verify Proof`)
+- `frontend/src/components/Navbar.tsx`
+  - Tracks top navigation clicks
+- `frontend/src/pages/IssueProof.tsx`
+  - Tracks proof issue form submits/success/errors
+- `frontend/src/pages/VerifyProof.tsx`
+  - Tracks proof search submits/success/errors and on-chain verify CTA
+- `frontend/src/pages/Marketplace.jsx`
+  - Tracks create template CTA and key submit actions (create/purchase/rating)
+- `frontend/src/analytics/webVitals.ts`
+  - Captures LCP, CLS, INP, FID, and TTFB and forwards as GA events
+
+### Verify In GA DebugView
+
+1. Start the frontend with `REACT_APP_GA_ID` set.
+2. Open the app and navigate across pages.
+3. Trigger key actions (CTA clicks, form submits, verify on-chain, etc.).
+4. In GA4, open `Admin -> DebugView`.
+5. Confirm events such as `page_view`, `cta_click`, `form_submit`, and `web_vital_*`.
+
+### Auth Event Note
+
+The current frontend routes do not expose login/signup UI yet. When those screens are added, call `trackLogin()` and `trackSignup()` (or `trackEvent(...)` directly) in their submit handlers.
 
 ## Production Deployment
 

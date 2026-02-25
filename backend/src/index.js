@@ -67,9 +67,9 @@ const {
 } = require("./utils/xssProtection");
 const { redisService } = require("./services/redisService");
 
-const proofRoutes      = require("./routes/proofs");
-const authRoutes       = require("./routes/auth");
-const stellarRoutes    = require("./routes/stellar");
+const proofRoutes = require("./routes/proofRoutes");
+const authRoutes = require("./routes/auth");
+const stellarRoutes = require("./routes/stellar");
 const marketplaceRoutes = require("./routes/marketplace");
 const searchRoutes     = require("./routes/search");
 const securityRoutes   = require("./routes/security");
@@ -79,6 +79,8 @@ const analyticsRoutes  = require("./routes/analytics");
 const ipfsRoutes       = require("./routes/ipfs");
 const performanceRoutes = require("./routes/performance");
 const cacheRoutes      = require("./routes/cache");
+const cacheRoutes = require("./routes/cache");
+const { redisService } = require("./services/redisService");
 
 const app  = express();
 const PORT = config.server.port;
