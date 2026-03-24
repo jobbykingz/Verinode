@@ -2,7 +2,7 @@
 name = "verinode-contracts"
 version = "0.1.0"
 edition = "2021"
-description = "Verinode Soroban smart contracts for cryptographic proof verification"
+description = "Verinode Soroban smart contracts with advanced gas optimization suite"
 authors = ["Verinode Team"]
 license = "MIT"
 
@@ -11,6 +11,11 @@ crate-type = ["cdylib"]
 
 [dependencies]
 soroban-sdk = "20.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+regex = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "3.2", features = ["derive"] }
 
 [dev-dependencies]
 soroban-sdk = { version = "20.0.0", features = ["testutils"] }
@@ -24,3 +29,11 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
+
+[[bin]]
+name = "advanced_gas_profiler"
+path = "tools/advanced_gas_profiler.rs"
+
+[[bin]]
+name = "optimization_suggester"
+path = "tools/optimization_suggester.rs"

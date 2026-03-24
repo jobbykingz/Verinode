@@ -7,6 +7,8 @@ mod chainVerifier;
 mod atomicSwap;
 mod messagePassing;
 mod grantTreasury;
+pub mod optimization;
+pub mod bridges;
 
 pub mod proof_verifier;
 pub mod optimization;

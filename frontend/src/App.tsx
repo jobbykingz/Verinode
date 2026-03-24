@@ -13,6 +13,12 @@ import Search from './pages/Search';
 import WalletDemo from './pages/WalletDemo';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import { performanceMetrics, preloadCriticalResources } from './utils/performance';
+// Import accessibility components
+import { ScreenReader } from './components/Accessibility/ScreenReader';
+import { KeyboardNavigation } from './components/Accessibility/KeyboardNavigation';
+import { VoiceCommands } from './components/Accessibility/VoiceCommands';
+import { HighContrast } from './components/Accessibility/HighContrast';
+import { accessibilityService } from './services/accessibilityService';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -22,6 +28,9 @@ function App() {
     // Initialize performance optimizations
     preloadCriticalResources();
     performanceMetrics.lazyLoadImages();
+
+    // Initialize accessibility service
+    // The service is already initialized in its constructor
 
     // Measure page load performance
     const metrics = performanceMetrics.measurePageLoad();
@@ -44,6 +53,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <RouteChangeTracker />
+        {/* Accessibility Components */}
+        <ScreenReader />
+        <KeyboardNavigation enableShortcuts={true} showHelp={true} />
+        <VoiceCommands showIndicator={true} />
+        <HighContrast showToggle={true} colorBlindSupport={true} />
+        
         <div className="min-h-screen bg-gray-50">
           <a href="#main-content" className="skip-link">
             Skip to main content

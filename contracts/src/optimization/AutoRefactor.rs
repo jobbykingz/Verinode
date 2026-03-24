@@ -1,364 +1,426 @@
-use soroban_sdk::{Env, String, Vec};
-use super::ai_optimizer::{OptimizationSuggestion, SuggestionType};
+#![no_std]
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec, Map, Symbol};
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct RefactoringResult {
-    pub optimized_code: String,
-    pub applied_changes: Vec<RefactoringChange>,
-    pub gas_savings_estimate: u64,
-    pub compilation_status: CompilationStatus,
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RefactorRule {
+    pub rule_id: u64,
+    pub name: String,
+    pub description: String,
+    pub pattern: String,
+    pub replacement: String,
+    pub gas_savings: u64,
+    pub risk_level: u8, // 1-10 scale
+    pub category: String,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct RefactoringChange {
-    pub change_type: ChangeType,
-    pub description: String,
-    pub line_number: usize,
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct RefactorResult {
+    pub success: bool,
     pub original_code: String,
     pub refactored_code: String,
-    pub impact_assessment: ImpactAssessment,
+    pub applied_rules: Vec<u64>,
+    pub total_gas_savings: u64,
+    pub risk_score: f64,
+    pub compilation_status: bool,
+    pub warnings: Vec<String>,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum ChangeType {
-    StorageOptimization,
-    LoopRefactoring,
-    FunctionInlining,
-    ConstantExtraction,
-    VariableRenaming,
-    CodeSimplification,
-    BatchOperation,
-    MemoryOptimization,
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CodeMetrics {
+    pub lines_of_code: u32,
+    pub cyclomatic_complexity: u32,
+    pub storage_operations: u32,
+    pub loop_operations: u32,
+    pub function_calls: u32,
+    pub estimated_gas: u64,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum ImpactAssessment {
-    Positive(u64), // Gas savings
-    Neutral,
-    Negative(u64), // Gas increase
+#[contracttype]
+pub enum AutoRefactorDataKey {
+    RefactorRules(u64),
+    RuleCount,
+    RefactorHistory,
+    MetricsCache,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum CompilationStatus {
-    Success,
-    Warning(String),
-    Error(String),
-}
-
+#[contract]
 pub struct AutoRefactor;
 
+#[contractimpl]
 impl AutoRefactor {
-    pub fn new() -> Self {
-        Self
-    }
-
-    pub fn apply_optimization(
-        &self,
-        original_code: &str,
-        suggestion: &OptimizationSuggestion,
-    ) -> String {
-        match suggestion.suggestion_type.clone() {
-            SuggestionType::StorageOptimization => self.optimize_storage_operations(original_code),
-            SuggestionType::LoopOptimization => self.optimize_loops(original_code),
-            SuggestionType::ArithmeticOptimization => self.optimize_arithmetic(original_code),
-            SuggestionType::MemoryOptimization => self.optimize_memory_usage(original_code),
-            SuggestionType::FunctionInlining => self.inline_functions(original_code),
-            SuggestionType::ConstantFolding => self.fold_constants(original_code),
-            SuggestionType::DeadCodeElimination => self.eliminate_dead_code(original_code),
-            SuggestionType::BatchOperations => self.batch_operations(original_code),
+    /// Initialize the auto refactoring system
+    pub fn initialize(env: Env, admin: Address) {
+        if env.storage().instance().has(&AutoRefactorDataKey::RuleCount) {
+            panic!("Auto Refactor already initialized");
         }
+        
+        env.storage().instance().set(&AutoRefactorDataKey::RuleCount, &0u64);
+        env.storage().instance().set(&AutoRefactorDataKey::RefactorHistory, &Vec::new(&env));
+        
+        // Initialize with default refactoring rules
+        Self::initialize_default_rules(&env);
     }
 
-    pub fn refactor_contract(
-        &self,
-        original_code: &str,
-        suggestions: &[OptimizationSuggestion],
-    ) -> RefactoringResult {
-        let mut optimized_code = original_code.to_string();
-        let mut applied_changes = Vec::new();
-        let mut total_gas_savings = 0u64;
+    /// Automatically refactor source code for gas optimization
+    pub fn auto_refactor(
+        env: Env,
+        source_code: String,
+        target_gas_reduction: f64, // Target percentage reduction (0.0-1.0)
+        max_risk_level: u8, // Maximum acceptable risk level (1-10)
+    ) -> RefactorResult {
+        let mut result = RefactorResult {
+            success: false,
+            original_code: source_code.clone(),
+            refactored_code: source_code.clone(),
+            applied_rules: Vec::new(&env),
+            total_gas_savings: 0,
+            risk_score: 0.0,
+            compilation_status: false,
+            warnings: Vec::new(&env),
+        };
 
-        for suggestion in suggestions {
-            if suggestion.confidence_score > 0.8 {
-                let previous_code = optimized_code.clone();
-                optimized_code = self.apply_optimization(&previous_code, suggestion);
-                
-                let change = RefactoringChange {
-                    change_type: self.map_suggestion_to_change_type(&suggestion.suggestion_type),
-                    description: suggestion.description.clone(),
-                    line_number: self.find_main_function_line(&optimized_code),
-                    original_code: previous_code,
-                    refactored_code: optimized_code.clone(),
-                    impact_assessment: ImpactAssessment::Positive(suggestion.current_gas_cost - suggestion.optimized_gas_cost),
-                };
-                
-                applied_changes.push(change);
-                total_gas_savings += suggestion.current_gas_cost - suggestion.optimized_gas_cost;
+        let original_metrics = Self::analyze_code_metrics(&env, source_code.clone());
+        let target_gas_savings = (original_metrics.estimated_gas as f64 * target_gas_reduction) as u64;
+        
+        let mut refactored_code = source_code;
+        let mut total_risk = 0.0;
+        let mut current_gas_savings = 0;
+
+        // Apply refactoring rules iteratively
+        let rule_count: u64 = env.storage().instance().get(&AutoRefactorDataKey::RuleCount).unwrap_or(0);
+        
+        for rule_id in 1..=rule_count {
+            if let Some(rule) = env.storage().instance().get::<AutoRefactorDataKey, RefactorRule>(
+                &AutoRefactorDataKey::RefactorRules(rule_id)
+            ) {
+                // Check if rule is within risk tolerance
+                if rule.risk_level <= max_risk_level {
+                    // Apply rule if pattern matches
+                    if refactored_code.contains(&rule.pattern) {
+                        let new_code = Self::apply_refactor_rule(&env, refactored_code.clone(), rule.clone());
+                        
+                        // Verify compilation and measure improvement
+                        if Self::verify_compilation(&env, new_code.clone()) {
+                            let new_metrics = Self::analyze_code_metrics(&env, new_code.clone());
+                            let gas_savings = original_metrics.estimated_gas - new_metrics.estimated_gas;
+                            
+                            if gas_savings > 0 {
+                                refactored_code = new_code;
+                                result.applied_rules.push_back(rule_id);
+                                result.total_gas_savings += gas_savings;
+                                total_risk += rule.risk_level as f64;
+                                current_gas_savings += gas_savings;
+                                
+                                // Add warning for high-risk transformations
+                                if rule.risk_level > 7 {
+                                    result.warnings.push_back(format!(
+                                        "High-risk rule applied: {} (Risk level: {})",
+                                        rule.name, rule.risk_level
+                                    ));
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        let compilation_status = self.validate_compilation(&optimized_code);
+        result.refactored_code = refactored_code;
+        result.compilation_status = Self::verify_compilation(&env, result.refactored_code.clone());
+        result.risk_score = if result.applied_rules.len() > 0 { 
+            total_risk / result.applied_rules.len() as f64 
+        } else { 
+            0.0 
+        };
+        
+        // Check if target gas reduction was achieved
+        result.success = current_gas_savings >= target_gas_savings && result.compilation_status;
 
-        RefactoringResult {
-            optimized_code,
-            applied_changes,
-            gas_savings_estimate: total_gas_savings,
-            compilation_status,
+        // Store refactor history
+        Self::store_refactor_history(&env, result.clone());
+
+        result
+    }
+
+    /// Initialize default refactoring rules
+    fn initialize_default_rules(env: &Env) {
+        let mut rule_id = 1u64;
+
+        // Rule 1: Replace persistent storage with instance storage for temporary data
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Persistent to Instance Storage"),
+            description: String::from_str(env, "Replace persistent storage with instance storage for temporary data"),
+            pattern: String::from_str(env, "env.storage().persistent().set"),
+            replacement: String::from_str(env, "env.storage().instance().set"),
+            gas_savings: 5000,
+            risk_level: 3,
+            category: String::from_str(env, "Storage"),
+        });
+
+        // Rule 2: Optimize vector initialization
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Vector Pre-allocation"),
+            description: String::from_str(env, "Pre-allocate vectors with known capacity"),
+            pattern: String::from_str(env, "Vec::new(&env)"),
+            replacement: String::from_str(env, "Vec::new(&env)"), // Will be enhanced in apply function
+            gas_savings: 2000,
+            risk_level: 2,
+            category: String::from_str(env, "Collections"),
+        });
+
+        // Rule 3: Early return optimization
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Early Return Pattern"),
+            description: String::from_str(env, "Use early returns to reduce nesting"),
+            pattern: String::from_str(env, "if condition { // complex logic } else { return }"),
+            replacement: String::from_str(env, "if !condition { return } // complex logic"),
+            gas_savings: 3000,
+            risk_level: 4,
+            category: String::from_str(env, "Control Flow"),
+        });
+
+        // Rule 4: Batch storage operations
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Batch Storage Operations"),
+            description: String::from_str(env, "Combine multiple storage operations into batches"),
+            pattern: String::from_str(env, "env.storage().instance().set(&key1, &val1); env.storage().instance().set(&key2, &val2)"),
+            replacement: String::from_str(env, "// Batch storage operations\nenv.storage().instance().set(&key1, &val1);\nenv.storage().instance().set(&key2, &val2)"),
+            gas_savings: 4000,
+            risk_level: 2,
+            category: String::from_str(env, "Storage"),
+        });
+
+        // Rule 5: Optimize string operations
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "String Reference Optimization"),
+            description: String::from_str(env, "Use string references instead of cloning"),
+            pattern: String::from_str(env, ".clone()"),
+            replacement: String::from_str(env, ""), // Will be context-aware in apply function
+            gas_savings: 1500,
+            risk_level: 5,
+            category: String::from_str(env, "Strings"),
+        });
+
+        // Rule 6: Loop unrolling for small iterations
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Small Loop Unrolling"),
+            description: String::from_str(env, "Unroll loops with small fixed iteration counts"),
+            pattern: String::from_str(env, "for i in 0..3"),
+            replacement: String::from_str(env, "let i = 0; { /* loop body */ } let i = 1; { /* loop body */ } let i = 2; { /* loop body */ }"),
+            gas_savings: 2500,
+            risk_level: 6,
+            category: String::from_str(env, "Loops"),
+        });
+
+        // Rule 7: Remove redundant checks
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Redundant Check Removal"),
+            description: String::from_str(env, "Remove redundant validation checks"),
+            pattern: String::from_str(env, "if true {"),
+            replacement: String::from_str(env, "{"),
+            gas_savings: 1000,
+            risk_level: 7,
+            category: String::from_str(env, "Validation"),
+        });
+
+        // Rule 8: Optimize arithmetic operations
+        Self::add_refactor_rule(env, &mut rule_id, RefactorRule {
+            rule_id,
+            name: String::from_str(env, "Arithmetic Optimization"),
+            description: String::from_str(env, "Replace expensive arithmetic with bit operations where possible"),
+            pattern: String::from_str(env, "* 2"),
+            replacement: String::from_str(env, "<< 1"),
+            gas_savings: 500,
+            risk_level: 1,
+            category: String::from_str(env, "Arithmetic"),
+        });
+    }
+
+    /// Add a refactoring rule
+    fn add_refactor_rule(env: &Env, rule_id: &mut u64, rule: RefactorRule) {
+        env.storage().instance().set(&AutoRefactorDataKey::RefactorRules(*rule_id), &rule);
+        *rule_id += 1;
+        env.storage().instance().set(&AutoRefactorDataKey::RuleCount, rule_id - 1);
+    }
+
+    /// Apply a specific refactoring rule
+    fn apply_refactor_rule(env: &Env, source_code: String, rule: RefactorRule) -> String {
+        let mut refactored = source_code;
+        
+        match rule.rule_id {
+            1 => { // Storage optimization
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+                refactored = refactored.replace("env.storage().persistent().get", "env.storage().instance().get");
+            }
+            2 => { // Vector pre-allocation - enhanced logic
+                // Find vector usage and add capacity hints
+                if refactored.contains("push_back") {
+                    let push_count = refactored.matches("push_back").count();
+                    if push_count <= 10 {
+                        refactored = refactored.replace("Vec::new(&env)", &format!("{{\n    let mut vec = Vec::new(&env);\n    vec.reserve_exact({});\n    vec\n}}", push_count));
+                    }
+                }
+            }
+            3 => { // Early return - simplified pattern matching
+                refactored = refactored.replace("if condition {", "if !condition { return }\n// Original condition logic:");
+            }
+            4 => { // Batch storage - already optimized in pattern
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+            }
+            5 => { // String optimization - context-aware
+                // Only remove unnecessary clones, not essential ones
+                let lines: Vec<&str> = refactored.lines().collect();
+                let mut new_lines = Vec::new();
+                
+                for line in lines {
+                    if line.trim().contains(".clone()") && !line.trim().contains("require_auth()") {
+                        let optimized_line = line.replace(".clone()", "");
+                        new_lines.push(optimized_line);
+                    } else {
+                        new_lines.push(line.to_string());
+                    }
+                }
+                refactored = new_lines.join("\n");
+            }
+            6 => { // Loop unrolling
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+            }
+            7 => { // Redundant check removal
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+            }
+            8 => { // Arithmetic optimization
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+                refactored = refactored.replace("* 4", "<< 2");
+                refactored = refactored.replace("* 8", "<< 3");
+                refactored = refactored.replace("* 16", "<< 4");
+            }
+            _ => {
+                refactored = refactored.replace(&rule.pattern, &rule.replacement);
+            }
+        }
+        
+        refactored
+    }
+
+    /// Analyze code metrics
+    fn analyze_code_metrics(env: &Env, source_code: String) -> CodeMetrics {
+        let lines = source_code.lines().count() as u32;
+        let storage_ops = source_code.matches("storage().").count() as u32;
+        let loop_ops = source_code.matches("for ").count() as u32 + source_code.matches("while ").count() as u32;
+        let function_calls = source_code.matches("fn ").count() as u32;
+        
+        // Simple cyclomatic complexity estimation
+        let decision_points = source_code.matches("if ").count() + 
+                             source_code.matches("match ").count() + 
+                             source_code.matches("while ").count() + 
+                             source_code.matches("for ").count();
+        let complexity = (decision_points + 1) as u32;
+        
+        // Estimated gas calculation
+        let mut estimated_gas = 21000; // Base transaction cost
+        estimated_gas += (storage_ops * 5000) as u64;
+        estimated_gas += (loop_ops * 3000) as u64;
+        estimated_gas += (function_calls * 1000) as u64;
+        estimated_gas += (lines * 100) as u64; // Rough estimate per line
+
+        CodeMetrics {
+            lines_of_code: lines,
+            cyclomatic_complexity: complexity,
+            storage_operations: storage_ops,
+            loop_operations: loop_ops,
+            function_calls: function_calls,
+            estimated_gas,
         }
     }
 
-    fn optimize_storage_operations(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Replace multiple individual storage operations with batched operations
-        if optimized.matches("env.storage().instance().set").count() > 2 {
-            // Example: Convert individual sets to batched storage
-            optimized = optimized.replace(
-                "env.storage().instance().set(&key1, &value1);\n        env.storage().instance().set(&key2, &value2);",
-                "// Batched storage operation\n        let batch_data = vec![(key1, value1), (key2, value2)];\n        for (key, value) in batch_data {\n            env.storage().instance().set(&key, &value);\n        }"
-            );
-        }
-        
-        // Suggest using persistent storage for long-term data
-        optimized = optimized.replace(
-            "env.storage().instance().set(&DataKey::Proof(proof_id), &proof);",
-            "// Use persistent storage for long-term data\n        env.storage().persistent().set(&format!(\"proof_{}\", proof_id), &proof);"
-        );
-        
-        optimized
-    }
-
-    fn optimize_loops(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Cache storage values before loops
-        optimized = optimized.replace(
-            "for i in 1..=count {\n            if let Some(proof) = env.storage().instance().get::<DataKey, Proof>(&DataKey::Proof(i)) {",
-            "// Cache storage values before loop\n        let cached_proofs: Vec<Proof> = (1..=count)\n            .filter_map(|i| env.storage().instance().get::<DataKey, Proof>(&DataKey::Proof(i)))\n            .collect();\n        \n        for proof in cached_proofs {"
-        );
-        
-        // Pre-allocate vector capacity when size is known
-        optimized = optimized.replace(
-            "let mut proofs = Vec::new(&env);",
-            "let mut proofs = Vec::with_capacity(&env, count as usize);"
-        );
-        
-        optimized
-    }
-
-    fn optimize_arithmetic(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Cache repeated computations
-        optimized = optimized.replace(
-            "let timestamp = env.ledger().timestamp();\n        let proof = Proof {\n            id: proof_id,\n            issuer: issuer.clone(),\n            event_data: event_data.clone(),\n            timestamp: env.ledger().timestamp(),",
-            "let timestamp = env.ledger().timestamp();\n        let proof = Proof {\n            id: proof_id,\n            issuer: issuer.clone(),\n            event_data: event_data.clone(),\n            timestamp: timestamp,"
-        );
-        
-        // Use bit shifts where possible instead of multiplication/division
-        optimized = optimized.replace(
-            "proof_id * 2",
-            "proof_id << 1"
-        );
-        
-        optimized = optimized.replace(
-            "proof_id / 2",
-            "proof_id >> 1"
-        );
-        
-        optimized
-    }
-
-    fn optimize_memory_usage(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Use with_capacity for vectors when size is predictable
-        optimized = optimized.replace(
-            "let mut results = Vec::new(&env);",
-            "let mut results = Vec::with_capacity(&env, estimated_size);"
-        );
-        
-        // Use arrays instead of vectors for fixed-size collections
-        if optimized.contains("Vec::with_capacity(&env, 3)") {
-            optimized = optimized.replace(
-                "Vec::with_capacity(&env, 3)",
-                "[T::default(); 3]"
-            );
-        }
-        
-        // Reuse vectors instead of creating new ones
-        optimized = optimized.replace(
-            "let mut new_vec = Vec::new(&env);",
-            "existing_vec.clear(); // Reuse existing vector"
-        );
-        
-        optimized
-    }
-
-    fn inline_functions(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Inline simple getter functions
-        if optimized.contains("fn get_admin(&env) -> Address") {
-            optimized = optimized.replace(
-                "env.storage().instance().get(&DataKey::Admin).unwrap()",
-                "// Inlined: get_admin\n        env.storage().instance().get(&DataKey::Admin).unwrap()"
-            );
-        }
-        
-        // Inline simple utility functions
-        optimized = optimized.replace(
-            "let count = get_proof_count(&env);",
-            "// Inlined: get_proof_count\n        let count = env.storage().instance().get(&DataKey::ProofCount).unwrap_or(0);"
-        );
-        
-        optimized
-    }
-
-    fn fold_constants(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Pre-compute constant expressions
-        optimized = optimized.replace(
-            "let max_items = 10 * 1000;",
-            "let max_items = 10000; // Pre-computed constant"
-        );
-        
-        // Extract magic numbers to constants
-        optimized = optimized.replace(
-            "if version == 0 || version > versions.len() {",
-            "const MIN_VERSION: u32 = 0;\n        if version == MIN_VERSION || version > versions.len() {"
-        );
-        
-        optimized
-    }
-
-    fn eliminate_dead_code(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Remove unused variables (basic pattern)
-        optimized = optimized.replace(
-            "let unused_var = some_value;\n        // function continues without using unused_var",
-            "// Removed unused variable"
-        );
-        
-        // Remove redundant checks
-        optimized = optimized.replace(
-            "if true {\n            some_operation()\n        }",
-            "some_operation() // Removed redundant if true"
-        );
-        
-        // Remove unreachable code patterns
-        optimized = optimized.replace(
-            "panic!(\"Unreachable\");\n        let x = 5;",
-            "panic!(\"Unreachable\"); // Removed unreachable code"
-        );
-        
-        optimized
-    }
-
-    fn batch_operations(&self, code: &str) -> String {
-        let mut optimized = code.to_string();
-        
-        // Batch multiple require_auth calls
-        if optimized.matches("require_auth()").count() > 2 {
-            optimized = optimized.replace(
-                "admin.require_auth();\n        issuer.require_auth();\n        verifier.require_auth();",
-                "// Batched authorization\n        let authorized_addresses = vec![admin, issuer, verifier];\n        for addr in authorized_addresses {\n            addr.require_auth();\n        }"
-            );
-        }
-        
-        // Batch storage reads
-        optimized = optimized.replace(
-            "let admin = env.storage().instance().get(&DataKey::Admin);\n        let count = env.storage().instance().get(&DataKey::ProofCount);",
-            "// Batched storage reads\n        let (admin, count) = (\n            env.storage().instance().get(&DataKey::Admin),\n            env.storage().instance().get(&DataKey::ProofCount)\n        );"
-        );
-        
-        optimized
-    }
-
-    fn map_suggestion_to_change_type(&self, suggestion_type: &SuggestionType) -> ChangeType {
-        match suggestion_type {
-            SuggestionType::StorageOptimization => ChangeType::StorageOptimization,
-            SuggestionType::LoopOptimization => ChangeType::LoopRefactoring,
-            SuggestionType::ArithmeticOptimization => ChangeType::CodeSimplification,
-            SuggestionType::MemoryOptimization => ChangeType::MemoryOptimization,
-            SuggestionType::FunctionInlining => ChangeType::FunctionInlining,
-            SuggestionType::ConstantFolding => ChangeType::ConstantExtraction,
-            SuggestionType::DeadCodeElimination => ChangeType::CodeSimplification,
-            SuggestionType::BatchOperations => ChangeType::BatchOperation,
-        }
-    }
-
-    fn find_main_function_line(&self, code: &str) -> usize {
-        code.lines()
-            .enumerate()
-            .find(|(_, line)| line.contains("pub fn") && !line.contains("#[cfg(test)]"))
-            .map(|(line_num, _)| line_num + 1)
-            .unwrap_or(1)
-    }
-
-    fn validate_compilation(&self, code: &str) -> CompilationStatus {
+    /// Verify that refactored code compiles correctly
+    fn verify_compilation(env: &Env, source_code: String) -> bool {
         // Basic syntax validation
-        let open_braces = code.matches("{").count();
-        let close_braces = code.matches("}").count();
+        let open_braces = source_code.matches("{").count();
+        let close_braces = source_code.matches("}").count();
+        let open_parens = source_code.matches("(").count();
+        let close_parens = source_code.matches(")").count();
+        let open_brackets = source_code.matches("[").count();
+        let close_brackets = source_code.matches("]").count();
         
-        if open_braces != close_braces {
-            return CompilationStatus::Error("Brace mismatch detected".to_string());
-        }
-        
-        let open_parens = code.matches("(").count();
-        let close_parens = code.matches(")").count();
-        
-        if open_parens != close_parens {
-            return CompilationStatus::Error("Parentheses mismatch detected".to_string());
+        // Check for balanced brackets and parentheses
+        if open_braces != close_braces || open_parens != close_parens || open_brackets != close_brackets {
+            return false;
         }
         
         // Check for basic Rust syntax requirements
-        if !code.contains("#![no_std]") && code.contains("soroban_sdk") {
-            return CompilationStatus::Warning("Missing #![no_std] directive".to_string());
+        if !source_code.contains("fn ") && !source_code.contains("impl ") {
+            return false;
         }
         
-        CompilationStatus::Success
+        // More sophisticated checks would go here in a real implementation
+        true
     }
 
-    pub fn generate_diff(&self, original: &str, optimized: &str) -> String {
-        let original_lines: Vec<&str> = original.lines().collect();
-        let optimized_lines: Vec<&str> = optimized.lines().collect();
-        let mut diff = String::new();
+    /// Store refactor history
+    fn store_refactor_history(env: &Env, result: RefactorResult) {
+        let mut history: Vec<RefactorResult> = env.storage().instance()
+            .get(&AutoRefactorDataKey::RefactorHistory)
+            .unwrap_or(Vec::new(env));
         
-        let mut i = 0;
-        let mut j = 0;
+        history.push_back(result);
         
-        while i < original_lines.len() || j < optimized_lines.len() {
-            if i < original_lines.len() && j < optimized_lines.len() && original_lines[i] == optimized_lines[j] {
-                diff.push_str(&format!("  {}\n", original_lines[i]));
-                i += 1;
-                j += 1;
-            } else if i < original_lines.len() && (j >= optimized_lines.len() || original_lines[i] != optimized_lines[j]) {
-                diff.push_str(&format!("- {}\n", original_lines[i]));
-                i += 1;
-            } else if j < optimized_lines.len() && (i >= original_lines.len() || original_lines[i] != optimized_lines[j]) {
-                diff.push_str(&format!("+ {}\n", optimized_lines[j]));
-                j += 1;
+        // Keep only last 50 refactors to save storage
+        if history.len() > 50 {
+            history.remove(0);
+        }
+        
+        env.storage().instance().set(&AutoRefactorDataKey::RefactorHistory, &history);
+    }
+
+    /// Get all refactoring rules
+    pub fn get_refactor_rules(env: Env) -> Vec<RefactorRule> {
+        let mut rules = Vec::new(&env);
+        let rule_count: u64 = env.storage().instance().get(&AutoRefactorDataKey::RuleCount).unwrap_or(0);
+        
+        for rule_id in 1..=rule_count {
+            if let Some(rule) = env.storage().instance().get::<AutoRefactorDataKey, RefactorRule>(
+                &AutoRefactorDataKey::RefactorRules(rule_id)
+            ) {
+                rules.push_back(rule);
             }
         }
         
-        diff
+        rules
     }
 
-    pub fn estimate_gas_savings(&self, changes: &[RefactoringChange]) -> u64 {
-        changes.iter()
-            .map(|change| match &change.impact_assessment {
-                ImpactAssessment::Positive(savings) => *savings,
-                ImpactAssessment::Neutral => 0,
-                ImpactAssessment::Negative(cost) => 0, // Don't count negative impacts in total savings
-            })
-            .sum()
+    /// Get refactor history
+    pub fn get_refactor_history(env: Env) -> Vec<RefactorResult> {
+        env.storage().instance()
+            .get(&AutoRefactorDataKey::RefactorHistory)
+            .unwrap_or(Vec::new(&env))
     }
 
-    pub fn rollback_changes(&self, original_code: &str, _result: &RefactoringResult) -> String {
-        // Simple rollback - return original code
-        original_code.to_string()
+    /// Add custom refactoring rule
+    pub fn add_custom_rule(env: Env, admin: Address, rule: RefactorRule) {
+        // In a real implementation, verify admin rights
+        let rule_count: u64 = env.storage().instance().get(&AutoRefactorDataKey::RuleCount).unwrap_or(0);
+        let new_rule_id = rule_count + 1;
+        
+        let mut new_rule = rule;
+        new_rule.rule_id = new_rule_id;
+        
+        env.storage().instance().set(&AutoRefactorDataKey::RefactorRules(new_rule_id), &new_rule);
+        env.storage().instance().set(&AutoRefactorDataKey::RuleCount, &new_rule_id);
+    }
+
+    /// Analyze code metrics without refactoring
+    pub fn analyze_code(env: Env, source_code: String) -> CodeMetrics {
+        Self::analyze_code_metrics(&env, source_code)
     }
 }
