@@ -9,6 +9,7 @@ mod messagePassing;
 
 pub mod optimization;
 pub mod security;
+pub mod storage;
 
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec};
 
