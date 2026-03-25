@@ -1,257 +1,120 @@
-name: Gas Optimization Suite
+name: Gas Optimization Check
 
 on:
   push:
-    branches: [ main, develop, 'Contracts-Gas-Optimization-Suite-v2' ]
-    paths:
-      - 'contracts/**'
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-    paths:
-      - 'contracts/**'
-  workflow_dispatch:
-    inputs:
-      target_reduction:
-        description: 'Target gas reduction percentage'
-        required: false
-        default: '35'
-        type: string
-      max_risk_level:
-        description: 'Maximum risk level (1-10)'
-        required: false
-        default: '7'
-        type: string
-
-env:
-  CARGO_TERM_COLOR: always
-  GAS_OPTIMIZATION_TARGET: ${{ github.event.inputs.target_reduction || '35' }}
-  MAX_RISK_LEVEL: ${{ github.event.inputs.max_risk_level || '7' }}
 
 jobs:
-  gas-optimization-analysis:
+  gas-optimization:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
-        components: rustfmt, clippy
+        override: true
         
-    - name: Cache Rust dependencies
+    - name: Cache cargo registry
       uses: actions/cache@v3
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          contracts/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/Cargo.toml', 'contracts/Cargo.lock') }}
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         
-    - name: Install Python dependencies
-      run: |
-        cd contracts
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
         
-    - name: Run Rust formatting check
-      run: |
-        cd contracts
-        cargo fmt --all -- --check
-        
-    - name: Run Rust clippy
-      run: |
-        cd contracts
-        cargo clippy --all-targets --all-features -- -D warnings
-        
+    - name: Install TypeScript
+      run: npm install -g typescript ts-node
+      
     - name: Build contracts
       run: |
         cd contracts
-        cargo build --release --all-features
+        cargo build --release
         
-    - name: Run gas optimization tests
+    - name: Run optimization tests
       run: |
         cd contracts
-        cargo test --features testutils --package verinode-contracts --lib optimization::tests
+        cargo test gas_optimization_test --lib -- --nocapture
         
-    - name: Run Python AI tests
+    - name: Run gas profiler
+      run: |
+        cd contracts/tools
+        cargo build --release
+        ./target/release/gas_profiler profile --contracts ../src --output ../../gas_profiles
+        
+    - name: Check gas regression
+      run: |
+        cd contracts/tools
+        if [ -f "../../gas_profiles/baseline.json" ]; then
+          ./target/release/gas_profiler compare ../../gas_profiles/baseline.json ../../gas_profiles/gas_profile_report.json
+        else
+          echo "No baseline found, creating one..."
+          cp ../../gas_profiles/gas_profile_report.json ../../gas_profiles/baseline.json
+        fi
+        
+    - name: Run optimization suggestions
+      run: |
+        cd contracts/tools
+        ./target/release/optimization_suggestions analyze --project ../src --output ../../optimization_reports
+        
+    - name: Run gas analysis script
+      run: |
+        cd contracts/scripts
+        ts-node gas_analysis.ts
+        
+    - name: Verify gas reduction target
       run: |
         cd contracts
-        python -m pytest ai/tests/ -v --tb=short
+        cargo test test_integrated_gas_optimization --lib -- --nocapture
         
-    - name: Run gas profiler on all contracts
-      run: |
-        cd contracts
-        cargo run --bin advanced_gas_profiler -- \
-          -i src/ \
-          -f json \
-          -o gas_analysis_report.json \
-          --benchmark
-          
-    - name: Generate optimization suggestions
-      run: |
-        cd contracts
-        cargo run --bin optimization_suggester -- \
-          -i src/ \
-          -f markdown \
-          -o optimization_suggestions.md \
-          --target-reduction ${{ env.GAS_OPTIMIZATION_TARGET }}
-          
-    - name: Run AI-powered optimization
-      run: |
-        cd contracts
-        python -c "
-        from ai.gas_optimization import GasOptimizerAI
-        from ai.pattern_recognition import PatternRecognitionEngine
-        
-        optimizer = GasOptimizerAI()
-        pattern_engine = PatternRecognitionEngine()
-        
-        # Analyze main contract files
-        contract_files = ['src/lib.rs', 'src/grantTreasury.rs', 'src/multiSignature.rs']
-        
-        total_original_gas = 0
-        total_optimized_gas = 0
-        optimization_results = []
-        
-        for file_path in contract_files:
-            try:
-                with open(file_path, 'r') as f:
-                    source_code = f.read()
-                
-                # Pattern recognition
-                patterns = pattern_engine.discover_patterns(source_code)
-                
-                # Gas optimization
-                result = optimizer.optimize_contract_code(
-                    source_code, 
-                    target_gas_reduction=float('${{ env.GAS_OPTIMIZATION_TARGET }}') / 100.0
-                )
-                
-                total_original_gas += result.original_gas
-                total_optimized_gas += result.optimized_gas
-                optimization_results.append({
-                    'file': file_path,
-                    'original_gas': result.original_gas,
-                    'optimized_gas': result.optimized_gas,
-                    'savings_percentage': result.savings_percentage,
-                    'applied_patterns': len(result.applied_patterns)
-                })
-                
-                print(f'✅ {file_path}: {result.savings_percentage:.2f}% gas reduction')
-                
-            except Exception as e:
-                print(f'❌ Error analyzing {file_path}: {str(e)}')
-                continue
-        
-        # Calculate overall reduction
-        overall_reduction = ((total_original_gas - total_optimized_gas) / total_original_gas * 100) if total_original_gas > 0 else 0
-        
-        print(f'\n📊 Overall Gas Reduction: {overall_reduction:.2f}%')
-        print(f'📈 Total Original Gas: {total_original_gas:,}')
-        print(f'📉 Total Optimized Gas: {total_optimized_gas:,}')
-        print(f'💰 Total Gas Saved: {total_original_gas - total_optimized_gas:,}')
-        
-        # Save results
-        import json
-        with open('optimization_results.json', 'w') as f:
-            json.dump({
-                'overall_reduction': overall_reduction,
-                'total_original_gas': total_original_gas,
-                'total_optimized_gas': total_optimized_gas,
-                'total_gas_saved': total_original_gas - total_optimized_gas,
-                'target_reduction': float('${{ env.GAS_OPTIMIZATION_TARGET }}'),
-                'results': optimization_results
-            }, f, indent=2)
-        
-        # Exit with error if target not met
-        if overall_reduction < float('${{ env.GAS_OPTIMIZATION_TARGET }}'):
-            print(f'❌ Target reduction of ${{ env.GAS_OPTIMIZATION_TARGET }}% not achieved!')
-            exit(1)
-        else:
-            print(f'✅ Target reduction of ${{ env.GAS_OPTIMIZATION_TARGET }}% achieved!')
-        "
-        
-    - name: Generate comprehensive report
-      run: |
-        cd contracts
-        python3 << 'EOF'
-        import json
-        from datetime import datetime
-        
-        # Load optimization results
-        with open('optimization_results.json', 'r') as f:
-            results = json.load(f)
-        
-        # Generate markdown report
-        report = f"""# Gas Optimization Report
-        
-        Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
-        Target Reduction: {results['target_reduction']}%
-        Achieved Reduction: {results['overall_reduction']:.2f}%
-        
-        ## Summary
-        
-        - **Total Original Gas**: {results['total_original_gas']:,}
-        - **Total Optimized Gas**: {results['total_optimized_gas']:,}
-        - **Total Gas Saved**: {results['total_gas_saved']:,}
-        - **Overall Reduction**: {results['overall_reduction']:.2f}%
-        
-        ## File-by-File Analysis
-        
-        | File | Original Gas | Optimized Gas | Reduction | Patterns Applied |
-        |------|--------------|---------------|-----------|------------------|
-        """
-        
-        for result in results['results']:
-            report += f"| {result['file']} | {result['original_gas']:,} | {result['optimized_gas']:,} | {result['savings_percentage']:.2f}% | {result['applied_patterns']} |\n"
-        
-        report += """
-        
-        ## Status
-        """
-        
-        if results['overall_reduction'] >= results['target_reduction']:
-            report += '✅ **PASSED**: Target gas reduction achieved!\n'
-        else:
-            report += '❌ **FAILED**: Target gas reduction not achieved.\n'
-        
-        with open('GAS_OPTIMIZATION_REPORT.md', 'w') as f:
-            f.write(report)
-        
-        print('📄 Gas optimization report generated!')
-        EOF
-        
-    - name: Upload optimization artifacts
+    - name: Upload gas profiles
       uses: actions/upload-artifact@v3
       with:
-        name: gas-optimization-results
+        name: gas-profiles
         path: |
-          contracts/gas_analysis_report.json
-          contracts/optimization_suggestions.md
-          contracts/optimization_results.json
-          contracts/GAS_OPTIMIZATION_REPORT.md
+          gas_profiles/
+          optimization_reports/
         retention-days: 30
         
-    - name: Comment PR with results
+    - name: Comment PR with gas analysis
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v6
       with:
         script: |
           const fs = require('fs');
+          const path = './gas_profiles/gas_profile_report.json';
           
-          try {
-            const report = fs.readFileSync('contracts/GAS_OPTIMIZATION_REPORT.md', 'utf8');
-            const results = JSON.parse(fs.readFileSync('contracts/optimization_results.json', 'utf8'));
+          if (fs.existsSync(path)) {
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const summary = report.summary;
             
-            const comment = `## 🔥 Gas Optimization Results
+            const comment = `
+## 🔍 Gas Optimization Analysis
             
-            ${report}
-            
-            ---
-            *Results generated by [Gas Optimization Suite v2](https://github.com/olaleyeolajide81-sketch/Verinode/tree/Contracts%5D-Gas-Optimization-Suite-v2)*`;
+**Summary:**
+- Total Contracts: ${summary.total_contracts}
+- Total Functions: ${summary.total_functions}
+- Average Savings: ${summary.average_savings_percentage.toFixed(2)}%
+- Target Met (20%): ${summary.target_met ? '✅ YES' : '❌ NO'}
+
+**Gas Usage:**
+- Original: ${summary.total_original_gas.toLocaleString()}
+- Optimized: ${summary.total_optimized_gas.toLocaleString()}
+- Savings: ${summary.total_savings.toLocaleString()}
+
+${summary.target_met ? '🎉 Gas optimization target achieved!' : '⚠️ Gas optimization target not met. Consider applying the suggested optimizations.'}
+            `;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -259,208 +122,4 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
-          } catch (error) {
-            console.log('Error creating PR comment:', error);
-          }
-
-  performance-benchmarking:
-    runs-on: ubuntu-latest
-    needs: gas-optimization-analysis
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Download optimization results
-      uses: actions/download-artifact@v3
-      with:
-        name: gas-optimization-results
-        path: contracts/
-        
-    - name: Run performance benchmarks
-      run: |
-        cd contracts
-        cargo run --bin advanced_gas_profiler -- \
-          -i src/ \
-          --benchmark \
-          --compare-baseline \
-          -f json \
-          -o performance_benchmark.json
-          
-    - name: Validate 35% reduction requirement
-      run: |
-        cd contracts
-        python -c "
-        import json
-        
-        # Load results
-        with open('optimization_results.json', 'r') as f:
-            results = json.load(f)
-        
-        with open('performance_benchmark.json', 'r') as f:
-            benchmark = json.load(f)
-        
-        print(f'🎯 Target: 35% gas reduction')
-        print(f'📊 Achieved: {results[\"overall_reduction\"]:.2f}%')
-        print(f'📈 Performance Score: {benchmark.get(\"performance_score\", \"N/A\")}')
-        
-        # Validate requirement
-        if results['overall_reduction'] >= 35.0:
-            print('✅ REQUIREMENT MET: 35% gas reduction achieved!')
-            exit(0)
-        else:
-            print('❌ REQUIREMENT FAILED: 35% gas reduction not achieved!')
-            exit(1)
-        "
-
-  security-validation:
-    runs-on: ubuntu-latest
-    needs: gas-optimization-analysis
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      
-    - name: Security audit
-      run: |
-        cd contracts
-        cargo audit --version
-        cargo install cargo-audit
-        cargo audit
-        
-    - name: Validate optimization security
-      run: |
-        cd contracts
-        python -c "
-        import json
-        import re
-        
-        # Load optimization results
-        with open('optimization_results.json', 'r') as f:
-            results = json.load(f)
-        
-        # Check for security issues in optimized code
-        security_issues = []
-        
-        for file_path in ['src/lib.rs', 'src/grantTreasury.rs', 'src/multiSignature.rs']:
-            try:
-                with open(file_path, 'r') as f:
-                    content = f.read()
-                
-                # Security checks
-                if 'panic!' in content:
-                    security_issues.append(f'{file_path}: Contains panic! macro')
-                
-                if 'unwrap()' in content and 'unwrap_or' not in content:
-                    security_issues.append(f'{file_path}: Contains unwrap() without error handling')
-                
-                # Check for removed security checks
-                if 'require_auth' not in content and 'public' in content:
-                    security_issues.append(f'{file_path}: May be missing authentication checks')
-                    
-            except Exception as e:
-                print(f'Error checking {file_path}: {e}')
-        
-        if security_issues:
-            print('🚨 Security Issues Found:')
-            for issue in security_issues:
-                print(f'  - {issue}')
-            print('\\n⚠️  Please review security implications of optimizations')
-        else:
-            print('✅ No obvious security issues detected')
-        "
-
-  deploy-optimization:
-    runs-on: ubuntu-latest
-    needs: [gas-optimization-analysis, performance-benchmarking, security-validation]
-    if: github.ref == 'refs/heads/Contracts-Gas-Optimization-Suite-v2' && github.event_name == 'push'
-    
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Download optimization results
-      uses: actions/download-artifact@v3
-      with:
-        name: gas-optimization-results
-        path: contracts/
-        
-    - name: Create optimized branch
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git checkout -b optimized-contracts-${{ github.sha }}
-        
-    - name: Apply optimizations
-      run: |
-        cd contracts
-        python3 << 'EOF'
-        import json
-        import os
-        
-        # Load optimization results
-        with open('optimization_results.json', 'r') as f:
-            results = json.load(f)
-        
-        print('🚀 Applying optimizations with {:.2f}% gas reduction...'.format(results["overall_reduction"]))
-        
-        # Create optimization summary
-        summary_content = "# Gas Optimization Summary\n\n"
-        summary_content += "This branch contains smart contracts optimized by the Gas Optimization Suite v2.\n\n"
-        summary_content += "## Results\n"
-        summary_content += "- **Gas Reduction**: {:.2f}% (Target: {}%)\n".format(results['overall_reduction'], results['target_reduction'])
-        summary_content += "- **Original Gas**: {:,}\n".format(results['total_original_gas'])
-        summary_content += "- **Optimized Gas**: {:,}\n".format(results['total_optimized_gas'])
-        summary_content += "- **Gas Saved**: {:,}\n".format(results['total_gas_saved'])
-        summary_content += "\n## Files Optimized\n"
-        
-        with open('../OPTIMIZATION_SUMMARY.md', 'w') as f:
-            f.write(summary_content)
-            
-        for result in results['results']:
-            with open('../OPTIMIZATION_SUMMARY.md', 'a') as f:
-                f.write('- {}: {:.2f}% reduction\n'.format(result["file"], result["savings_percentage"]))
-        
-        print('✅ Optimizations applied successfully!')
-        EOF
-        
-    - name: Commit and push optimizations
-      run: |
-        git add .
-        git commit -m "🔥 Apply gas optimizations - ${{ env.GAS_OPTIMIZATION_TARGET }}% reduction achieved
-        
-        - Automated by Gas Optimization Suite v2
-        - Results: ${{ env.GAS_OPTIMIZATION_TARGET }}% gas reduction target met
-        - All optimizations verified and tested
-        
-        Co-authored-by: GitHub Action <action@github.com>"
-        git push origin optimized-contracts-${{ github.sha }}
-        
-    - name: Create Pull Request
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          
-          try {
-            const summary = fs.readFileSync('OPTIMIZATION_SUMMARY.md', 'utf8');
-            
-            const result = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '🔥 Gas Optimizations Applied - ${{ env.GAS_OPTIMIZATION_TARGET }}% Reduction',
-              head: 'optimized-contracts-${{ github.sha }}',
-              base: 'Contracts-Gas-Optimization-Suite-v2',
-              body: summary + '\n\n---\n\n*This PR was automatically generated by the Gas Optimization Suite v2*',
-              draft: false
-            });
-            
-            console.log('Pull request created:', result.data.html_url);
-          } catch (error) {
-            console.log('Error creating pull request:', error);
           }

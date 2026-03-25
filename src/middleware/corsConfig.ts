@@ -1,5 +1,6 @@
 import cors from 'cors';
 import { Request, Response } from 'express';
+import { config } from '../config';
 
 interface CorsOptions {
   origin: string | string[] | boolean;
@@ -12,17 +13,15 @@ interface CorsOptions {
   optionsSuccessStatus?: number;
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = config.server.nodeEnv === 'production';
 
-const allowedOrigins = isProduction 
-  ? (process.env.ALLOWED_ORIGINS?.split(',') || ['https://yourdomain.com'])
-  : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:4000'];
+const allowedOrigins = config.server.allowedOrigins;
 
 export const corsConfig: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -31,7 +30,7 @@ export const corsConfig: CorsOptions = {
         timestamp: new Date().toISOString(),
         ip: origin
       });
-      
+
       callback(new Error('Not allowed by CORS'), false);
     }
   },
@@ -64,7 +63,7 @@ export const strictCorsConfig: CorsOptions = {
   ...corsConfig,
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     if (!origin) return callback(new Error('Origin required'), false);
-    
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -73,7 +72,7 @@ export const strictCorsConfig: CorsOptions = {
         timestamp: new Date().toISOString(),
         ip: origin
       });
-      
+
       callback(new Error('Not allowed by CORS policy'), false);
     }
   },

@@ -10,11 +10,15 @@ import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
+import WalletDemo from './pages/WalletDemo';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import { performanceMetrics, preloadCriticalResources } from './utils/performance';
-import { ThemeProvider } from './themes/ThemeManager';
-import ThemeSelector from './components/Theme/ThemeSelector';
-import ThemeTest from './components/Theme/ThemeTest';
+// Import accessibility components
+import { ScreenReader } from './components/Accessibility/ScreenReader';
+import { KeyboardNavigation } from './components/Accessibility/KeyboardNavigation';
+import { VoiceCommands } from './components/Accessibility/VoiceCommands';
+import { HighContrast } from './components/Accessibility/HighContrast';
+import { accessibilityService } from './services/accessibilityService';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -24,6 +28,9 @@ function App() {
     // Initialize performance optimizations
     preloadCriticalResources();
     performanceMetrics.lazyLoadImages();
+
+    // Initialize accessibility service
+    // The service is already initialized in its constructor
 
     // Measure page load performance
     const metrics = performanceMetrics.measurePageLoad();
@@ -44,36 +51,37 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <Router>
-          <RouteChangeTracker />
-          <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text)' }}>
-            <a href="#main-content" className="skip-link">
-              Skip to main content
-            </a>
-            <Navbar />
-            <div className="fixed top-4 right-4 z-40">
-              <ThemeSelector />
-            </div>
-            <main
-              id="main-content"
-              className="container mx-auto px-4 py-8"
-              aria-label="Main content"
-            >
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/issue" element={<IssueProof />} />
-                <Route path="/verify" element={<VerifyProof />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/marketplace" element={<Marketplace />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/theme-test" element={<ThemeTest />} />
-              </Routes>
-            </main>
-            <Toaster position="top-right" />
-          </div>
-        </Router>
-      </ThemeProvider>
+      <Router>
+        <RouteChangeTracker />
+        {/* Accessibility Components */}
+        <ScreenReader />
+        <KeyboardNavigation enableShortcuts={true} showHelp={true} />
+        <VoiceCommands showIndicator={true} />
+        <HighContrast showToggle={true} colorBlindSupport={true} />
+        
+        <div className="min-h-screen bg-gray-50">
+          <a href="#main-content" className="skip-link">
+            Skip to main content
+          </a>
+          <Navbar />
+          <main
+            id="main-content"
+            className="container mx-auto px-4 py-8"
+            aria-label="Main content"
+          >
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/issue" element={<IssueProof />} />
+              <Route path="/verify" element={<VerifyProof />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/marketplace" element={<Marketplace />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/wallet-demo" element={<WalletDemo />} />
+            </Routes>
+          </main>
+          <Toaster position="top-right" />
+        </div>
+      </Router>
     </QueryClientProvider>
   );
 }

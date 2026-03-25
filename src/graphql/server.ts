@@ -14,22 +14,23 @@ import { proofSubscriptions, publishProofUpdated, publishProofCreated, publishPr
 import { createAuthContext } from './middleware/auth';
 import { applyRateLimit } from './middleware/rateLimit';
 import { GraphQLContext } from '../types';
+import { config } from '../config';
 
 // Import new security middleware
-import { 
-  strictRateLimiter, 
-  authRateLimiter, 
-  apiRateLimiter 
+import {
+  strictRateLimiter,
+  authRateLimiter,
+  apiRateLimiter
 } from '../middleware/rateLimiter';
-import { 
-  sanitizeRequestBody, 
-  validateContentType, 
-  validateContentLength 
+import {
+  sanitizeRequestBody,
+  validateContentType,
+  validateContentLength
 } from '../middleware/inputValidation';
 import { corsMiddleware, strictCorsMiddleware } from '../middleware/corsConfig';
-import { 
-  securityHeadersMiddleware, 
-  customSecurityHeaders 
+import {
+  securityHeadersMiddleware,
+  customSecurityHeaders
 } from '../middleware/securityHeaders';
 import { requestLogger } from '../middleware/requestLogger';
 import { createXSSMiddleware } from '../utils/xssProtection';
@@ -59,24 +60,24 @@ export const createApolloServer = () => {
     resolvers,
     context: async ({ req, res }) => {
       const context = await createAuthContext(req, res);
-      
+
       // Apply rate limiting based on operation type
       const operationName = req.body?.operationName;
       const query = req.body?.query || '';
-      
+
       let operationType: 'query' | 'mutation' | 'subscription' = 'query';
       if (query.trim().startsWith('mutation')) {
         operationType = 'mutation';
       } else if (query.trim().startsWith('subscription')) {
         operationType = 'subscription';
       }
-      
+
       applyRateLimit(context, operationType);
-      
+
       return context;
     },
-    introspection: process.env.NODE_ENV !== 'production',
-    playground: process.env.NODE_ENV !== 'production',
+    introspection: config.features.enableIntrospection,
+    playground: config.features.enablePlayground,
     plugins: [
       // Security monitoring plugin
       {
@@ -86,8 +87,8 @@ export const createApolloServer = () => {
               // Log GraphQL operations for security monitoring
               const operation = requestContext.request.operation;
               const operationName = requestContext.request.operationName;
-              
-              if (process.env.NODE_ENV === 'production') {
+
+              if (config.server.nodeEnv === 'production') {
                 console.log('GraphQL Operation:', {
                   operation: operation?.operation,
                   operationName,
@@ -95,7 +96,7 @@ export const createApolloServer = () => {
                 });
               }
             },
-            
+
             didEncounterErrors(requestContext) {
               // Log GraphQL errors for security monitoring
               console.error('GraphQL Error:', {
@@ -117,32 +118,32 @@ export const createApolloServer = () => {
 // Create Express app with GraphQL
 export const createGraphQLApp = async () => {
   const app = express();
-  
+
   // Security middleware chain - order matters!
-  
+
   // 1. Request logging (first to capture all requests)
   app.use(requestLogger);
-  
+
   // 2. Security headers
   app.use(securityHeadersMiddleware);
   app.use(customSecurityHeaders);
-  
+
   // 3. CORS configuration
   app.use(corsMiddleware);
-  
+
   // 4. Rate limiting
   app.use('/api', apiRateLimiter);
   app.use('/auth', authRateLimiter);
   app.use('/graphql', strictRateLimiter);
-  
+
   // 5. Content validation
   app.use(validateContentType(['application/json', 'application/x-www-form-urlencoded']));
   app.use(validateContentLength(10 * 1024 * 1024)); // 10MB limit
-  
+
   // 6. XSS protection and input sanitization
   app.use(createXSSMiddleware());
   app.use(sanitizeRequestBody);
-  
+
   // 7. Body parsing (after security checks)
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -175,63 +176,66 @@ export const createGraphQLApp = async () => {
   await apolloServer.start();
 
   // Apply Apollo middleware with strict CORS for GraphQL
-  apolloServer.applyMiddleware({ 
-    app, 
+  apolloServer.applyMiddleware({
+    app,
     path: '/graphql',
     cors: false // We handle CORS above
   });
 
   const httpServer = createServer(app);
 
-  // Create subscription server with security
-  const subscriptionServer = SubscriptionServer.create(
-    {
-      execute,
-      subscribe,
-      schema: apolloServer.schema,
-      onConnect: async (connectionParams: any, webSocket: any, context: any) => {
-        // Enhanced WebSocket authentication for subscriptions
-        const token = connectionParams?.authorization || connectionParams?.Authorization;
-        
-        if (!token) {
-          throw new Error('Authentication required for subscriptions');
-        }
-        
-        if (token.startsWith('Bearer ')) {
-          const jwtToken = token.substring(7);
-          if (jwtToken.startsWith('mock-jwt-token-')) {
-            const userId = jwtToken.replace('mock-jwt-token-', '');
-            
-            // Log subscription connection for security
-            console.log('Subscription Connected:', {
-              userId,
-              timestamp: new Date().toISOString()
-            });
-            
-            return { userId };
+  // Create subscription server with security - only if enabled
+  let subscriptionServer: SubscriptionServer | null = null;
+  if (config.features.enableSubscriptions) {
+    subscriptionServer = SubscriptionServer.create(
+      {
+        execute,
+        subscribe,
+        schema: apolloServer.schema,
+        onConnect: async (connectionParams: any, webSocket: any, context: any) => {
+          // Enhanced WebSocket authentication for subscriptions
+          const token = connectionParams?.authorization || connectionParams?.Authorization;
+
+          if (!token) {
+            throw new Error('Authentication required for subscriptions');
           }
+
+          if (token.startsWith('Bearer ')) {
+            const jwtToken = token.substring(7);
+            if (jwtToken.startsWith('mock-jwt-token-')) {
+              const userId = jwtToken.replace('mock-jwt-token-', '');
+
+              // Log subscription connection for security
+              console.log('Subscription Connected:', {
+                userId,
+                timestamp: new Date().toISOString()
+              });
+
+              return { userId };
+            }
+          }
+
+          throw new Error('Invalid authentication token');
+        },
+
+        onDisconnect: (webSocket: any, context: any) => {
+          // Log subscription disconnection
+          console.log('Subscription Disconnected:', {
+            timestamp: new Date().toISOString()
+          });
         }
-        
-        throw new Error('Invalid authentication token');
       },
-      
-      onDisconnect: (webSocket: any, context: any) => {
-        // Log subscription disconnection
-        console.log('Subscription Disconnected:', {
-          timestamp: new Date().toISOString()
-        });
+      {
+        server: httpServer,
+        path: apolloServer.graphqlPath,
       }
-    },
-    {
-      server: httpServer,
-      path: apolloServer.graphqlPath,
-    }
-  );
+    );
+  }
 
   // Graceful shutdown
   process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully');
-    subscriptionServer.close();
+    subscriptionServer?.close();
     httpServer.close(() => {
       console.log('Server closed');
       process.exit(0);
@@ -240,7 +244,7 @@ export const createGraphQLApp = async () => {
 
   process.on('SIGINT', () => {
     console.log('SIGINT received, shutting down gracefully');
-    subscriptionServer.close();
+    subscriptionServer?.close();
     httpServer.close(() => {
       console.log('Server closed');
       process.exit(0);
