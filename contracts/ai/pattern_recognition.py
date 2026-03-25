@@ -1,791 +1,832 @@
+#!/usr/bin/env python3
 """
-Pattern Recognition Module for Smart Contract Gas Optimization
+Advanced Pattern Recognition for Gas Optimization
 
-This module uses advanced machine learning techniques to recognize gas optimization patterns
-in smart contract code, learn from historical data, and provide intelligent suggestions.
+This module uses machine learning and static analysis to identify
+gas optimization patterns in Soroban smart contracts.
 """
 
+import ast
+import re
+import json
 import numpy as np
-import pandas as pd
 from typing import List, Dict, Tuple, Optional, Any, Set
 from dataclasses import dataclass, field
+from enum import Enum
 from collections import defaultdict, Counter
-import re
-import ast
-import json
-from pathlib import Path
-import hashlib
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from sklearn.ensemble import IsolationForest
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics.pairwise import cosine_similarity
 import networkx as nx
-from difflib import SequenceMatcher
+from sklearn.cluster import DBSCAN
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pickle
+import os
 
+class PatternType(Enum):
+    INEFFICIENT_STORAGE = "inefficient_storage"
+    STORAGE_IN_LOOP = "storage_in_loop"
+    REPEATED_COMPUTATION = "repeated_computation"
+    INEFFICIENT_VECTOR = "inefficient_vector"
+    EXCESSIVE_AUTH = "excessive_auth"
+    REDUNDANT_CHECKS = "redundant_checks"
+    MAGIC_NUMBERS = "magic_numbers"
+    UNNECESSARY_CLONES = "unnecessary_clones"
+    MISSING_CACHE = "missing_cache"
+    SUBOPTIMAL_ALGORITHM = "suboptimal_algorithm"
+    UNUSED_VARIABLES = "unused_variables"
+    DEEP_NESTING = "deep_nesting"
+    LARGE_FUNCTIONS = "large_functions"
+
+class Severity(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class Confidence(Enum):
+    VERY_LOW = 0.1
+    LOW = 0.3
+    MEDIUM = 0.5
+    HIGH = 0.7
+    VERY_HIGH = 0.9
 
 @dataclass
 class CodePattern:
-    """Represents a recognized code pattern"""
-    pattern_id: str
-    name: str
-    category: str
-    regex_pattern: str
-    code_snippet: str
-    frequency: int
-    gas_impact: int
-    confidence: float
-    complexity_score: float
-    examples: List[str] = field(default_factory=list)
-    optimization_suggestions: List[str] = field(default_factory=list)
-
+    """Represents a detected code pattern"""
+    pattern_type: PatternType
+    severity: Severity
+    confidence: Confidence
+    description: str
+    line_numbers: List[int]
+    code_snippets: List[str]
+    optimization_suggestion: str
+    estimated_gas_savings: int
+    implementation_complexity: str
 
 @dataclass
-class PatternMatch:
-    """Represents a pattern match in code"""
-    pattern: CodePattern
-    start_line: int
-    end_line: int
-    matched_code: str
-    confidence: float
-    context: str
-    gas_savings_potential: int
-
+class FunctionMetrics:
+    """Metrics for a function"""
+    name: str
+    line_count: int
+    cyclomatic_complexity: int
+    nesting_depth: int
+    storage_operations: int
+    loop_count: int
+    conditional_count: int
+    auth_operations: int
+    allocation_count: int
+    crypto_operations: int
+    parameter_count: int
+    return_statements: int
 
 @dataclass
 class PatternCluster:
-    """Represents a cluster of similar patterns"""
+    """Cluster of similar patterns"""
     cluster_id: int
+    pattern_type: PatternType
     patterns: List[CodePattern]
-    centroid_pattern: str
-    similarity_score: float
-    common_optimizations: List[str]
+    common_characteristics: Dict[str, Any]
+    optimization_strategy: str
 
-
-@dataclass
-class LearningMetrics:
-    """Metrics for pattern learning system"""
-    total_patterns_learned: int
-    successful_optimizations: int
-    accuracy_score: float
-    false_positive_rate: float
-    average_gas_savings: float
-    learning_rate: float
-
-
-class PatternRecognitionEngine:
-    """Advanced pattern recognition engine for gas optimization"""
+class ASTAnalyzer:
+    """Analyzes Abstract Syntax Tree for patterns"""
     
     def __init__(self):
-        self.patterns = []
-        self.pattern_history = []
-        self.vectorizer = TfidfVectorizer(
-            max_features=1000,
-            ngram_range=(2, 4),
-            stop_words=None,
-            analyzer='word'
-        )
-        self.scaler = StandardScaler()
-        self.is_trained = False
-        self.pattern_graph = nx.DiGraph()
-        self.learning_metrics = LearningMetrics(
-            total_patterns_learned=0,
-            successful_optimizations=0,
-            accuracy_score=0.0,
-            false_positive_rate=0.0,
-            average_gas_savings=0.0,
-            learning_rate=0.1
-        )
-        
-        # Initialize with known patterns
-        self._initialize_base_patterns()
+        self.function_metrics = {}
+        self.call_graph = nx.DiGraph()
+        self.data_flow_graph = nx.DiGraph()
     
-    def _initialize_base_patterns(self):
-        """Initialize with known gas optimization patterns"""
-        base_patterns = [
-            {
-                'name': 'Inefficient Storage Pattern',
-                'category': 'Storage',
-                'regex': r'env\.storage\(\)\.persistent\(\)\.(set|get)\([^)]+\)',
-                'gas_impact': 5000,
-                'confidence': 0.85,
-                'snippet': 'env.storage().persistent().set(&key, &value)'
-            },
-            {
-                'name': 'Unoptimized Loop Pattern',
-                'category': 'Loops',
-                'regex': r'for\s+\w+\s+in\s+0\.\.\d+.*?{.*?push_back',
-                'gas_impact': 3000,
-                'confidence': 0.75,
-                'snippet': 'for i in 0..n { vec.push_back(item) }'
-            },
-            {
-                'name': 'String Cloning Pattern',
-                'category': 'Strings',
-                'regex': r'\w+\.clone\(\)',
-                'gas_impact': 800,
-                'confidence': 0.70,
-                'snippet': 'let cloned = original.clone()'
-            },
-            {
-                'name': 'Redundant Computation Pattern',
-                'category': 'Computation',
-                'regex': r'(\w+\s*[\+\-\*/]\s*\w+).*?\1',
-                'gas_impact': 1500,
-                'confidence': 0.80,
-                'snippet': 'result = a + b; // Later: result = a + b'
-            },
-            {
-                'name': 'Inefficient Vector Usage',
-                'category': 'Collections',
-                'regex': r'Vec::new\(&env\).*?reserve_exact',
-                'gas_impact': 2000,
-                'confidence': 0.90,
-                'snippet': 'let mut vec = Vec::new(&env); vec.push_back(item)'
-            },
-            {
-                'name': 'Nested Conditional Pattern',
-                'category': 'Control Flow',
-                'regex': r'if\s+.*?{.*?if\s+.*?{.*?}',
-                'gas_impact': 1200,
-                'confidence': 0.65,
-                'snippet': 'if condition1 { if condition2 { ... } }'
-            },
-            {
-                'name': 'Multiple Storage Writes',
-                'category': 'Storage',
-                'regex': r'storage\(\)\.instance\(\)\.set[^;]+;.*?storage\(\)\.instance\(\)\.set',
-                'gas_impact': 4000,
-                'confidence': 0.80,
-                'snippet': 'storage.set(&k1, &v1); storage.set(&k2, &v2)'
-            },
-            {
-                'name': 'Arithmetic Inefficiency',
-                'category': 'Arithmetic',
-                'regex': r'\*\s*2\b|\*\s*4\b|\*\s*8\b',
-                'gas_impact': 100,
-                'confidence': 0.95,
-                'snippet': 'result = value * 2'
-            }
-        ]
-        
-        for i, pattern_data in enumerate(base_patterns):
-            pattern = CodePattern(
-                pattern_id=f"base_{i}",
-                name=pattern_data['name'],
-                category=pattern_data['category'],
-                regex_pattern=pattern_data['regex'],
-                code_snippet=pattern_data['snippet'],
-                frequency=0,
-                gas_impact=pattern_data['gas_impact'],
-                confidence=pattern_data['confidence'],
-                complexity_score=0.5,
-                optimization_suggestions=self._get_optimization_suggestions(pattern_data['category'])
-            )
-            self.patterns.append(pattern)
+    def analyze_code(self, code: str) -> Dict[str, Any]:
+        """Analyze code and extract metrics"""
+        try:
+            # For Rust code, we'll use regex-based analysis since AST parsing is complex
+            return self.analyze_rust_code(code)
+        except Exception as e:
+            print(f"Error analyzing code: {e}")
+            return {}
     
-    def _get_optimization_suggestions(self, category: str) -> List[str]:
-        """Get optimization suggestions for a pattern category"""
-        suggestions = {
-            'Storage': [
-                'Use instance storage for temporary data',
-                'Batch multiple storage operations',
-                'Consider using events instead of storage for logs'
-            ],
-            'Loops': [
-                'Unroll small fixed loops',
-                'Pre-allocate collection capacity',
-                'Use iterators instead of index-based loops'
-            ],
-            'Strings': [
-                'Use string references instead of cloning',
-                'Consider using Bytes for binary data',
-                'Avoid unnecessary string concatenations'
-            ],
-            'Computation': [
-                'Cache expensive computations',
-                'Use bit operations where possible',
-                'Pre-compute constant values'
-            ],
-            'Collections': [
-                'Pre-allocate with known capacity',
-                'Use appropriate data structures',
-                'Avoid unnecessary clones'
-            ],
-            'Control Flow': [
-                'Use early returns',
-                'Reduce nesting levels',
-                'Combine similar conditions'
-            ],
-            'Arithmetic': [
-                'Use bit operations for multiplication/division by powers of 2',
-                'Cache arithmetic results',
-                'Use checked arithmetic where needed'
-            ]
+    def analyze_rust_code(self, code: str) -> Dict[str, Any]:
+        """Analyze Rust code using regex and heuristics"""
+        lines = code.split('\n')
+        functions = self.extract_functions(code)
+        
+        analysis = {
+            'functions': {},
+            'total_metrics': self.calculate_total_metrics(code),
+            'patterns': [],
+            'complexity_distribution': [],
+            'security_issues': []
         }
-        return suggestions.get(category, ['Review for optimization opportunities'])
+        
+        for func_name, func_code in functions.items():
+            metrics = self.calculate_function_metrics(func_name, func_code)
+            analysis['functions'][func_name] = metrics
+            
+            # Add to complexity distribution
+            analysis['complexity_distribution'].append({
+                'function': func_name,
+                'complexity': metrics.cyclomatic_complexity
+            })
+        
+        return analysis
     
-    def extract_code_features(self, source_code: str) -> Dict[str, Any]:
-        """Extract comprehensive features from source code"""
-        lines = source_code.split('\n')
+    def extract_functions(self, code: str) -> Dict[str, str]:
+        """Extract functions from code"""
+        functions = {}
+        lines = code.split('\n')
+        current_function = None
+        function_lines = []
+        brace_count = 0
+        
+        for line in lines:
+            # Check for function definition
+            if re.match(r'\s*(pub\s+)?fn\s+\w+', line):
+                if current_function:
+                    functions[current_function] = '\n'.join(function_lines)
+                
+                func_match = re.search(r'fn\s+(\w+)', line)
+                current_function = func_match.group(1) if func_match else f"function_{len(functions)}"
+                function_lines = [line]
+                brace_count = line.count('{') - line.count('}')
+                continue
+            
+            if current_function:
+                function_lines.append(line)
+                brace_count += line.count('{') - line.count('}')
+                
+                if brace_count == 0:
+                    functions[current_function] = '\n'.join(function_lines)
+                    current_function = None
+                    function_lines = []
+        
+        if current_function and function_lines:
+            functions[current_function] = '\n'.join(function_lines)
+        
+        return functions
+    
+    def calculate_function_metrics(self, func_name: str, func_code: str) -> FunctionMetrics:
+        """Calculate metrics for a function"""
+        lines = func_code.split('\n')
         
         # Basic metrics
-        features = {
-            'line_count': len(lines),
-            'char_count': len(source_code),
-            'function_count': len(re.findall(r'\bfn\s+\w+', source_code)),
-            'loop_count': len(re.findall(r'\b(for|while)\b', source_code)),
-            'if_count': len(re.findall(r'\bif\b', source_code)),
-            'match_count': len(re.findall(r'\bmatch\b', source_code)),
-            'storage_ops': len(re.findall(r'storage\(\)', source_code)),
-            'vector_ops': len(re.findall(r'Vec::', source_code)),
-            'string_ops': len(re.findall(r'String::', source_code)),
-            'clone_ops': len(re.findall(r'\.clone\(\)', source_code)),
-            'arithmetic_ops': len(re.findall(r'[+\-*/%]', source_code)),
-            'bit_ops': len(re.findall(r'[&|^<<>>]', source_code)),
-            'function_calls': len(re.findall(r'\w+\(', source_code)),
-        }
+        line_count = len([l for l in lines if l.strip()])
+        cyclomatic_complexity = self.calculate_cyclomatic_complexity(func_code)
+        nesting_depth = self.calculate_nesting_depth(func_code)
         
-        # Complexity metrics
-        features['cyclomatic_complexity'] = (
-            features['if_count'] + 
-            features['loop_count'] + 
-            features['match_count'] + 1
+        # Operation counts
+        storage_operations = func_code.count('env.storage()')
+        loop_count = func_code.count('for ') + func_code.count('while ')
+        conditional_count = func_code.count('if ') + func_code.count('match ')
+        auth_operations = func_code.count('require_auth()')
+        allocation_count = func_code.count('Vec::new') + func_code.count('String::new')
+        crypto_operations = func_code.count('hash') + func_code.count('verify') + func_code.count('sign')
+        
+        # Parameter and return analysis
+        param_match = re.search(r'fn\s+\w+\(([^)]*)\)', func_code)
+        parameter_count = len(param_match.group(1).split(',')) if param_match and param_match.group(1).strip() else 0
+        return_statements = func_code.count('return ') + func_code.count('-> ')
+        
+        return FunctionMetrics(
+            name=func_name,
+            line_count=line_count,
+            cyclomatic_complexity=cyclomatic_complexity,
+            nesting_depth=nesting_depth,
+            storage_operations=storage_operations,
+            loop_count=loop_count,
+            conditional_count=conditional_count,
+            auth_operations=auth_operations,
+            allocation_count=allocation_count,
+            crypto_operations=crypto_operations,
+            parameter_count=parameter_count,
+            return_statements=return_statements
         )
-        
-        # Code density
-        features['code_density'] = features['char_count'] / max(features['line_count'], 1)
-        
-        # Pattern density
-        features['pattern_density'] = (
-            features['storage_ops'] + 
-            features['loop_count'] + 
-            features['clone_ops']
-        ) / max(features['line_count'], 1)
-        
-        return features
     
-    def tokenize_code(self, source_code: str) -> List[str]:
-        """Tokenize source code for pattern matching"""
-        # Remove comments and strings
-        code = re.sub(r'//.*?\n', '\n', source_code)
-        code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
-        code = re.sub(r'"[^"]*"', 'STRING', code)
-        code = re.sub(r"'[^']*'", 'STRING', code)
-        
-        # Extract tokens
-        tokens = re.findall(r'\b\w+\b|[{}()\[\];,+\-*/%&|^<>=!~]', code)
-        return tokens
+    def calculate_cyclomatic_complexity(self, code: str) -> int:
+        """Calculate cyclomatic complexity"""
+        complexity = 1  # Base complexity
+        complexity += code.count('if ')
+        complexity += code.count('for ')
+        complexity += code.count('while ')
+        complexity += code.count('match ')
+        complexity += code.count('case ')
+        complexity += code.count('&&') + code.count('||')
+        return complexity
     
-    def calculate_pattern_similarity(self, pattern1: str, pattern2: str) -> float:
-        """Calculate similarity between two code patterns"""
-        # Tokenize both patterns
-        tokens1 = self.tokenize_code(pattern1)
-        tokens2 = self.tokenize_code(pattern2)
+    def calculate_nesting_depth(self, code: str) -> int:
+        """Calculate maximum nesting depth"""
+        max_depth = 0
+        current_depth = 0
         
-        # Calculate Jaccard similarity
-        set1 = set(tokens1)
-        set2 = set(tokens2)
+        for line in code.split('\n'):
+            stripped = line.strip()
+            if any(stripped.startswith(keyword) for keyword in ['if ', 'for ', 'while ', 'match']):
+                current_depth += 1
+                max_depth = max(max_depth, current_depth)
+            elif stripped == '}' and current_depth > 0:
+                current_depth -= 1
         
-        intersection = len(set1.intersection(set2))
-        union = len(set1.union(set2))
-        
-        if union == 0:
-            return 0.0
-        
-        jaccard_similarity = intersection / union
-        
-        # Calculate sequence similarity
-        seq_similarity = SequenceMatcher(None, tokens1, tokens2).ratio()
-        
-        # Combine similarities
-        return (jaccard_similarity * 0.6 + seq_similarity * 0.4)
+        return max_depth
     
-    def discover_patterns(self, source_code: str) -> List[PatternMatch]:
-        """Discover patterns in source code"""
-        matches = []
-        lines = source_code.split('\n')
-        
-        for pattern in self.patterns:
-            try:
-                regex_matches = list(re.finditer(
-                    pattern.regex_pattern, 
-                    source_code, 
-                    re.MULTILINE | re.DOTALL
-                ))
-                
-                for match in regex_matches:
-                    start_line = source_code[:match.start()].count('\n')
-                    end_line = source_code[:match.end()].count('\n')
-                    matched_code = match.group()
-                    
-                    # Extract context (surrounding lines)
-                    context_start = max(0, start_line - 2)
-                    context_end = min(len(lines), end_line + 3)
-                    context = '\n'.join(lines[context_start:context_end])
-                    
-                    # Calculate confidence based on context
-                    confidence = self._calculate_match_confidence(
-                        pattern, matched_code, context
-                    )
-                    
-                    # Calculate gas savings potential
-                    gas_savings = self._calculate_gas_savings_potential(
-                        pattern, matched_code, context
-                    )
-                    
-                    pattern_match = PatternMatch(
-                        pattern=pattern,
-                        start_line=start_line,
-                        end_line=end_line,
-                        matched_code=matched_code,
-                        confidence=confidence,
-                        context=context,
-                        gas_savings_potential=gas_savings
-                    )
-                    
-                    matches.append(pattern_match)
-                    
-            except re.error:
-                # Skip invalid regex patterns
-                continue
-        
-        return matches
+    def calculate_total_metrics(self, code: str) -> Dict[str, int]:
+        """Calculate total metrics for the entire code"""
+        return {
+            'total_lines': len([l for l in code.split('\n') if l.strip()]),
+            'total_functions': len(re.findall(r'\bfn\s+\w+', code)),
+            'total_storage_ops': code.count('env.storage()'),
+            'total_loops': code.count('for ') + code.count('while '),
+            'total_conditionals': code.count('if ') + code.count('match '),
+            'total_auth_ops': code.count('require_auth()'),
+            'total_allocations': code.count('Vec::new') + code.count('String::new'),
+            'total_crypto_ops': code.count('hash') + code.count('verify') + code.count('sign'),
+        }
+
+class PatternMatcher:
+    """Matches code patterns using various techniques"""
     
-    def _calculate_match_confidence(
-        self, 
-        pattern: CodePattern, 
-        matched_code: str, 
-        context: str
-    ) -> float:
-        """Calculate confidence score for a pattern match"""
-        base_confidence = pattern.confidence
-        
-        # Adjust based on code similarity
-        similarity = self.calculate_pattern_similarity(pattern.code_snippet, matched_code)
-        adjusted_confidence = base_confidence * (0.5 + 0.5 * similarity)
-        
-        # Adjust based on context
-        context_features = self.extract_code_features(context)
-        
-        # High complexity reduces confidence
-        if context_features['cyclomatic_complexity'] > 10:
-            adjusted_confidence *= 0.8
-        
-        # Many operations increase confidence
-        if context_features['pattern_density'] > 0.1:
-            adjusted_confidence *= 1.1
-        
-        return min(adjusted_confidence, 1.0)
+    def __init__(self):
+        self.patterns = self.initialize_patterns()
+        self.ml_model = None
+        self.vectorizer = TfidfVectorizer(max_features=1000)
     
-    def _calculate_gas_savings_potential(
-        self, 
-        pattern: CodePattern, 
-        matched_code: str, 
-        context: str
-    ) -> int:
-        """Calculate potential gas savings for a pattern match"""
-        base_savings = pattern.gas_impact
-        
-        # Adjust based on context complexity
-        context_features = self.extract_code_features(context)
-        
-        # More operations = more potential savings
-        complexity_multiplier = 1.0 + (context_features['pattern_density'] * 2)
-        
-        # Adjust for loop patterns
-        if pattern.category == 'Loops':
-            loop_iterations = len(re.findall(r'push_back|set', context))
-            base_savings *= min(loop_iterations, 5)
-        
-        return int(base_savings * complexity_multiplier)
+    def initialize_patterns(self) -> Dict[PatternType, Dict[str, Any]]:
+        """Initialize pattern definitions"""
+        return {
+            PatternType.INEFFICIENT_STORAGE: {
+                'regex_patterns': [
+                    r'env\.storage\(\)\.instance\(\)\.set',
+                    r'env\.storage\(\)\.instance\(\)\.get',
+                ],
+                'threshold': 3,
+                'severity': Severity.HIGH,
+                'confidence': Confidence.HIGH,
+                'description': 'Multiple storage operations detected',
+                'suggestion': 'Batch storage operations or use persistent storage',
+                'estimated_savings': 3000
+            },
+            PatternType.STORAGE_IN_LOOP: {
+                'regex_patterns': [
+                    r'for.*\{[^}]*env\.storage\(\)',
+                    r'while.*\{[^}]*env\.storage\(\)',
+                ],
+                'threshold': 1,
+                'severity': Severity.CRITICAL,
+                'confidence': Confidence.VERY_HIGH,
+                'description': 'Storage operations inside loops detected',
+                'suggestion': 'Cache storage values before loops',
+                'estimated_savings': 5000
+            },
+            PatternType.REPEATED_COMPUTATION: {
+                'regex_patterns': [
+                    r'env\.ledger\(\)\.timestamp\(\)',
+                    r'env\.ledger\(\)\.seq\(\)',
+                    r'env\.ledger\(\)\.version\(\)',
+                ],
+                'threshold': 2,
+                'severity': Severity.MEDIUM,
+                'confidence': Confidence.HIGH,
+                'description': 'Repeated expensive computations detected',
+                'suggestion': 'Cache computed values in variables',
+                'estimated_savings': 2000
+            },
+            PatternType.INEFFICIENT_VECTOR: {
+                'regex_patterns': [
+                    r'Vec::new.*push_back',
+                    r'vec!\[.*\].*push',
+                ],
+                'threshold': 2,
+                'severity': Severity.MEDIUM,
+                'confidence': Confidence.MEDIUM,
+                'description': 'Inefficient vector operations detected',
+                'suggestion': 'Use Vec::with_capacity for pre-allocation',
+                'estimated_savings': 1500
+            },
+            PatternType.EXCESSIVE_AUTH: {
+                'regex_patterns': [
+                    r'require_auth\(\).*require_auth\(\)',
+                ],
+                'threshold': 3,
+                'severity': Severity.MEDIUM,
+                'confidence': Confidence.MEDIUM,
+                'description': 'Multiple authorization checks detected',
+                'suggestion': 'Batch authorization checks',
+                'estimated_savings': 2500
+            },
+            PatternType.REDUNDANT_CHECKS: {
+                'regex_patterns': [
+                    r'if true',
+                    r'if false',
+                    r'if \w+ == true',
+                    r'if \w+ == false',
+                ],
+                'threshold': 1,
+                'severity': Severity.LOW,
+                'confidence': Confidence.VERY_HIGH,
+                'description': 'Redundant conditional checks detected',
+                'suggestion': 'Remove redundant checks',
+                'estimated_savings': 500
+            },
+            PatternType.MAGIC_NUMBERS: {
+                'regex_patterns': [
+                    r'\b(10|100|1000|10000)\b',
+                    r'\b(0x[0-9a-fA-F]+)\b',
+                ],
+                'threshold': 3,
+                'severity': Severity.LOW,
+                'confidence': Confidence.MEDIUM,
+                'description': 'Magic numbers detected',
+                'suggestion': 'Replace with named constants',
+                'estimated_savings': 100
+            },
+            PatternType.UNNECESSARY_CLONES: {
+                'regex_patterns': [
+                    r'\.clone\(\).*\.clone\(\)',
+                    r'\.clone\(\)\s*$',
+                ],
+                'threshold': 2,
+                'severity': Severity.MEDIUM,
+                'confidence': Confidence.MEDIUM,
+                'description': 'Unnecessary cloning detected',
+                'suggestion': 'Remove unnecessary clones or use references',
+                'estimated_savings': 1000
+            },
+            PatternType.DEEP_NESTING: {
+                'threshold': 4,
+                'severity': Severity.HIGH,
+                'confidence': Confidence.HIGH,
+                'description': 'Deep nesting detected',
+                'suggestion': 'Refactor to reduce nesting depth',
+                'estimated_savings': 2000
+            },
+            PatternType.LARGE_FUNCTIONS: {
+                'threshold': 50,
+                'severity': Severity.MEDIUM,
+                'confidence': Confidence.MEDIUM,
+                'description': 'Large function detected',
+                'suggestion': 'Break function into smaller functions',
+                'estimated_savings': 1500
+            }
+        }
     
-    def cluster_similar_patterns(self, min_similarity: float = 0.7) -> List[PatternCluster]:
-        """Cluster similar patterns for analysis"""
-        if len(self.patterns) < 2:
-            return []
+    def find_patterns(self, code: str, analysis_result: Dict[str, Any]) -> List[CodePattern]:
+        """Find all patterns in code"""
+        patterns = []
+        lines = code.split('\n')
         
-        # Create similarity matrix
-        similarity_matrix = np.zeros((len(self.patterns), len(self.patterns)))
+        # Regex-based pattern matching
+        for pattern_type, pattern_config in self.patterns.items():
+            if pattern_type in [PatternType.DEEP_NESTING, PatternType.LARGE_FUNCTIONS]:
+                # These require metric analysis
+                pattern = self.find_metric_based_pattern(pattern_type, pattern_config, analysis_result, lines)
+                if pattern:
+                    patterns.append(pattern)
+            else:
+                # Regex-based patterns
+                found_patterns = self.find_regex_patterns(pattern_type, pattern_config, lines)
+                patterns.extend(found_patterns)
         
-        for i, pattern1 in enumerate(self.patterns):
-            for j, pattern2 in enumerate(self.patterns):
-                if i != j:
-                    similarity = self.calculate_pattern_similarity(
-                        pattern1.code_snippet, 
-                        pattern2.code_snippet
-                    )
-                    similarity_matrix[i][j] = similarity
+        # ML-based pattern detection
+        ml_patterns = self.find_ml_patterns(code, analysis_result)
+        patterns.extend(ml_patterns)
         
-        # Perform clustering
-        clustering = KMeans(n_clusters=min(5, len(self.patterns)), random_state=42)
+        return patterns
+    
+    def find_regex_patterns(self, pattern_type: PatternType, config: Dict[str, Any], lines: List[str]) -> List[CodePattern]:
+        """Find patterns using regex matching"""
+        patterns = []
+        regex_patterns = config.get('regex_patterns', [])
+        threshold = config.get('threshold', 1)
         
-        # Convert similarity to distance for clustering
-        distance_matrix = 1 - similarity_matrix
-        np.fill_diagonal(distance_matrix, 0)
-        
-        try:
-            cluster_labels = clustering.fit_predict(distance_matrix)
-        except:
-            # Fallback if clustering fails
-            cluster_labels = [0] * len(self.patterns)
-        
-        # Create clusters
-        clusters = defaultdict(list)
-        for i, label in enumerate(cluster_labels):
-            clusters[label].append(self.patterns[i])
-        
-        # Build PatternCluster objects
-        pattern_clusters = []
-        for cluster_id, patterns_in_cluster in clusters.items():
-            if len(patterns_in_cluster) > 1:
-                # Find centroid pattern
-                centroid_idx = np.argmax([similarity_matrix[i].sum() for i in range(len(patterns))])
-                centroid_pattern = self.patterns[centroid_idx].code_snippet
-                
-                # Calculate average similarity
-                similarities = []
-                for pattern in patterns_in_cluster:
-                    sim = self.calculate_pattern_similarity(
-                        centroid_pattern, 
-                        pattern.code_snippet
-                    )
-                    similarities.append(sim)
-                
-                avg_similarity = np.mean(similarities)
-                
-                # Find common optimizations
-                all_suggestions = []
-                for pattern in patterns_in_cluster:
-                    all_suggestions.extend(pattern.optimization_suggestions)
-                
-                common_suggestions = list(set(
-                    suggestion for suggestion in all_suggestions 
-                    if all_suggestions.count(suggestion) > 1
-                ))
-                
-                cluster = PatternCluster(
-                    cluster_id=cluster_id,
-                    patterns=patterns_in_cluster,
-                    centroid_pattern=centroid_pattern,
-                    similarity_score=avg_similarity,
-                    common_optimizations=common_suggestions
+        for pattern in regex_patterns:
+            matches = []
+            for line_num, line in enumerate(lines, 1):
+                if re.search(pattern, line):
+                    matches.append((line_num, line.strip()))
+            
+            if len(matches) >= threshold:
+                code_pattern = CodePattern(
+                    pattern_type=pattern_type,
+                    severity=config['severity'],
+                    confidence=config['confidence'],
+                    description=config['description'],
+                    line_numbers=[match[0] for match in matches],
+                    code_snippets=[match[1] for match in matches],
+                    optimization_suggestion=config['suggestion'],
+                    estimated_gas_savings=config['estimated_savings'] * len(matches),
+                    implementation_complexity=self.assess_complexity(pattern_type)
                 )
-                pattern_clusters.append(cluster)
+                patterns.append(code_pattern)
         
-        return pattern_clusters
+        return patterns
     
-    def learn_from_feedback(
-        self, 
-        pattern_matches: List[PatternMatch], 
-        feedback: Dict[str, bool],
-        actual_gas_savings: Dict[str, int]
-    ):
-        """Learn from user feedback and actual results"""
-        for match in pattern_matches:
-            pattern_id = match.pattern.pattern_id
-            
-            if pattern_id in feedback:
-                # Update pattern confidence based on feedback
-                if feedback[pattern_id]:
-                    # Positive feedback
-                    match.pattern.confidence = min(
-                        match.pattern.confidence + self.learning_metrics.learning_rate,
-                        1.0
-                    )
-                    self.learning_metrics.successful_optimizations += 1
-                else:
-                    # Negative feedback
-                    match.pattern.confidence = max(
-                        match.pattern.confidence - self.learning_metrics.learning_rate,
-                        0.1
-                    )
-                
-                # Update frequency
-                match.pattern.frequency += 1
-                
-                # Update gas impact if actual data available
-                if pattern_id in actual_gas_savings:
-                    actual_savings = actual_gas_savings[pattern_id]
-                    # Weighted average update
-                    weight = 0.3
-                    match.pattern.gas_impact = int(
-                        (1 - weight) * match.pattern.gas_impact + 
-                        weight * actual_savings
+    def find_metric_based_pattern(self, pattern_type: PatternType, config: Dict[str, Any], 
+                                 analysis_result: Dict[str, Any], lines: List[str]) -> Optional[CodePattern]:
+        """Find patterns based on code metrics"""
+        threshold = config.get('threshold', 1)
+        
+        if pattern_type == PatternType.DEEP_NESTING:
+            # Check for deep nesting in functions
+            for func_name, metrics in analysis_result.get('functions', {}).items():
+                if metrics.nesting_depth >= threshold:
+                    return CodePattern(
+                        pattern_type=pattern_type,
+                        severity=config['severity'],
+                        confidence=config['confidence'],
+                        description=f"Deep nesting in function {func_name}",
+                        line_numbers=[],
+                        code_snippets=[f"Function {func_name} has nesting depth of {metrics.nesting_depth}"],
+                        optimization_suggestion=config['suggestion'],
+                        estimated_gas_savings=config['estimated_savings'],
+                        implementation_complexity="moderate"
                     )
         
-        # Update learning metrics
-        self._update_learning_metrics()
-    
-    def _update_learning_metrics(self):
-        """Update learning system metrics"""
-        if len(self.patterns) > 0:
-            self.learning_metrics.total_patterns_learned = len(self.patterns)
-            
-            # Calculate average confidence
-            avg_confidence = np.mean([p.confidence for p in self.patterns])
-            self.learning_metrics.accuracy_score = avg_confidence
-            
-            # Calculate average gas savings
-            avg_savings = np.mean([p.gas_impact for p in self.patterns])
-            self.learning_metrics.average_gas_savings = avg_savings
-            
-            # Estimate false positive rate (simplified)
-            low_confidence_patterns = [p for p in self.patterns if p.confidence < 0.5]
-            self.learning_metrics.false_positive_rate = len(low_confidence_patterns) / len(self.patterns)
-    
-    def discover_new_patterns(
-        self, 
-        source_codes: List[str], 
-        min_frequency: int = 3
-    ) -> List[CodePattern]:
-        """Discover new patterns from multiple source codes"""
-        # Extract all code snippets
-        all_snippets = []
-        for code in source_codes:
-            lines = code.split('\n')
-            
-            # Extract function bodies
-            function_matches = re.finditer(
-                r'fn\s+\w+\([^)]*\)\s*->\s*\w+\s*{(.*?)}',
-                code,
-                re.DOTALL
-            )
-            
-            for match in function_matches:
-                function_body = match.group(1).strip()
-                if len(function_body) > 20:  # Minimum length
-                    all_snippets.append(function_body)
-        
-        # Find common patterns using TF-IDF
-        if len(all_snippets) < min_frequency:
-            return []
-        
-        # Create TF-IDF matrix
-        try:
-            tfidf_matrix = self.vectorizer.fit_transform(all_snippets)
-            
-            # Find similar code snippets
-            similarity_matrix = cosine_similarity(tfidf_matrix)
-            
-            # Cluster similar snippets
-            n_clusters = min(10, len(all_snippets) // min_frequency)
-            clustering = KMeans(n_clusters=n_clusters, random_state=42)
-            cluster_labels = clustering.fit_predict(similarity_matrix)
-            
-            # Extract patterns from clusters
-            new_patterns = []
-            for cluster_id in range(n_clusters):
-                cluster_snippets = [
-                    all_snippets[i] for i in range(len(all_snippets))
-                    if cluster_labels[i] == cluster_id
-                ]
-                
-                if len(cluster_snippets) >= min_frequency:
-                    # Create pattern from cluster
-                    pattern = self._create_pattern_from_cluster(
-                        cluster_snippets, 
-                        cluster_id
+        elif pattern_type == PatternType.LARGE_FUNCTIONS:
+            # Check for large functions
+            for func_name, metrics in analysis_result.get('functions', {}).items():
+                if metrics.line_count >= threshold:
+                    return CodePattern(
+                        pattern_type=pattern_type,
+                        severity=config['severity'],
+                        confidence=config['confidence'],
+                        description=f"Large function {func_name}",
+                        line_numbers=[],
+                        code_snippets=[f"Function {func_name} has {metrics.line_count} lines"],
+                        optimization_suggestion=config['suggestion'],
+                        estimated_gas_savings=config['estimated_savings'],
+                        implementation_complexity="moderate"
                     )
-                    if pattern:
-                        new_patterns.append(pattern)
-            
-            return new_patterns
-            
-        except Exception as e:
-            print(f"Error discovering patterns: {e}")
-            return []
-    
-    def _create_pattern_from_cluster(
-        self, 
-        snippets: List[str], 
-        cluster_id: int
-    ) -> Optional[CodePattern]:
-        """Create a pattern from a cluster of similar code snippets"""
-        if len(snippets) == 0:
-            return None
-        
-        # Find common elements
-        all_tokens = []
-        for snippet in snippets:
-            tokens = self.tokenize_code(snippet)
-            all_tokens.extend(tokens)
-        
-        # Find most common tokens
-        token_counts = Counter(all_tokens)
-        common_tokens = [token for token, count in token_counts.most_common(10)]
-        
-        # Create regex pattern from common tokens
-        if len(common_tokens) >= 3:
-            # Build regex pattern (simplified)
-            pattern_regex = r'\b(?:' + '|'.join(common_tokens[:5]) + r')\b'
-            
-            # Estimate gas impact based on complexity
-            avg_length = np.mean([len(snippet) for snippet in snippets])
-            gas_impact = int(avg_length * 2)  # Rough estimate
-            
-            # Calculate complexity score
-            complexity = min(len(common_tokens) / 10, 1.0)
-            
-            pattern = CodePattern(
-                pattern_id=f"discovered_{cluster_id}",
-                name=f"Discovered Pattern {cluster_id}",
-                category="Discovered",
-                regex_pattern=pattern_regex,
-                code_snippet=snippets[0][:100] + "..." if len(snippets[0]) > 100 else snippets[0],
-                frequency=len(snippets),
-                gas_impact=gas_impact,
-                confidence=0.6,  # Lower confidence for discovered patterns
-                complexity_score=complexity,
-                examples=snippets[:3],  # Keep first 3 examples
-                optimization_suggestions=["Review this pattern for optimization opportunities"]
-            )
-            
-            return pattern
         
         return None
     
-    def analyze_pattern_trends(self) -> Dict[str, Any]:
-        """Analyze trends in pattern usage and effectiveness"""
-        if len(self.patterns) == 0:
-            return {}
+    def find_ml_patterns(self, code: str, analysis_result: Dict[str, Any]) -> List[CodePattern]:
+        """Find patterns using machine learning"""
+        patterns = []
         
-        # Category distribution
-        category_counts = Counter([p.category for p in self.patterns])
+        # Analyze function complexity distribution
+        complexity_dist = analysis_result.get('complexity_distribution', [])
+        if complexity_dist:
+            complexities = [item['complexity'] for item in complexity_dist]
+            avg_complexity = np.mean(complexities)
+            
+            # Find outliers (functions with unusually high complexity)
+            for item in complexity_dist:
+                if item['complexity'] > avg_complexity * 2:
+                    patterns.append(CodePattern(
+                        pattern_type=PatternType.SUBOPTIMAL_ALGORITHM,
+                        severity=Severity.MEDIUM,
+                        confidence=Confidence.MEDIUM,
+                        description=f"Function {item['function']} has unusually high complexity",
+                        line_numbers=[],
+                        code_snippets=[f"Complexity: {item['complexity']} (average: {avg_complexity:.1f})"],
+                        optimization_suggestion="Review algorithm efficiency",
+                        estimated_gas_savings=3000,
+                        implementation_complexity="complex"
+                    ))
         
-        # Gas impact distribution
-        gas_impacts = [p.gas_impact for p in self.patterns]
-        
-        # Confidence distribution
-        confidences = [p.confidence for p in self.patterns]
-        
-        # Frequency distribution
-        frequencies = [p.frequency for p in self.patterns]
-        
-        trends = {
-            'category_distribution': dict(category_counts),
-            'total_patterns': len(self.patterns),
-            'avg_gas_impact': np.mean(gas_impacts),
-            'avg_confidence': np.mean(confidences),
-            'avg_frequency': np.mean(frequencies),
-            'high_impact_patterns': len([p for p in self.patterns if p.gas_impact > 3000]),
-            'high_confidence_patterns': len([p for p in self.patterns if p.confidence > 0.8]),
-            'learning_metrics': {
-                'total_patterns_learned': self.learning_metrics.total_patterns_learned,
-                'successful_optimizations': self.learning_metrics.successful_optimizations,
-                'accuracy_score': self.learning_metrics.accuracy_score,
-                'false_positive_rate': self.learning_metrics.false_positive_rate,
-                'average_gas_savings': self.learning_metrics.average_gas_savings
-            }
-        }
-        
-        return trends
+        return patterns
     
-    def export_patterns(self, format: str = "json") -> str:
-        """Export patterns in specified format"""
-        pattern_data = []
-        for pattern in self.patterns:
-            pattern_dict = {
-                'pattern_id': pattern.pattern_id,
-                'name': pattern.name,
-                'category': pattern.category,
-                'regex_pattern': pattern.regex_pattern,
-                'code_snippet': pattern.code_snippet,
-                'frequency': pattern.frequency,
-                'gas_impact': pattern.gas_impact,
-                'confidence': pattern.confidence,
-                'complexity_score': pattern.complexity_score,
-                'optimization_suggestions': pattern.optimization_suggestions
-            }
-            pattern_data.append(pattern_dict)
-        
-        if format.lower() == "json":
-            return json.dumps(pattern_data, indent=2)
-        elif format.lower() == "csv":
-            if not pattern_data:
-                return ""
-            
-            # Get all keys
-            keys = pattern_data[0].keys()
-            
-            # Create CSV
-            lines = [",".join(keys)]
-            for pattern in pattern_data:
-                values = [str(pattern.get(key, "")) for key in keys]
-                lines.append(",".join(values))
-            
-            return "\n".join(lines)
-        else:
-            return json.dumps(pattern_data, indent=2)
+    def assess_complexity(self, pattern_type: PatternType) -> str:
+        """Assess implementation complexity for pattern type"""
+        complexity_map = {
+            PatternType.REDUNDANT_CHECKS: "trivial",
+            PatternType.MAGIC_NUMBERS: "simple",
+            PatternType.REPEATED_COMPUTATION: "simple",
+            PatternType.INEFFICIENT_VECTOR: "simple",
+            PatternType.EXCESSIVE_AUTH: "moderate",
+            PatternType.UNNECESSARY_CLONES: "moderate",
+            PatternType.INEFFICIENT_STORAGE: "moderate",
+            PatternType.STORAGE_IN_LOOP: "moderate",
+            PatternType.DEEP_NESTING: "moderate",
+            PatternType.LARGE_FUNCTIONS: "moderate",
+            PatternType.SUBOPTIMAL_ALGORITHM: "complex",
+        }
+        return complexity_map.get(pattern_type, "moderate")
 
+class PatternClusterer:
+    """Clusters similar patterns for analysis"""
+    
+    def __init__(self):
+        self.clustering_algorithm = DBSCAN(eps=0.3, min_samples=2)
+    
+    def cluster_patterns(self, patterns: List[CodePattern]) -> List[PatternCluster]:
+        """Cluster similar patterns"""
+        if len(patterns) < 2:
+            return []
+        
+        # Group patterns by type first
+        type_groups = defaultdict(list)
+        for pattern in patterns:
+            type_groups[pattern.pattern_type].append(pattern)
+        
+        clusters = []
+        cluster_id = 0
+        
+        for pattern_type, type_patterns in type_groups.items():
+            if len(type_patterns) >= 2:
+                # Create cluster for this pattern type
+                cluster = self.create_cluster(cluster_id, pattern_type, type_patterns)
+                clusters.append(cluster)
+                cluster_id += 1
+        
+        return clusters
+    
+    def create_cluster(self, cluster_id: int, pattern_type: PatternType, patterns: List[CodePattern]) -> PatternCluster:
+        """Create a pattern cluster"""
+        # Analyze common characteristics
+        total_savings = sum(p.estimated_gas_savings for p in patterns)
+        avg_confidence = np.mean([p.confidence.value for p in patterns])
+        common_lines = set()
+        for pattern in patterns:
+            common_lines.update(pattern.line_numbers)
+        
+        # Determine optimization strategy
+        strategy = self.determine_strategy(pattern_type, patterns)
+        
+        return PatternCluster(
+            cluster_id=cluster_id,
+            pattern_type=pattern_type,
+            patterns=patterns,
+            common_characteristics={
+                'total_patterns': len(patterns),
+                'total_savings': total_savings,
+                'average_confidence': avg_confidence,
+                'affected_lines': list(common_lines),
+                'severity_distribution': self.get_severity_distribution(patterns)
+            },
+            optimization_strategy=strategy
+        )
+    
+    def determine_strategy(self, pattern_type: PatternType, patterns: List[CodePattern]) -> str:
+        """Determine optimization strategy for cluster"""
+        strategies = {
+            PatternType.INEFFICIENT_STORAGE: "Implement storage batching and use persistent storage for long-term data",
+            PatternType.STORAGE_IN_LOOP: "Cache storage values before loops and minimize storage operations in iterations",
+            PatternType.REPEATED_COMPUTATION: "Implement caching mechanism for expensive computations",
+            PatternType.INEFFICIENT_VECTOR: "Pre-allocate memory and use appropriate data structures",
+            PatternType.EXCESSIVE_AUTH: "Batch authorization checks and implement role-based access control",
+            PatternType.REDUNDANT_CHECKS: "Remove redundant conditions and simplify logic",
+            PatternType.MAGIC_NUMBERS: "Replace with named constants and configuration values",
+            PatternType.UNNECESSARY_CLONES: "Use references and avoid unnecessary memory copies",
+            PatternType.DEEP_NESTING: "Refactor to reduce nesting depth and improve readability",
+            PatternType.LARGE_FUNCTIONS: "Break down into smaller, focused functions",
+            PatternType.SUBOPTIMAL_ALGORITHM: "Review and replace with more efficient algorithms",
+        }
+        return strategies.get(pattern_type, "Review and optimize based on specific patterns")
+    
+    def get_severity_distribution(self, patterns: List[CodePattern]) -> Dict[str, int]:
+        """Get distribution of severities in patterns"""
+        distribution = Counter()
+        for pattern in patterns:
+            distribution[pattern.severity.value] += 1
+        return dict(distribution)
+
+class AdvancedPatternRecognizer:
+    """Advanced pattern recognition system"""
+    
+    def __init__(self):
+        self.ast_analyzer = ASTAnalyzer()
+        self.pattern_matcher = PatternMatcher()
+        self.clusterer = PatternClusterer()
+        self.pattern_history = []
+        self.learning_data = []
+    
+    def analyze_contract(self, contract_code: str) -> Dict[str, Any]:
+        """Perform comprehensive pattern analysis"""
+        print("Performing advanced pattern recognition...")
+        
+        # AST analysis
+        analysis_result = self.ast_analyzer.analyze_code(contract_code)
+        
+        # Pattern matching
+        patterns = self.pattern_matcher.find_patterns(contract_code, analysis_result)
+        
+        # Pattern clustering
+        clusters = self.clusterer.cluster_patterns(patterns)
+        
+        # Generate insights
+        insights = self.generate_insights(patterns, clusters, analysis_result)
+        
+        # Store in history
+        self.pattern_history.append({
+            'timestamp': self.get_timestamp(),
+            'patterns': patterns,
+            'clusters': clusters,
+            'analysis_result': analysis_result,
+            'insights': insights
+        })
+        
+        return {
+            'analysis_result': analysis_result,
+            'patterns': patterns,
+            'clusters': clusters,
+            'insights': insights,
+            'summary': self.generate_summary(patterns, clusters)
+        }
+    
+    def generate_insights(self, patterns: List[CodePattern], clusters: List[PatternCluster], 
+                        analysis_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Generate insights from pattern analysis"""
+        insights = []
+        
+        # High-impact patterns
+        high_impact_patterns = [p for p in patterns if p.estimated_gas_savings > 3000]
+        if high_impact_patterns:
+            insights.append({
+                'type': 'high_impact',
+                'message': f"Found {len(high_impact_patterns)} high-impact optimization opportunities",
+                'patterns': high_impact_patterns,
+                'potential_savings': sum(p.estimated_gas_savings for p in high_impact_patterns)
+            })
+        
+        # Critical severity patterns
+        critical_patterns = [p for p in patterns if p.severity == Severity.CRITICAL]
+        if critical_patterns:
+            insights.append({
+                'type': 'critical',
+                'message': f"Found {len(critical_patterns)} critical issues requiring immediate attention",
+                'patterns': critical_patterns,
+                'recommendation': "Address these patterns first as they have the highest impact"
+            })
+        
+        # Pattern clusters analysis
+        if clusters:
+            insights.append({
+                'type': 'clusters',
+                'message': f"Identified {len(clusters)} pattern clusters for systematic optimization",
+                'clusters': clusters,
+                'recommendation': "Address patterns in clusters for comprehensive improvements"
+            })
+        
+        # Complexity analysis
+        functions = analysis_result.get('functions', {})
+        complex_functions = [f for f in functions.values() if f.cyclomatic_complexity > 10]
+        if complex_functions:
+            insights.append({
+                'type': 'complexity',
+                'message': f"Found {len(complex_functions)} functions with high complexity",
+                'functions': [f.name for f in complex_functions],
+                'recommendation': "Consider refactoring complex functions to improve maintainability and gas efficiency"
+            })
+        
+        return insights
+    
+    def generate_summary(self, patterns: List[CodePattern], clusters: List[PatternCluster]) -> Dict[str, Any]:
+        """Generate summary of pattern analysis"""
+        total_savings = sum(p.estimated_gas_savings for p in patterns)
+        severity_counts = Counter(p.severity.value for p in patterns)
+        confidence_avg = np.mean([p.confidence.value for p in patterns]) if patterns else 0
+        
+        return {
+            'total_patterns': len(patterns),
+            'total_clusters': len(clusters),
+            'total_potential_savings': total_savings,
+            'severity_distribution': dict(severity_counts),
+            'average_confidence': confidence_avg,
+            'high_priority_patterns': len([p for p in patterns if p.severity in [Severity.HIGH, Severity.CRITICAL]]),
+            'optimization_recommendations': self.get_top_recommendations(patterns)
+        }
+    
+    def get_top_recommendations(self, patterns: List[CodePattern]) -> List[str]:
+        """Get top optimization recommendations"""
+        # Sort patterns by estimated savings
+        sorted_patterns = sorted(patterns, key=lambda p: p.estimated_gas_savings, reverse=True)
+        
+        recommendations = []
+        for pattern in sorted_patterns[:5]:  # Top 5 recommendations
+            recommendations.append(
+                f"{pattern.pattern_type.value}: {pattern.optimization_suggestion} "
+                f"(Estimated savings: {pattern.estimated_gas_savings:,} gas)"
+            )
+        
+        return recommendations
+    
+    def get_timestamp(self) -> int:
+        """Get current timestamp"""
+        import time
+        return int(time.time())
+    
+    def save_analysis(self, filepath: str, analysis_result: Dict[str, Any]):
+        """Save analysis results to file"""
+        # Convert enums to strings for JSON serialization
+        serializable_result = self.make_serializable(analysis_result)
+        
+        with open(filepath, 'w') as f:
+            json.dump(serializable_result, f, indent=2)
+        
+        print(f"Analysis results saved to {filepath}")
+    
+    def make_serializable(self, obj: Any) -> Any:
+        """Convert objects to JSON-serializable format"""
+        if isinstance(obj, dict):
+            return {k: self.make_serializable(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self.make_serializable(item) for item in obj]
+        elif isinstance(obj, (PatternType, Severity, Confidence)):
+            return obj.value
+        elif hasattr(obj, '__dict__'):
+            return self.make_serializable(obj.__dict__)
+        else:
+            return obj
+    
+    def load_analysis(self, filepath: str) -> Optional[Dict[str, Any]]:
+        """Load analysis results from file"""
+        if os.path.exists(filepath):
+            with open(filepath, 'r') as f:
+                return json.load(f)
+        return None
+    
+    def generate_pattern_report(self, analysis_result: Dict[str, Any]) -> str:
+        """Generate detailed pattern report"""
+        report = []
+        report.append("# Advanced Pattern Recognition Report\n")
+        
+        # Summary
+        summary = analysis_result.get('summary', {})
+        report.append("## Summary\n")
+        report.append(f"- Total Patterns Found: {summary.get('total_patterns', 0)}\n")
+        report.append(f"- Pattern Clusters: {summary.get('total_clusters', 0)}\n")
+        report.append(f"- Potential Gas Savings: {summary.get('total_potential_savings', 0):,}\n")
+        report.append(f"- High Priority Patterns: {summary.get('high_priority_patterns', 0)}\n\n")
+        
+        # Insights
+        insights = analysis_result.get('insights', [])
+        if insights:
+            report.append("## Key Insights\n")
+            for insight in insights:
+                report.append(f"### {insight['type'].title()}\n")
+                report.append(f"{insight['message']}\n")
+                if 'recommendation' in insight:
+                    report.append(f"**Recommendation:** {insight['recommendation']}\n")
+                report.append("\n")
+        
+        # Pattern clusters
+        clusters = analysis_result.get('clusters', [])
+        if clusters:
+            report.append("## Pattern Clusters\n")
+            for cluster in clusters:
+                report.append(f"### Cluster {cluster.cluster_id}: {cluster.pattern_type.value.title()}\n")
+                report.append(f"**Patterns:** {len(cluster.patterns)}\n")
+                report.append(f"**Total Savings:** {cluster.common_characteristics['total_savings']:,}\n")
+                report.append(f"**Strategy:** {cluster.optimization_strategy}\n\n")
+        
+        # Top recommendations
+        recommendations = summary.get('optimization_recommendations', [])
+        if recommendations:
+            report.append("## Top Optimization Recommendations\n")
+            for i, rec in enumerate(recommendations, 1):
+                report.append(f"{i}. {rec}\n")
+            report.append("\n")
+        
+        return ''.join(report)
 
 def main():
-    """Example usage of the PatternRecognitionEngine"""
-    engine = PatternRecognitionEngine()
-    
-    # Example smart contract code
-    sample_code = """
-    pub fn inefficient_function(env: Env, data: Vec<Bytes>) -> u64 {
-        let mut result = 0;
+    """Main function for testing pattern recognition"""
+    # Sample contract code
+    sample_contract = '''
+    pub fn complex_function(env: Env, data: Vec<Bytes>) -> Vec<Bytes> {
+        let mut results = Vec::new(&env);
         
-        // Inefficient storage operations
-        env.storage().persistent().set(&1, &data);
-        env.storage().persistent().set(&2, &data);
-        
-        // Inefficient loop
-        for i in 0..3 {
-            let cloned_data = data.clone();
-            result += i * 2;
-            env.storage().persistent().set(&i, &cloned_data);
+        for i in 0..data.len() {
+            let timestamp = env.ledger().timestamp();
+            let proof = env.storage().instance().get(&DataKey::Proof(i as u64));
+            
+            if let Some(p) = proof {
+                if p.verified == true {
+                    if p.timestamp > timestamp - 86400 {
+                        results.push_back(p.event_data.clone());
+                        env.storage().instance().set(&DataKey::Result(i as u64), &timestamp);
+                    }
+                }
+            }
+            
+            for j in 0..10 {
+                let temp = env.ledger().timestamp();
+                if temp > 0 {
+                    results.push_back(data[i].clone());
+                }
+            }
         }
         
-        // Redundant computation
-        let expensive = data.len() * 2;
-        let result2 = data.len() * 2;
-        
-        result + expensive + result2
+        results
     }
-    """
+    '''
     
-    # Discover patterns
-    patterns = engine.discover_patterns(sample_code)
+    # Initialize pattern recognizer
+    recognizer = AdvancedPatternRecognizer()
     
-    print("=== Discovered Patterns ===")
-    for i, match in enumerate(patterns, 1):
-        print(f"{i}. {match.pattern.name}")
-        print(f"   Category: {match.pattern.category}")
-        print(f"   Lines: {match.start_line}-{match.end_line}")
-        print(f"   Confidence: {match.confidence:.2f}")
-        print(f"   Gas Savings Potential: {match.gas_savings_potential}")
-        print(f"   Code: {match.matched_code[:80]}...")
-        print()
+    # Analyze contract
+    result = recognizer.analyze_contract(sample_contract)
     
-    # Analyze trends
-    trends = engine.analyze_pattern_trends()
-    print("=== Pattern Trends ===")
-    print(f"Total Patterns: {trends['total_patterns']}")
-    print(f"Average Gas Impact: {trends['avg_gas_impact']:.0f}")
-    print(f"Average Confidence: {trends['avg_confidence']:.2f}")
-    print(f"Category Distribution: {trends['category_distribution']}")
+    # Generate report
+    report = recognizer.generate_pattern_report(result)
+    print(report)
     
-    # Simulate learning from feedback
-    feedback = {
-        patterns[0].pattern.pattern_id: True,
-        patterns[1].pattern.pattern_id: False,
-    }
+    # Save results
+    recognizer.save_analysis('pattern_analysis.json', result)
     
-    actual_savings = {
-        patterns[0].pattern.pattern_id: 4500,
-        patterns[1].pattern.pattern_id: 2000,
-    }
+    with open('pattern_report.md', 'w') as f:
+        f.write(report)
     
-    engine.learn_from_feedback(patterns, feedback, actual_savings)
-    
-    print("\n=== After Learning ===")
-    updated_metrics = engine.analyze_pattern_trends()['learning_metrics']
-    print(f"Successful Optimizations: {updated_metrics['successful_optimizations']}")
-    print(f"Accuracy Score: {updated_metrics['accuracy_score']:.2f}")
-
+    print("\nPattern recognition complete!")
+    print("Results saved to pattern_analysis.json and pattern_report.md")
 
 if __name__ == "__main__":
     main()

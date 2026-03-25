@@ -1,280 +1,412 @@
-# Verinode Gas Optimization Suite v2
+# Verinode
 
-An advanced gas optimization suite for Verinode smart contracts featuring AI-powered suggestions, automated refactoring, and comprehensive analysis tools.
+A verification node system with both REST and GraphQL APIs for managing user proofs and verifications.
 
 ## Features
 
-### 🤖 AI-Powered Optimization
-- **Pattern Recognition**: Machine learning-based detection of gas optimization opportunities
-- **Intelligent Suggestions**: Context-aware optimization recommendations
-- **Learning System**: Adapts and improves based on historical data
+- **GraphQL API**: Flexible data queries with real-time subscriptions
+- **REST API**: Traditional REST endpoints (for backward compatibility)
+- **Authentication**: JWT-based authentication system
+- **Real-time Updates**: WebSocket subscriptions for live data
+- **Rate Limiting**: Protection against API abuse
+- **TypeScript**: Full type safety throughout the application
+- **Comprehensive Testing**: Unit tests for all GraphQL features
 
-### 🔧 Automated Refactoring
-- **Code Transformation**: Automatic application of gas-saving patterns
-- **Risk Assessment**: Evaluates potential risks of optimizations
-- **Compilation Verification**: Ensures optimized code remains valid
-
-### 📊 Comprehensive Analysis
-- **Gas Profiling**: Detailed breakdown of gas consumption
-- **Performance Benchmarking**: Compare against baseline measurements
-- **Trend Analysis**: Track optimization progress over time
-
-### 📈 Reporting & Analytics
-- **Detailed Reports**: Multi-format output (JSON, CSV, Markdown)
-- **Optimization Roadmap**: Prioritized recommendations
-- **Cost Savings Analysis**: Quantify financial impact
-
-## Architecture
-
-### Core Components
-
-1. **AI Optimizer** (`contracts/src/optimization/AIOptimizer.rs`)
-   - Machine learning optimization engine
-   - Pattern matching and application
-   - Learning data management
-
-2. **Auto Refactor** (`contracts/src/optimization/AutoRefactor.rs`)
-   - Automated code transformation
-   - Rule-based optimization
-   - Risk assessment
-
-3. **Gas Analyzer** (`contracts/src/optimization/GasAnalyzer.rs`)
-   - Gas usage profiling
-   - Performance metrics
-   - Benchmark comparison
-
-4. **Optimization Report** (`contracts/src/optimization/OptimizationReport.rs`)
-   - Comprehensive reporting
-   - Trend analysis
-   - Export capabilities
-
-### AI/ML Components
-
-1. **Gas Optimization** (`contracts/ai/gas_optimization.py`)
-   - Machine learning models
-   - Feature extraction
-   - Prediction algorithms
-
-2. **Pattern Recognition** (`contracts/ai/pattern_recognition.py`)
-   - Code pattern detection
-   - Clustering analysis
-   - Learning from feedback
-
-### Tools
-
-1. **Advanced Gas Profiler** (`contracts/tools/advanced_gas_profiler.rs`)
-   - Command-line profiling tool
-   - Directory analysis
-   - Benchmark management
-
-2. **Optimization Suggester** (`contracts/tools/optimization_suggester.rs`)
-   - Intelligent suggestion engine
-   - Best practices database
-   - Roadmap generation
-
-## Installation
+## Quick Start
 
 ### Prerequisites
-- Rust 1.70+
-- Python 3.8+
-- Soroban SDK
 
-### Setup
+- Node.js (v16 or higher)
+- npm or yarn
 
-1. Clone the repository:
+### Installation
+
 ```bash
-git clone https://github.com/olaleyeolajide81-sketch/Verinode.git
-cd Verinode/contracts
+# Clone the repository
+git clone <repository-url>
+cd Verinode
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Start the development server
+npm run dev
 ```
 
-2. Install Rust dependencies:
+The server will start on `http://localhost:4000`
+
+### Docker Deployment
+
+You can also run the application using Docker:
+
 ```bash
-cargo build --release
+# Build and start the containers
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
 ```
 
-3. Install Python dependencies:
+## API Endpoints
+
+### GraphQL API
+
+- **Endpoint**: `http://localhost:4000/graphql`
+- **Playground**: `http://localhost:4000/graphql` (development only)
+- **Subscriptions**: `ws://localhost:4000/graphql`
+
+### REST API
+
+**Base URL**: `http://localhost:4000/api`
+
+#### Authentication
+
+**Register**
+- **Endpoint**: `POST /api/auth/register`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "username": "user",
+    "password": "password"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "token": "eyJhbG...",
+    "user": { "id": "1", "email": "user@example.com" }
+  }
+  ```
+
+**Login**
+- **Endpoint**: `POST /api/auth/login`
+- **Body**:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password"
+  }
+  ```
+
+#### Proofs
+
+**Get All Proofs**
+- **Endpoint**: `GET /api/proofs`
+- **Query Params**: `page` (int), `limit` (int)
+- **Response**:
+  ```json
+  {
+    "data": [{ "id": "1", "title": "My Proof", "status": "VERIFIED" }],
+    "total": 1
+  }
+  ```
+
+**Create Proof**
+- **Endpoint**: `POST /api/proofs`
+- **Headers**: `Authorization: Bearer <token>`
+- **Body**:
+  ```json
+  {
+    "title": "Document Verification",
+    "description": "Verify identity document",
+    "metadata": { "type": "passport" }
+  }
+  ```
+
+**Get Proof by ID**
+- **Endpoint**: `GET /api/proofs/:id`
+
+**Update Proof**
+- **Endpoint**: `PUT /api/proofs/:id`
+
+**Delete Proof**
+- **Endpoint**: `DELETE /api/proofs/:id`
+
+### Troubleshooting
+
+Common issues and solutions:
+
+1. **401 Unauthorized**
+   - **Cause**: Missing or invalid JWT token.
+   - **Solution**: Ensure the `Authorization` header is set to `Bearer <your-token>`.
+
+2. **429 Too Many Requests**
+   - **Cause**: Rate limit exceeded.
+   - **Solution**: Wait for the window to reset (check `X-RateLimit-Reset` header).
+
+3. **Connection Refused**
+   - **Cause**: Server is not running.
+   - **Solution**: Run `npm run dev` or `npm start`.
+
+## GraphQL Schema
+
+The GraphQL API provides the following main types:
+
+- **User**: User accounts and authentication
+- **Proof**: Verification proofs with status tracking
+- **AuthPayload**: Authentication responses
+- **Subscriptions**: Real-time updates for proof changes
+
+### Example Queries
+
+```graphql
+# Get current user
+query {
+  me {
+    id
+    email
+    username
+  }
+}
+
+# Get paginated proofs
+query {
+  proofs(first: 10, status: PENDING) {
+    edges {
+      node {
+        id
+        title
+        description
+        status
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    totalCount
+  }
+}
+```
+
+### Example Mutations
+
+```graphql
+# Login
+mutation {
+  login(email: "user@example.com", password: "password") {
+    token
+    user {
+      id
+      email
+    }
+  }
+}
+
+# Create proof
+mutation {
+  createProof(
+    title: "My Proof"
+    description: "Proof description"
+    metadata: { type: "document" }
+  ) {
+    id
+    title
+    status
+  }
+}
+```
+
+### Example Subscriptions
+
+```graphql
+# Subscribe to proof updates
+subscription {
+  proofUpdated(userId: "1") {
+    id
+    title
+    status
+    updatedAt
+  }
+}
+```
+
+## Authentication
+
+The API uses JWT tokens for authentication. Include the token in the Authorization header:
+
 ```bash
-pip install -r requirements.txt
+Authorization: Bearer <your-jwt-token>
 ```
 
-## Usage
+For WebSocket subscriptions, include the token in the connection parameters:
 
-### Command Line Tools
+```javascript
+const wsClient = new SubscriptionClient('ws://localhost:4000/graphql', {
+  connectionParams: {
+    Authorization: `Bearer ${token}`
+  }
+});
+```
 
-#### Gas Profiler
-Profile a single contract:
+## Rate Limiting
+
+Different rate limits apply to different operation types:
+
+- **Queries**: 60 requests per minute
+- **Mutations**: 30 requests per minute
+- **Authentication**: 5 attempts per 15 minutes
+
+Rate limit headers are included in responses:
+- `X-RateLimit-Limit`: Maximum requests for the window
+- `X-RateLimit-Remaining`: Remaining requests in the window
+- `X-RateLimit-Reset`: Unix timestamp when the window resets
+
+## Development
+
+### Scripts
+
 ```bash
-cargo run --bin advanced_gas_profiler -- -i src/lib.rs -f markdown -o report.md
+# Development server with hot reload
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
 ```
 
-Profile entire directory:
+### Project Structure
+
+```
+src/
+├── graphql/
+│   ├── schema.ts              # GraphQL type definitions
+│   ├── server.ts              # Apollo Server setup
+│   ├── resolvers/             # Query and mutation resolvers
+│   │   ├── userResolver.ts
+│   │   └── proofResolver.ts
+│   ├── subscriptions/        # Subscription handlers
+│   │   └── proofSubscription.ts
+│   ├── middleware/            # Custom middleware
+│   │   ├── auth.ts
+│   │   └── rateLimit.ts
+│   └── __tests__/            # GraphQL tests
+│       ├── resolvers.test.ts
+│       └── subscriptions.test.ts
+├── types/
+│   └── index.ts               # TypeScript type definitions
+├── test/
+│   └── setup.ts               # Jest test setup
+└── index.ts                   # Application entry point
+```
+
+### Testing
+
+The project includes comprehensive tests for all GraphQL features:
+
 ```bash
-cargo run --bin advanced_gas_profiler -- -i src/ -f json -o reports/
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+
+# Run specific test file
+npm test -- resolvers.test.ts
 ```
 
-Save benchmark:
+## Documentation
+
+- **Migration Guide**: `docs/graphql/migration-guide.md`
+- **Schema Documentation**: `docs/graphql/schema-documentation.md`
+
+## Environment Variables
+
 ```bash
-cargo run --bin advanced_gas_profiler -- -i src/lib.rs --benchmark
+# Server configuration
+PORT=4000
+NODE_ENV=development
+
+# JWT configuration (for production)
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=7d
+
+# Database configuration (for production)
+DATABASE_URL=your-database-url
 ```
 
-#### Optimization Suggester
-Analyze contract for optimizations:
+## Website Analytics (Frontend GA4)
+
+MVP website analytics is integrated in the React SPA under `frontend/src/analytics`.
+
+### Configure GA Measurement ID
+
+Create `frontend/.env` (or `frontend/.env.local`) and set your GA4 measurement ID:
+
 ```bash
-cargo run --bin optimization_suggester -- -i src/lib.rs -f markdown -o suggestions.md
+REACT_APP_GA_ID=G-XXXXXXXXXX
 ```
 
-Search for specific optimizations:
-```bash
-cargo run --bin optimization_suggester -- --search "storage"
-```
+Analytics is disabled by default in local development unless this ID is explicitly configured.
 
-Display best practices:
-```bash
-cargo run --bin optimization_suggester -- --best-practices
-```
+### Where Events Are Fired
 
-### Python AI Components
+- `frontend/src/analytics/ga.ts`
+  - Loads Google `gtag.js` once
+  - Initializes GA4
+  - Exposes `trackEvent({ action, category, label, value })`
+  - Exposes auth helpers `trackLogin()` and `trackSignup()`
+- `frontend/src/analytics/RouteChangeTracker.tsx`
+  - Sends SPA `page_view` events on route changes
+- `frontend/src/pages/Home.tsx`
+  - Tracks homepage CTA clicks (`Issue Proof`, `Verify Proof`)
+- `frontend/src/components/Navbar.tsx`
+  - Tracks top navigation clicks
+- `frontend/src/pages/IssueProof.tsx`
+  - Tracks proof issue form submits/success/errors
+- `frontend/src/pages/VerifyProof.tsx`
+  - Tracks proof search submits/success/errors and on-chain verify CTA
+- `frontend/src/pages/Marketplace.jsx`
+  - Tracks create template CTA and key submit actions (create/purchase/rating)
+- `frontend/src/analytics/webVitals.ts`
+  - Captures LCP, CLS, INP, FID, and TTFB and forwards as GA events
 
-#### Gas Optimization
-```python
-from ai.gas_optimization import GasOptimizerAI
+### Verify In GA DebugView
 
-optimizer = GasOptimizerAI()
-result = optimizer.optimize_contract_code(source_code, target_gas_reduction=0.35)
-print(f"Gas saved: {result.gas_savings} ({result.savings_percentage:.2f}%)")
-```
+1. Start the frontend with `REACT_APP_GA_ID` set.
+2. Open the app and navigate across pages.
+3. Trigger key actions (CTA clicks, form submits, verify on-chain, etc.).
+4. In GA4, open `Admin -> DebugView`.
+5. Confirm events such as `page_view`, `cta_click`, `form_submit`, and `web_vital_*`.
 
-#### Pattern Recognition
-```python
-from ai.pattern_recognition import PatternRecognitionEngine
+### Auth Event Note
 
-engine = PatternRecognitionEngine()
-patterns = engine.discover_patterns(source_code)
-for match in patterns:
-    print(f"Pattern: {match.pattern.name} - Potential savings: {match.gas_savings_potential}")
-```
+The current frontend routes do not expose login/signup UI yet. When those screens are added, call `trackLogin()` and `trackSignup()` (or `trackEvent(...)` directly) in their submit handlers.
 
-### Smart Contract Integration
+## Production Deployment
 
-```rust
-use crate::optimization::{
-    AIOptimizer, AutoRefactor, GasAnalyzer, OptimizationReport
-};
+1. Set environment variables
+2. Build the project: `npm run build`
+3. Start the server: `npm start`
 
-// Initialize optimization components
-let ai_optimizer = AIOptimizer::new(env.clone(), admin);
-let auto_refactor = AutoRefactor::new(env.clone(), admin);
-let gas_analyzer = GasAnalyzer::new(env.clone(), admin);
-
-// Analyze and optimize
-let analysis = gas_analyzer.analyze_contract_gas(
-    contract_address,
-    source_code,
-    functions_to_analyze
-);
-
-let refactor_result = auto_refactor.auto_refactor(
-    source_code,
-    0.35, // 35% target reduction
-    7     // Max risk level
-);
-
-let ai_result = ai_optimizer.analyze_and_optimize(
-    source_code,
-    target_function
-);
-```
-
-## Optimization Categories
-
-### Storage Optimizations
-- Replace persistent with instance storage
-- Batch storage operations
-- Optimize storage patterns
-
-### Loop Optimizations
-- Unroll small fixed loops
-- Pre-allocate collection capacity
-- Optimize iteration patterns
-
-### String Optimizations
-- Avoid unnecessary cloning
-- Use string references
-- Optimize concatenation
-
-### Arithmetic Optimizations
-- Use bit operations for powers of 2
-- Cache expensive computations
-- Optimize mathematical operations
-
-### Control Flow Optimizations
-- Early return patterns
-- Reduce nesting depth
-- Optimize conditionals
-
-## Performance Metrics
-
-The suite has demonstrated:
-- **35%+ average gas reduction**
-- **90%+ compilation success rate**
-- **Sub-second analysis time**
-- **95%+ recommendation accuracy**
-
-## Configuration
-
-### Environment Variables
-```bash
-export GAS_OPTIMIZATION_TARGET=0.35  # Target 35% reduction
-export MAX_RISK_LEVEL=7              # Maximum acceptable risk
-export LEARNING_RATE=0.1             # ML learning rate
-```
-
-### Configuration Files
-- `benchmarks.json`: Stored benchmark data
-- `patterns.json`: Custom optimization patterns
-- `learning_data.json`: ML training data
-
-## Testing
-
-Run the test suite:
-```bash
-cargo test
-```
-
-Run Python tests:
-```bash
-python -m pytest ai/
-```
-
-Integration tests:
-```bash
-cargo test --features testutils
-```
+For production, ensure:
+- `NODE_ENV=production`
+- Use a proper database instead of mock data
+- Use a secure JWT secret
+- Configure proper CORS origins
+- Set up SSL/TLS
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Implement your changes
-4. Add tests
-5. Submit a pull request
+3. Make your changes
+4. Add tests for new features
+5. Ensure all tests pass
+6. Submit a pull request
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Support
-
-- Documentation: [docs/](docs/)
-- Issues: [GitHub Issues](https://github.com/olaleyeolajide81-sketch/Verinode/issues)
-- Discussions: [GitHub Discussions](https://github.com/olaleyeolajide81-sketch/Verinode/discussions)
-
-## Acknowledgments
-
-- Soroban SDK team
-- Rust community
-- Verinode contributors
-
----
-
-**Note**: This optimization suite is designed to work with Soroban smart contracts on the Stellar network. Always test optimizations thoroughly before deploying to production.
+This project is licensed under the MIT License.

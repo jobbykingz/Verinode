@@ -1,304 +1,377 @@
-#![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec, Map, Symbol};
-use crate::gas_analyzer::GasAnalysisResult;
-use crate::optimization_report::OptimizationReport;
+use std::collections::HashMap;
+use std::path::Path;
+use serde::{Deserialize, Serialize};
+use tokio::process::Command;
+use crate::optimization::{GasAnalyzer, OptimizationReport, AutoRefactor};
 
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OptimizationPattern {
-    pub pattern_id: u64,
-    pub name: String,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptimizationSuggestion {
+    pub id: String,
+    pub title: String,
     pub description: String,
-    pub gas_impact: u64,
+    pub category: OptimizationCategory,
+    pub severity: Severity,
+    pub estimated_gas_saving: u64,
     pub confidence: f64,
-    pub code_snippet: String,
-    pub optimized_snippet: String,
+    pub code_snippet: Option<String>,
+    pub suggested_fix: Option<String>,
+    pub line_number: Option<u32>,
+    pub function_name: Option<String>,
 }
 
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum OptimizationCategory {
+    Storage,
+    Loops,
+    Arithmetic,
+    ExternalCalls,
+    DataStructures,
+    ControlFlow,
+    Memory,
+    Events,
+    Modifiers,
+    Libraries,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Severity {
+    Critical,
+    High,
+    Medium,
+    Low,
+    Info,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AIOptimizationResult {
-    pub original_gas: u64,
-    pub optimized_gas: u64,
-    pub gas_reduction: f64,
-    pub applied_patterns: Vec<OptimizationPattern>,
-    pub risk_score: f64,
-    pub compilation_verified: bool,
+    pub suggestions: Vec<OptimizationSuggestion>,
+    pub total_estimated_savings: u64,
+    pub analysis_time_ms: u64,
+    pub contract_complexity_score: f64,
+    pub optimization_potential: f64,
 }
 
-#[contracttype]
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct LearningData {
-    pub pattern_id: u64,
-    pub success_rate: f64,
-    pub gas_saved: u64,
-    pub usage_count: u64,
-    pub last_updated: u64,
+pub struct AIOptimizer {
+    gas_analyzer: GasAnalyzer,
+    auto_refactor: AutoRefactor,
+    ml_model_path: String,
+    optimization_patterns: HashMap<String, OptimizationPattern>,
 }
 
-#[contracttype]
-pub enum AIOptimizerDataKey {
-    LearningData(u64),
-    PatternCount,
-    ModelVersion,
-    OptimizationHistory,
+#[derive(Debug, Clone)]
+struct OptimizationPattern {
+    pattern_id: String,
+    regex_pattern: String,
+    category: OptimizationCategory,
+    base_gas_cost: u64,
+    optimized_gas_cost: u64,
+    description: String,
+    suggestion_template: String,
 }
 
-#[contract]
-pub struct AIOptimizer;
-
-#[contractimpl]
 impl AIOptimizer {
-    /// Initialize the AI optimizer with learning capabilities
-    pub fn initialize(env: Env, admin: Address) {
-        if env.storage().instance().has(&AIOptimizerDataKey::ModelVersion) {
-            panic!("AI Optimizer already initialized");
-        }
+    pub fn new(ml_model_path: &str) -> Self {
+        let mut optimizer = Self {
+            gas_analyzer: GasAnalyzer::new(),
+            auto_refactor: AutoRefactor::new(),
+            ml_model_path: ml_model_path.to_string(),
+            optimization_patterns: HashMap::new(),
+        };
         
-        env.storage().instance().set(&AIOptimizerDataKey::ModelVersion, &1u32);
-        env.storage().instance().set(&AIOptimizerDataKey::PatternCount, &0u64);
-        env.storage().instance().set(&AIOptimizerDataKey::OptimizationHistory, &Vec::new(&env));
+        optimizer.initialize_patterns();
+        optimizer
     }
 
-    /// Analyze code and provide AI-powered optimization suggestions
-    pub fn analyze_and_optimize(
-        env: Env,
-        source_code: String,
-        target_function: String,
-    ) -> AIOptimizationResult {
-        let patterns = Self::identify_optimization_patterns(&env, source_code.clone());
-        let mut result = AIOptimizationResult {
-            original_gas: Self::estimate_gas_usage(&env, source_code.clone()),
-            optimized_gas: 0,
-            gas_reduction: 0.0,
-            applied_patterns: Vec::new(&env),
-            risk_score: 0.0,
-            compilation_verified: false,
-        };
+    fn initialize_patterns(&mut self) {
+        // Storage optimization patterns
+        self.optimization_patterns.insert("storage_packing".to_string(), OptimizationPattern {
+            pattern_id: "storage_packing".to_string(),
+            regex_pattern: r"struct\s+\w+\s*\{[^}]*\}".to_string(),
+            category: OptimizationCategory::Storage,
+            base_gas_cost: 20000,
+            optimized_gas_cost: 15000,
+            description: "Pack struct variables to save storage slots".to_string(),
+            suggestion_template: "Consider reordering struct fields to pack them into fewer storage slots".to_string(),
+        });
 
-        let mut optimized_code = source_code;
-        let mut total_risk = 0.0;
+        // Loop optimization patterns
+        self.optimization_patterns.insert("loop_unrolling".to_string(), OptimizationPattern {
+            pattern_id: "loop_unrolling".to_string(),
+            regex_pattern: r"for\s*\([^)]*\)\s*\{[^}]*\}".to_string(),
+            category: OptimizationCategory::Loops,
+            base_gas_cost: 5000,
+            optimized_gas_cost: 3000,
+            description: "Unroll small loops for better gas efficiency".to_string(),
+            suggestion_template: "Consider unrolling this loop as it has a small, fixed number of iterations".to_string(),
+        });
 
-        for pattern in patterns {
-            if Self::should_apply_pattern(&env, pattern.clone()) {
-                optimized_code = Self::apply_optimization_pattern(&env, optimized_code, pattern.clone());
-                result.applied_patterns.push_back(pattern.clone());
-                total_risk += pattern.confidence;
+        // Arithmetic optimization patterns
+        self.optimization_patterns.insert("bitwise_operations".to_string(), OptimizationPattern {
+            pattern_id: "bitwise_operations".to_string(),
+            regex_pattern: r"(\*\s*2|\/\s*2|\+\s*1|\-\s*1)".to_string(),
+            category: OptimizationCategory::Arithmetic,
+            base_gas_cost: 300,
+            optimized_gas_cost: 150,
+            description: "Use bitwise operations instead of arithmetic where possible".to_string(),
+            suggestion_template: "Replace arithmetic operation with equivalent bitwise operation for gas savings".to_string(),
+        });
+
+        // External call optimization patterns
+        self.optimization_patterns.insert("batch_external_calls".to_string(), OptimizationPattern {
+            pattern_id: "batch_external_calls".to_string(),
+            regex_pattern: r"\.call\s*\([^)]*\)".to_string(),
+            category: OptimizationCategory::ExternalCalls,
+            base_gas_cost: 21000,
+            optimized_gas_cost: 15000,
+            description: "Batch multiple external calls to reduce overhead".to_string(),
+            suggestion_template: "Consider batching these external calls to reduce transaction costs".to_string(),
+        });
+
+        // Memory optimization patterns
+        self.optimization_patterns.insert("memory_vs_storage".to_string(), OptimizationPattern {
+            pattern_id: "memory_vs_storage".to_string(),
+            regex_pattern: r"storage\s+.*=.*".to_string(),
+            category: OptimizationCategory::Memory,
+            base_gas_cost: 20000,
+            optimized_gas_cost: 5000,
+            description: "Use memory instead of storage for temporary variables".to_string(),
+            suggestion_template: "Move this variable to memory as it's only used temporarily".to_string(),
+        });
+    }
+
+    pub async fn analyze_contract(&self, contract_path: &str) -> Result<AIOptimizationResult, Box<dyn std::error::Error>> {
+        let start_time = std::time::Instant::now();
+        
+        // Read contract source code
+        let source_code = tokio::fs::read_to_string(contract_path).await?;
+        
+        // Perform gas analysis
+        let gas_analysis = self.gas_analyzer.analyze_contract(contract_path).await?;
+        
+        // Generate AI-powered suggestions
+        let mut suggestions = Vec::new();
+        
+        // Pattern-based analysis
+        suggestions.extend(self.analyze_patterns(&source_code).await?);
+        
+        // ML-based analysis (if available)
+        if Path::new(&self.ml_model_path).exists() {
+            suggestions.extend(self.ml_based_analysis(&source_code).await?);
+        }
+        
+        // Static analysis suggestions
+        suggestions.extend(self.static_analysis_suggestions(&source_code, &gas_analysis).await?);
+        
+        // Sort suggestions by estimated gas savings
+        suggestions.sort_by(|a, b| b.estimated_gas_saving.cmp(&a.estimated_gas_saving));
+        
+        let analysis_time = start_time.elapsed().as_millis() as u64;
+        let total_savings = suggestions.iter().map(|s| s.estimated_gas_saving).sum();
+        let complexity_score = self.calculate_complexity_score(&source_code);
+        let optimization_potential = self.calculate_optimization_potential(&gas_analysis, total_savings);
+        
+        Ok(AIOptimizationResult {
+            suggestions,
+            total_estimated_savings: total_savings,
+            analysis_time_ms: analysis_time,
+            contract_complexity_score: complexity_score,
+            optimization_potential,
+        })
+    }
+
+    async fn analyze_patterns(&self, source_code: &str) -> Result<Vec<OptimizationSuggestion>, Box<dyn std::error::Error>> {
+        let mut suggestions = Vec::new();
+        
+        for (pattern_id, pattern) in &self.optimization_patterns {
+            // Simple pattern matching (in production, use proper regex)
+            if source_code.contains(&pattern.pattern_id.replace("_", " ")) || 
+               source_code.contains("for") || source_code.contains("struct") {
                 
-                // Update learning data
-                Self::update_learning_data(&env, pattern.pattern_id, true);
+                let suggestion = OptimizationSuggestion {
+                    id: format!("pattern_{}", pattern_id),
+                    title: format!("{} Optimization", self.category_to_string(&pattern.category)),
+                    description: pattern.description.clone(),
+                    category: pattern.category.clone(),
+                    severity: self.calculate_severity(pattern.base_gas_cost, pattern.optimized_gas_cost),
+                    estimated_gas_saving: pattern.base_gas_cost - pattern.optimized_gas_cost,
+                    confidence: 0.8,
+                    code_snippet: None,
+                    suggested_fix: Some(pattern.suggestion_template.clone()),
+                    line_number: None,
+                    function_name: None,
+                };
+                
+                suggestions.push(suggestion);
             }
         }
-
-        result.optimized_gas = Self::estimate_gas_usage(&env, optimized_code);
-        result.gas_reduction = ((result.original_gas as f64 - result.optimized_gas as f64) / result.original_gas as f64) * 100.0;
-        result.risk_score = if result.applied_patterns.len() > 0 { total_risk / result.applied_patterns.len() as f64 } else { 0.0 };
-        result.compilation_verified = Self::verify_compilation(&env, optimized_code);
-
-        // Store optimization history
-        Self::store_optimization_history(&env, result.clone());
-
-        result
+        
+        Ok(suggestions)
     }
 
-    /// Identify optimization patterns using AI
-    fn identify_optimization_patterns(env: &Env, source_code: String) -> Vec<OptimizationPattern> {
-        let mut patterns = Vec::new(env);
+    async fn ml_based_analysis(&self, source_code: &str) -> Result<Vec<OptimizationSuggestion>, Box<dyn std::error::Error>> {
+        let mut suggestions = Vec::new();
         
-        // Pattern 1: Storage optimization - use instance storage instead of persistent where possible
-        if source_code.contains("persistent().set") && !source_code.contains("instance().set") {
-            patterns.push_back(OptimizationPattern {
-                pattern_id: 1,
-                name: String::from_str(env, "Storage Optimization"),
-                description: String::from_str(env, "Replace persistent storage with instance storage for temporary data"),
-                gas_impact: 5000,
-                confidence: 0.85,
-                code_snippet: String::from_str(env, "env.storage().persistent().set(&key, &value)"),
-                optimized_snippet: String::from_str(env, "env.storage().instance().set(&key, &value)"),
+        // Simulate ML model inference
+        // In production, this would call an actual ML model
+        let output = Command::new("python")
+            .arg("ai/gas_optimization.py")
+            .arg("--analyze")
+            .arg(source_code)
+            .output()
+            .await?;
+        
+        if output.status.success() {
+            let result = String::from_utf8_lossy(&output.stdout);
+            // Parse ML results and convert to suggestions
+            // This is a simplified version
+            suggestions.push(OptimizationSuggestion {
+                id: "ml_analysis_1".to_string(),
+                title: "ML-Based Optimization".to_string(),
+                description: "Machine learning model identified optimization opportunities".to_string(),
+                category: OptimizationCategory::Storage,
+                severity: Severity::Medium,
+                estimated_gas_saving: 5000,
+                confidence: 0.9,
+                code_snippet: None,
+                suggested_fix: Some(result.trim().to_string()),
+                line_number: None,
+                function_name: None,
             });
         }
+        
+        Ok(suggestions)
+    }
 
-        // Pattern 2: Loop unrolling for small fixed iterations
-        if source_code.contains("for i in 0..3") || source_code.contains("for i in 0..5") {
-            patterns.push_back(OptimizationPattern {
-                pattern_id: 2,
-                name: String::from_str(env, "Loop Unrolling"),
-                description: String::from_str(env, "Unroll small fixed loops to reduce iteration overhead"),
-                gas_impact: 3000,
-                confidence: 0.75,
-                code_snippet: String::from_str(env, "for i in 0..3 { process(i) }"),
-                optimized_snippet: String::from_str(env, "process(0); process(1); process(2)"),
+    async fn static_analysis_suggestions(&self, source_code: &str, gas_analysis: &crate::optimization::GasAnalysisResult) -> Result<Vec<OptimizationSuggestion>, Box<dyn std::error::Error>> {
+        let mut suggestions = Vec::new();
+        
+        // Check for expensive operations
+        if source_code.contains("require(") {
+            suggestions.push(OptimizationSuggestion {
+                id: "require_optimization".to_string(),
+                title: "Optimize Require Statements".to_string(),
+                description: "Combine multiple require statements or use custom errors".to_string(),
+                category: OptimizationCategory::ControlFlow,
+                severity: Severity::Medium,
+                estimated_gas_saving: 2000,
+                confidence: 0.7,
+                code_snippet: None,
+                suggested_fix: Some("Consider using custom error messages or combining conditions".to_string()),
+                line_number: None,
+                function_name: None,
             });
         }
-
-        // Pattern 3: Batch operations optimization
-        if source_code.contains("Vec::new") && source_code.contains("push_back") {
-            patterns.push_back(OptimizationPattern {
-                pattern_id: 3,
-                name: String::from_str(env, "Batch Operations"),
-                description: String::from_str(env, "Use batch operations and pre-allocated vectors"),
-                gas_impact: 4000,
-                confidence: 0.90,
-                code_snippet: String::from_str(env, "let mut vec = Vec::new(&env); vec.push_back(item)"),
-                optimized_snippet: String::from_str(env, "let mut vec = Vec::new(&env); vec.reserve_exact(10); vec.push_back(item)"),
+        
+        // Check for unnecessary storage operations
+        if source_code.matches("storage ").count() > 5 {
+            suggestions.push(OptimizationSuggestion {
+                id: "storage_optimization".to_string(),
+                title: "Reduce Storage Operations".to_string(),
+                description: "Multiple storage operations detected, consider optimization".to_string(),
+                category: OptimizationCategory::Storage,
+                severity: Severity::High,
+                estimated_gas_saving: 15000,
+                confidence: 0.8,
+                code_snippet: None,
+                suggested_fix: Some("Consider using memory variables or batching storage operations".to_string()),
+                line_number: None,
+                function_name: None,
             });
         }
-
-        // Pattern 4: Early return optimization
-        if source_code.contains("if condition {") && source_code.contains("} else {") {
-            patterns.push_back(OptimizationPattern {
-                pattern_id: 4,
-                name: String::from_str(env, "Early Return"),
-                description: String::from_str(env, "Use early returns to reduce nesting and gas cost"),
-                gas_impact: 2000,
-                confidence: 0.80,
-                code_snippet: String::from_str(env, "if condition { // complex logic } else { return }"),
-                optimized_snippet: String::from_str(env, "if !condition { return } // complex logic"),
-            });
-        }
-
-        // Pattern 5: String optimization
-        if source_code.contains("String::from_str") && source_code.contains("clone") {
-            patterns.push_back(OptimizationPattern {
-                pattern_id: 5,
-                name: String::from_str(env, "String Optimization"),
-                description: String::from_str(env, "Avoid unnecessary string cloning and use references"),
-                gas_impact: 1500,
-                confidence: 0.70,
-                code_snippet: String::from_str(env, "let s = string.clone(); process(s)"),
-                optimized_snippet: String::from_str(env, "process(&string)"),
-            });
-        }
-
-        patterns
+        
+        Ok(suggestions)
     }
 
-    /// Apply an optimization pattern to the source code
-    fn apply_optimization_pattern(env: &Env, source_code: String, pattern: OptimizationPattern) -> String {
-        // This is a simplified implementation - in practice, you'd use proper AST manipulation
-        let mut optimized = source_code;
-        
-        // Replace storage patterns
-        if pattern.pattern_id == 1 {
-            optimized = optimized.replace("persistent().set", "instance().set");
-            optimized = optimized.replace("persistent().get", "instance().get");
-        }
-        
-        // Replace loop patterns
-        if pattern.pattern_id == 2 {
-            optimized = optimized.replace("for i in 0..3 {", "// Unrolled loop:\nlet i = 0; {");
-            optimized = optimized.replace("}", ";\nlet i = 1; {");
-            optimized = optimized.replace("}", ";\nlet i = 2; {");
-        }
-        
-        optimized
-    }
-
-    /// Determine if a pattern should be applied based on learning data
-    fn should_apply_pattern(env: &Env, pattern: OptimizationPattern) -> bool {
-        if let Some(learning_data) = env.storage().instance().get::<AIOptimizerDataKey, LearningData>(
-            &AIOptimizerDataKey::LearningData(pattern.pattern_id)
-        ) {
-            // Apply if success rate is above 70% and confidence is high
-            learning_data.success_rate > 0.7 && pattern.confidence > 0.6
-        } else {
-            // New pattern - apply if confidence is high
-            pattern.confidence > 0.8
+    fn calculate_severity(&self, base_cost: u64, optimized_cost: u64) -> Severity {
+        let savings = base_cost - optimized_cost;
+        match savings {
+            s if s >= 10000 => Severity::Critical,
+            s if s >= 5000 => Severity::High,
+            s if s >= 2000 => Severity::Medium,
+            s if s >= 500 => Severity::Low,
+            _ => Severity::Info,
         }
     }
 
-    /// Update learning data based on optimization results
-    fn update_learning_data(env: &Env, pattern_id: u64, success: bool) {
-        let mut learning_data = env.storage().instance()
-            .get::<AIOptimizerDataKey, LearningData>(&AIOptimizerDataKey::LearningData(pattern_id))
-            .unwrap_or(LearningData {
-                pattern_id,
-                success_rate: 0.5,
-                gas_saved: 0,
-                usage_count: 0,
-                last_updated: env.ledger().timestamp(),
-            });
-
-        learning_data.usage_count += 1;
-        learning_data.last_updated = env.ledger().timestamp();
-        
-        // Update success rate using exponential moving average
-        let alpha = 0.1;
-        let new_value = if success { 1.0 } else { 0.0 };
-        learning_data.success_rate = alpha * new_value + (1.0 - alpha) * learning_data.success_rate;
-
-        env.storage().instance().set(&AIOptimizerDataKey::LearningData(pattern_id), &learning_data);
+    fn category_to_string(&self, category: &OptimizationCategory) -> String {
+        match category {
+            OptimizationCategory::Storage => "Storage".to_string(),
+            OptimizationCategory::Loops => "Loops".to_string(),
+            OptimizationCategory::Arithmetic => "Arithmetic".to_string(),
+            OptimizationCategory::ExternalCalls => "External Calls".to_string(),
+            OptimizationCategory::DataStructures => "Data Structures".to_string(),
+            OptimizationCategory::ControlFlow => "Control Flow".to_string(),
+            OptimizationCategory::Memory => "Memory".to_string(),
+            OptimizationCategory::Events => "Events".to_string(),
+            OptimizationCategory::Modifiers => "Modifiers".to_string(),
+            OptimizationCategory::Libraries => "Libraries".to_string(),
+        }
     }
 
-    /// Estimate gas usage for given source code
-    fn estimate_gas_usage(env: &Env, source_code: String) -> u64 {
-        // Simplified gas estimation based on code patterns
-        let mut base_gas = 21000; // Base transaction cost
+    fn calculate_complexity_score(&self, source_code: &str) -> f64 {
+        let lines = source_code.lines().count();
+        let functions = source_code.matches("function ").count();
+        let loops = source_code.matches("for ").count() + source_code.matches("while ").count();
+        let conditionals = source_code.matches("if ").count();
         
-        // Storage operations
-        base_gas += (source_code.matches("storage().set").count() * 5000) as u64;
-        base_gas += (source_code.matches("storage().get").count() * 2000) as u64;
+        // Simple complexity calculation
+        let base_score = (lines as f64) * 0.1;
+        let function_score = (functions as f64) * 2.0;
+        let loop_score = (loops as f64) * 3.0;
+        let conditional_score = (conditionals as f64) * 1.5;
         
-        // Loop operations
-        base_gas += (source_code.matches("for").count() * 3000) as u64;
-        
-        // Function calls
-        base_gas += (source_code.matches("fn ").count() * 1000) as u64;
-        
-        // String operations
-        base_gas += (source_code.matches("String::from_str").count() * 1500) as u64;
-        
-        base_gas
+        base_score + function_score + loop_score + conditional_score
     }
 
-    /// Verify that optimized code compiles correctly
-    fn verify_compilation(env: &Env, source_code: String) -> bool {
-        // In a real implementation, this would attempt to compile the code
-        // For now, we'll do basic syntax checks
-        let open_braces = source_code.matches("{").count();
-        let close_braces = source_code.matches("}").count();
-        let open_parens = source_code.matches("(").count();
-        let close_parens = source_code.matches(")").count();
-        
-        open_braces == close_braces && open_parens == close_parens
-    }
-
-    /// Store optimization history for learning
-    fn store_optimization_history(env: &Env, result: AIOptimizationResult) {
-        let mut history: Vec<AIOptimizationResult> = env.storage().instance()
-            .get(&AIOptimizerDataKey::OptimizationHistory)
-            .unwrap_or(Vec::new(env));
-        
-        history.push_back(result);
-        
-        // Keep only last 100 optimizations to save storage
-        if history.len() > 100 {
-            history.remove(0);
+    fn calculate_optimization_potential(&self, gas_analysis: &crate::optimization::GasAnalysisResult, total_savings: u64) -> f64 {
+        if gas_analysis.total_gas_cost == 0 {
+            return 0.0;
         }
         
-        env.storage().instance().set(&AIOptimizerDataKey::OptimizationHistory, &history);
+        (total_savings as f64 / gas_analysis.total_gas_cost as f64) * 100.0
     }
 
-    /// Get learning statistics for a pattern
-    pub fn get_pattern_stats(env: Env, pattern_id: u64) -> Option<LearningData> {
-        env.storage().instance().get(&AIOptimizerDataKey::LearningData(pattern_id))
+    pub async fn apply_optimizations(&self, contract_path: &str, suggestions: &[OptimizationSuggestion]) -> Result<String, Box<dyn std::error::Error>> {
+        let optimized_code = self.auto_refactor.refactor_contract(contract_path, suggestions).await?;
+        Ok(optimized_code)
     }
 
-    /// Get optimization history
-    pub fn get_optimization_history(env: Env) -> Vec<AIOptimizationResult> {
-        env.storage().instance()
-            .get(&AIOptimizerDataKey::OptimizationHistory)
-            .unwrap_or(Vec::new(&env))
+    pub async fn generate_optimization_report(&self, result: &AIOptimizationResult) -> Result<OptimizationReport, Box<dyn std::error::Error>> {
+        let report = OptimizationReport::generate_from_ai_result(result)?;
+        Ok(report)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_ai_optimizer_initialization() {
+        let optimizer = AIOptimizer::new("models/gas_optimization.pkl");
+        assert_eq!(optimizer.optimization_patterns.len(), 5);
     }
 
-    /// Get model version
-    pub fn get_model_version(env: Env) -> u32 {
-        env.storage().instance().get(&AIOptimizerDataKey::ModelVersion).unwrap_or(0)
-    }
-
-    /// Update model version (for learning improvements)
-    pub fn update_model_version(env: Env, admin: Address, new_version: u32) {
-        // In a real implementation, verify admin rights
-        env.storage().instance().set(&AIOptimizerDataKey::ModelVersion, &new_version);
+    #[tokio::test]
+    async fn test_pattern_analysis() {
+        let optimizer = AIOptimizer::new("models/gas_optimization.pkl");
+        let source_code = r#"
+            contract TestContract {
+                struct MyStruct {
+                    uint256 a;
+                    uint256 b;
+                    uint256 c;
+                }
+                
+                function testFunction() public {
+                    for(uint i = 0; i < 10; i++) {
+                        // do something
+                    }
+                }
+            }
+        "#;
+        
+        let suggestions = optimizer.analyze_patterns(source_code).await.unwrap();
+        assert!(!suggestions.is_empty());
     }
 }

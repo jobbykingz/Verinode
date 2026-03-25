@@ -1,4 +1,7 @@
 import { WinstonLogger } from '../utils/logger';
+import { eventService } from './events/EventService';
+import { ProofCreatedEvent, ProofVerifiedEvent, ProofUpdatedEvent, ProofDeletedEvent } from '../events/EventTypes';
+import { EventUtils } from '../utils/eventUtils';
 
 export interface ZKProof {
   id: string;
@@ -70,6 +73,36 @@ export class ZKProofService {
       // Store in database (mock implementation)
       await this.storeZKProof(zkProof);
 
+      // Emit PROOF_CREATED event
+      try {
+        const proofCreatedEvent = await eventService.createEvent<ProofCreatedEvent>(
+          'PROOF_CREATED',
+          {
+            proofId: zkProof.id,
+            proofType: zkProof.proofType,
+            creator: zkProof.metadata.creator,
+            commitment: zkProof.commitment,
+            verificationKey: zkProof.verificationKey,
+            publicInputs: zkProof.publicInputs,
+            metadata: zkProof.metadata.description ? {
+              description: zkProof.metadata.description,
+              expiresAt: zkProof.metadata.expiresAt
+            } : undefined
+          },
+          {
+            source: 'zk-proof-service',
+            metadata: {
+              operation: 'create',
+              timestamp: new Date()
+            }
+          }
+        );
+        
+        await eventService.publishEvent(proofCreatedEvent, `proof:${zkProof.id}`);
+      } catch (eventError) {
+        this.logger.warn('Failed to publish PROOF_CREATED event:', eventError);
+      }
+
       this.logger.info('ZK-proof created successfully:', { proofId: zkProof.id });
       return zkProof;
     } catch (error) {
@@ -137,6 +170,32 @@ export class ZKProofService {
         this.logger.info('ZK-proof verified successfully:', { proofId: request.proofId });
       } else {
         this.logger.warn('ZK-proof verification failed:', { proofId: request.proofId });
+      }
+
+      // Emit PROOF_VERIFIED event
+      try {
+        const proofVerifiedEvent = await eventService.createEvent<ProofVerifiedEvent>(
+          'PROOF_VERIFIED',
+          {
+            proofId: request.proofId,
+            verified: isValid,
+            verificationTime: Date.now() - startTime,
+            verificationAttempts: storedProof.verificationAttempts + 1,
+            error: result.error,
+            verifiedBy: 'zk-proof-service'
+          },
+          {
+            source: 'zk-proof-service',
+            metadata: {
+              operation: 'verify',
+              timestamp: new Date()
+            }
+          }
+        );
+        
+        await eventService.publishEvent(proofVerifiedEvent, `proof:${request.proofId}`);
+      } catch (eventError) {
+        this.logger.warn('Failed to publish PROOF_VERIFIED event:', eventError);
       }
 
       return result;
@@ -208,6 +267,35 @@ export class ZKProofService {
       const updatedProof = { ...existingProof, ...updates };
       await this.storeZKProof(updatedProof);
       
+      // Emit PROOF_UPDATED event
+      try {
+        const proofUpdatedEvent = await eventService.createEvent<ProofUpdatedEvent>(
+          'PROOF_UPDATED',
+          {
+            proofId: proofId,
+            updates: {
+              proofType: updates.proofType,
+              commitment: updates.commitment,
+              verificationKey: updates.verificationKey,
+              publicInputs: updates.publicInputs,
+              metadata: updates.metadata
+            },
+            updatedBy: 'zk-proof-service'
+          },
+          {
+            source: 'zk-proof-service',
+            metadata: {
+              operation: 'update',
+              timestamp: new Date()
+            }
+          }
+        );
+        
+        await eventService.publishEvent(proofUpdatedEvent, `proof:${proofId}`);
+      } catch (eventError) {
+        this.logger.warn('Failed to publish PROOF_UPDATED event:', eventError);
+      }
+      
       this.logger.info('ZK-proof updated:', { proofId });
       return true;
     } catch (error) {
@@ -220,6 +308,29 @@ export class ZKProofService {
     try {
       // Mock database deletion
       await this.deleteFromDatabase('zk_proof', proofId);
+      
+      // Emit PROOF_DELETED event
+      try {
+        const proofDeletedEvent = await eventService.createEvent<ProofDeletedEvent>(
+          'PROOF_DELETED',
+          {
+            proofId: proofId,
+            deletedBy: 'zk-proof-service',
+            reason: 'User requested deletion'
+          },
+          {
+            source: 'zk-proof-service',
+            metadata: {
+              operation: 'delete',
+              timestamp: new Date()
+            }
+          }
+        );
+        
+        await eventService.publishEvent(proofDeletedEvent, `proof:${proofId}`);
+      } catch (eventError) {
+        this.logger.warn('Failed to publish PROOF_DELETED event:', eventError);
+      }
       
       this.logger.info('ZK-proof deleted:', { proofId });
       return true;

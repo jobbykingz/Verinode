@@ -1,877 +1,1117 @@
-/*
-Optimization Suggester for Verinode Smart Contracts
+#!/usr/bin/env rust
 
-This tool provides intelligent optimization suggestions based on:
-- Code pattern analysis
-- Gas usage profiling
-- Best practices database
-- Machine learning recommendations
-- Historical optimization data
-*/
+//! Advanced Optimization Suggester for Soroban Smart Contracts
+//! 
+//! This tool provides intelligent optimization suggestions based on
+//! comprehensive code analysis, machine learning insights, and best practices.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 use std::fs;
 use std::path::Path;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use regex::Regex;
-use clap::{Arg, Command};
+use std::cmp::Ordering;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptimizationSuggestion {
     pub id: String,
     pub title: String,
     pub description: String,
-    pub category: SuggestionCategory,
-    pub severity: SuggestionSeverity,
-    pub gas_savings: u64,
+    pub suggestion_type: SuggestionType,
+    pub priority: Priority,
     pub confidence: f64,
-    pub code_snippet: String,
-    pub optimized_snippet: String,
-    pub explanation: String,
-    pub references: Vec<String>,
-    pub implementation_difficulty: ImplementationDifficulty,
+    pub estimated_gas_savings: u64,
+    pub implementation_difficulty: Difficulty,
+    pub affected_functions: Vec<String>,
+    pub code_examples: Vec<CodeExample>,
+    pub prerequisites: Vec<String>,
+    pub risks: Vec<Risk>,
+    pub testing_requirements: Vec<String>,
+    pub performance_impact: PerformanceImpact,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum SuggestionCategory {
-    Storage,
-    Loops,
-    Strings,
-    Arithmetic,
-    Collections,
-    ControlFlow,
-    Memory,
-    Security,
-    BestPractices,
+pub enum SuggestionType {
+    StorageOptimization,
+    LoopOptimization,
+    MemoryOptimization,
+    AlgorithmImprovement,
+    ConstantFolding,
+    FunctionInlining,
+    BatchOperations,
+    Caching,
+    DeadCodeElimination,
+    DataStructureOptimization,
+    ArithmeticOptimization,
+    ConditionalOptimization,
+    EventOptimization,
+    AuthOptimization,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum SuggestionSeverity {
+pub enum Priority {
     Critical,
     High,
     Medium,
     Low,
-    Info,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ImplementationDifficulty {
+pub enum Difficulty {
+    Trivial,
     Easy,
-    Medium,
+    Moderate,
     Hard,
     Expert,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SuggestionReport {
-    pub contract_name: String,
-    pub file_path: String,
-    pub total_suggestions: usize,
-    pub total_potential_savings: u64,
-    pub suggestions_by_category: HashMap<String, usize>,
-    pub suggestions_by_severity: HashMap<String, usize>,
-    pub suggestions: Vec<OptimizationSuggestion>,
-    pub optimization_roadmap: Vec<RoadmapItem>,
+pub struct CodeExample {
+    pub language: String,
+    pub before_code: String,
+    pub after_code: String,
+    pub explanation: String,
+    pub gas_savings: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RoadmapItem {
-    pub priority: u32,
-    pub suggestion_ids: Vec<String>,
-    pub estimated_savings: u64,
-    pub estimated_effort: String,
+pub struct Risk {
+    pub risk_type: RiskType,
     pub description: String,
+    pub probability: f64,
+    pub impact: String,
+    pub mitigation: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BestPractice {
-    pub id: String,
+pub enum RiskType {
+    Functional,
+    Performance,
+    Security,
+    Compatibility,
+    Maintainability,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PerformanceImpact {
+    pub gas_efficiency_improvement: f64,
+    pub execution_time_improvement: f64,
+    pub memory_usage_change: f64,
+    pub code_size_impact: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OptimizationPlan {
+    pub suggestions: Vec<OptimizationSuggestion>,
+    pub total_gas_savings: u64,
+    pub total_implementation_time: u64, // in hours
+    pub risk_assessment: RiskAssessment,
+    pub implementation_phases: Vec<ImplementationPhase>,
+    pub success_metrics: Vec<SuccessMetric>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RiskAssessment {
+    pub overall_risk_level: Priority,
+    pub high_risk_suggestions: Vec<String>,
+    pub mitigation_strategies: Vec<String>,
+    pub rollback_plan: RollbackPlan,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RollbackPlan {
+    pub checkpoints: Vec<String>,
+    pub rollback_triggers: Vec<String>,
+    pub rollback_procedures: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ImplementationPhase {
+    pub phase_number: u32,
     pub name: String,
     pub description: String,
-    pub pattern: String,
-    pub anti_pattern: String,
-    pub gas_impact: u64,
-    pub examples: Vec<String>,
+    pub suggestions: Vec<String>, // Suggestion IDs
+    pub estimated_duration: u64, // in hours
+    pub dependencies: Vec<String>,
+    pub deliverables: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SuccessMetric {
+    pub metric_name: String,
+    pub target_value: f64,
+    pub measurement_method: String,
+    pub success_criteria: String,
 }
 
 pub struct OptimizationSuggester {
-    suggestions: Vec<OptimizationSuggestion>,
-    best_practices: Vec<BestPractice>,
-    code_patterns: HashMap<String, Regex>,
-    learning_weights: HashMap<String, f64>,
+    suggestion_templates: HashMap<SuggestionType, SuggestionTemplate>,
+    optimization_rules: Vec<OptimizationRule>,
+    historical_data: HashMap<String, HistoricalOptimization>,
+}
+
+#[derive(Debug, Clone)]
+struct SuggestionTemplate {
+    title_template: String,
+    description_template: String,
+    base_confidence: f64,
+    difficulty: Difficulty,
+    common_risks: Vec<RiskType>,
+    testing_requirements: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+struct OptimizationRule {
+    rule_id: String,
+    pattern: Regex,
+    suggestion_type: SuggestionType,
+    priority: Priority,
+    confidence_modifier: f64,
+    gas_savings_estimate: u64,
+    conditions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HistoricalOptimization {
+    pub contract_type: String,
+    pub optimization_type: SuggestionType,
+    pub actual_gas_savings: u64,
+    pub implementation_difficulty: Difficulty,
+    pub success_rate: f64,
+    pub sample_size: u32,
 }
 
 impl OptimizationSuggester {
     pub fn new() -> Self {
-        let mut suggester = Self {
-            suggestions: Vec::new(),
-            best_practices: Vec::new(),
-            code_patterns: HashMap::new(),
-            learning_weights: HashMap::new(),
+        let suggester = Self {
+            suggestion_templates: Self::initialize_templates(),
+            optimization_rules: Self::initialize_rules(),
+            historical_data: Self::load_historical_data(),
         };
         
-        suggester.initialize_suggestions();
-        suggester.initialize_best_practices();
-        suggester.compile_patterns();
+        println!("Optimization Suggester initialized with {} templates and {} rules", 
+                suggester.suggestion_templates.len(), 
+                suggester.optimization_rules.len());
+        
         suggester
     }
-    
-    fn initialize_suggestions(&mut self) {
-        // Storage optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "storage_001".to_string(),
-            title: "Use Instance Storage for Temporary Data".to_string(),
-            description: "Replace persistent storage with instance storage for data that doesn't need to persist across contract instances".to_string(),
-            category: SuggestionCategory::Storage,
-            severity: SuggestionSeverity::High,
-            gas_savings: 5000,
-            confidence: 0.85,
-            code_snippet: "env.storage().persistent().set(&key, &value)".to_string(),
-            optimized_snippet: "env.storage().instance().set(&key, &value)".to_string(),
-            explanation: "Instance storage is significantly cheaper than persistent storage and should be used for temporary data".to_string(),
-            references: vec![
-                "Soroban Storage Best Practices".to_string(),
-                "Gas Optimization Guide".to_string(),
-            ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
-        });
+
+    fn initialize_templates() -> HashMap<SuggestionType, SuggestionTemplate> {
+        let mut templates = HashMap::new();
         
-        self.suggestions.push(OptimizationSuggestion {
-            id: "storage_002".to_string(),
-            title: "Batch Storage Operations".to_string(),
-            description: "Combine multiple storage operations into batches to reduce transaction costs".to_string(),
-            category: SuggestionCategory::Storage,
-            severity: SuggestionSeverity::Medium,
-            gas_savings: 4000,
-            confidence: 0.80,
-            code_snippet: "env.storage().set(&key1, &val1);\nenv.storage().set(&key2, &val2);".to_string(),
-            optimized_snippet: "// Batch storage operations\nenv.storage().set(&key1, &val1);\nenv.storage().set(&key2, &val2);".to_string(),
-            explanation: "Batching storage operations can reduce overhead and improve gas efficiency".to_string(),
-            references: vec![
-                "Storage Optimization Techniques".to_string(),
+        templates.insert(SuggestionType::StorageOptimization, SuggestionTemplate {
+            title_template: "Optimize Storage Operations in {function}".to_string(),
+            description_template: "Reduce gas costs by optimizing storage operations in {function}. Current implementation uses {storage_ops} storage operations which can be reduced by batching and using persistent storage.".to_string(),
+            base_confidence: 0.85,
+            difficulty: Difficulty::Moderate,
+            common_risks: vec![RiskType::Functional, RiskType::Compatibility],
+            testing_requirements: vec![
+                "Storage operation tests".to_string(),
+                "Data persistence tests".to_string(),
+                "Migration tests".to_string(),
             ],
-            implementation_difficulty: ImplementationDifficulty::Medium,
         });
-        
-        // Loop optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "loop_001".to_string(),
-            title: "Unroll Small Fixed Loops".to_string(),
-            description: "Unroll loops with small, fixed iteration counts to eliminate loop overhead".to_string(),
-            category: SuggestionCategory::Loops,
-            severity: SuggestionSeverity::Medium,
-            gas_savings: 3000,
-            confidence: 0.75,
-            code_snippet: "for i in 0..3 {\n    process(i);\n}".to_string(),
-            optimized_snippet: "process(0);\nprocess(1);\nprocess(2);".to_string(),
-            explanation: "Loop unrolling eliminates the overhead of loop control for small, fixed iterations".to_string(),
-            references: vec![
-                "Loop Optimization Techniques".to_string(),
+
+        templates.insert(SuggestionType::LoopOptimization, SuggestionTemplate {
+            title_template: "Optimize Loop Performance in {function}".to_string(),
+            description_template: "Improve gas efficiency by optimizing loops in {function}. Current implementation has {loop_count} loops with potential for caching and reducing iterations.".to_string(),
+            base_confidence: 0.9,
+            difficulty: Difficulty::Easy,
+            common_risks: vec![RiskType::Functional],
+            testing_requirements: vec![
+                "Loop correctness tests".to_string(),
+                "Performance benchmarks".to_string(),
+                "Edge case tests".to_string(),
             ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
         });
-        
-        self.suggestions.push(OptimizationSuggestion {
-            id: "loop_002".to_string(),
-            title: "Pre-allocate Vector Capacity".to_string(),
-            description: "Pre-allocate vector capacity when the final size is known to avoid reallocations".to_string(),
-            category: SuggestionCategory::Collections,
-            severity: SuggestionSeverity::High,
-            gas_savings: 2000,
-            confidence: 0.90,
-            code_snippet: "let mut vec = Vec::new(&env);\nfor i in 0..10 {\n    vec.push_back(i);\n}".to_string(),
-            optimized_snippet: "let mut vec = Vec::new(&env);\nvec.reserve_exact(10);\nfor i in 0..10 {\n    vec.push_back(i);\n}".to_string(),
-            explanation: "Pre-allocating capacity prevents multiple reallocations and copying".to_string(),
-            references: vec![
-                "Vector Optimization Guide".to_string(),
+
+        templates.insert(SuggestionType::MemoryOptimization, SuggestionTemplate {
+            title_template: "Optimize Memory Usage in {function}".to_string(),
+            description_template: "Reduce gas costs by optimizing memory allocations in {function}. Current code has {allocation_count} allocations that can be optimized through pre-allocation and reuse.".to_string(),
+            base_confidence: 0.8,
+            difficulty: Difficulty::Easy,
+            common_risks: vec![RiskType::Performance],
+            testing_requirements: vec![
+                "Memory usage tests".to_string(),
+                "Allocation pattern tests".to_string(),
+                "Stress tests".to_string(),
             ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
         });
-        
-        // String optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "string_001".to_string(),
-            title: "Avoid String Cloning".to_string(),
-            description: "Use string references instead of cloning to reduce memory allocation and gas costs".to_string(),
-            category: SuggestionCategory::Strings,
-            severity: SuggestionSeverity::Medium,
-            gas_savings: 800,
-            confidence: 0.70,
-            code_snippet: "let cloned_string = original_string.clone();\nprocess(cloned_string);".to_string(),
-            optimized_snippet: "process(&original_string);".to_string(),
-            explanation: "String cloning creates unnecessary allocations and increases gas costs".to_string(),
-            references: vec![
-                "String Optimization Best Practices".to_string(),
+
+        templates.insert(SuggestionType::ConstantFolding, SuggestionTemplate {
+            title_template: "Apply Constant Folding in {function}".to_string(),
+            description_template: "Eliminate redundant computations by applying constant folding in {function}. Found {repeated_ops} repeated computations that can be cached.".to_string(),
+            base_confidence: 0.95,
+            difficulty: Difficulty::Trivial,
+            common_risks: vec![],
+            testing_requirements: vec![
+                "Computation correctness tests".to_string(),
+                "Value consistency tests".to_string(),
             ],
-            implementation_difficulty: ImplementationDifficulty::Medium,
         });
-        
-        // Arithmetic optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "arith_001".to_string(),
-            title: "Use Bit Operations for Multiplication by Powers of 2".to_string(),
-            description: "Replace multiplication by powers of 2 with more efficient bit shift operations".to_string(),
-            category: SuggestionCategory::Arithmetic,
-            severity: SuggestionSeverity::Low,
-            gas_savings: 100,
-            confidence: 0.95,
-            code_snippet: "result = value * 2;".to_string(),
-            optimized_snippet: "result = value << 1;".to_string(),
-            explanation: "Bit shift operations are significantly cheaper than multiplication for powers of 2".to_string(),
-            references: vec![
-                "Arithmetic Optimization Guide".to_string(),
+
+        templates.insert(SuggestionType::BatchOperations, SuggestionTemplate {
+            title_template: "Batch Operations in {function}".to_string(),
+            description_template: "Improve efficiency by batching similar operations in {function}. Found {batchable_ops} operations that can be batched together.".to_string(),
+            base_confidence: 0.75,
+            difficulty: Difficulty::Moderate,
+            common_risks: vec![RiskType::Functional, RiskType::Performance],
+            testing_requirements: vec![
+                "Batch operation tests".to_string(),
+                "Atomicity tests".to_string(),
+                "Rollback tests".to_string(),
             ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
         });
-        
-        // Control flow optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "control_001".to_string(),
-            title: "Use Early Returns".to_string(),
-            description: "Use early returns to reduce nesting and improve gas efficiency".to_string(),
-            category: SuggestionCategory::ControlFlow,
-            severity: SuggestionSeverity::Medium,
-            gas_savings: 1500,
-            confidence: 0.80,
-            code_snippet: "if condition {\n    // complex logic\n} else {\n    return;\n}".to_string(),
-            optimized_snippet: "if !condition {\n    return;\n}\n// complex logic".to_string(),
-            explanation: "Early returns reduce nesting depth and can improve gas efficiency".to_string(),
-            references: vec![
-                "Control Flow Best Practices".to_string(),
-            ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
-        });
-        
-        // Memory optimizations
-        self.suggestions.push(OptimizationSuggestion {
-            id: "memory_001".to_string(),
-            title: "Use Efficient Data Structures".to_string(),
-            description: "Choose the most gas-efficient data structure for your use case".to_string(),
-            category: SuggestionCategory::Memory,
-            severity: SuggestionSeverity::Medium,
-            gas_savings: 2500,
-            confidence: 0.75,
-            code_snippet: "let data = Vec::new(&env);\n// Simple key-value storage".to_string(),
-            optimized_snippet: "let data = Map::new(&env);\n// More efficient for key-value storage".to_string(),
-            explanation: "Maps are more efficient than vectors for key-value storage operations".to_string(),
-            references: vec![
-                "Data Structure Selection Guide".to_string(),
-            ],
-            implementation_difficulty: ImplementationDifficulty::Medium,
-        });
-        
-        // Security optimizations (that also save gas)
-        self.suggestions.push(OptimizationSuggestion {
-            id: "security_001".to_string(),
-            title: "Remove Redundant Checks".to_string(),
-            description: "Remove redundant validation checks that don't add security value".to_string(),
-            category: SuggestionCategory::Security,
-            severity: SuggestionSeverity::Low,
-            gas_savings: 500,
-            confidence: 0.90,
-            code_snippet: "if true {\n    // always executed\n}".to_string(),
-            optimized_snippet: "{\n    // always executed\n}".to_string(),
-            explanation: "Redundant checks waste gas without providing any security benefit".to_string(),
-            references: vec![
-                "Security Best Practices".to_string(),
-            ],
-            implementation_difficulty: ImplementationDifficulty::Easy,
-        });
+
+        templates
     }
-    
-    fn initialize_best_practices(&mut self) {
-        self.best_practices.push(BestPractice {
-            id: "bp_001".to_string(),
-            name: "Prefer Instance Storage".to_string(),
-            description: "Use instance storage instead of persistent storage when data doesn't need to persist".to_string(),
-            pattern: "env.storage().instance()".to_string(),
-            anti_pattern: "env.storage().persistent()".to_string(),
-            gas_impact: 3000,
-            examples: vec![
-                "Temporary calculation results".to_string(),
-                "Cache data within a transaction".to_string(),
-            ],
-        });
-        
-        self.best_practices.push(BestPractice {
-            id: "bp_002".to_string(),
-            name: "Batch Operations".to_string(),
-            description: "Batch similar operations to reduce overhead".to_string(),
-            pattern: "batch_operations".to_string(),
-            anti_pattern: "individual_operations".to_string(),
-            gas_impact: 2000,
-            examples: vec![
-                "Multiple storage writes".to_string(),
-                "Vector insertions".to_string(),
-            ],
-        });
-        
-        self.best_practices.push(BestPractice {
-            id: "bp_003".to_string(),
-            name: "Pre-allocate Collections".to_string(),
-            description: "Pre-allocate collection capacity when final size is known".to_string(),
-            pattern: "reserve_exact".to_string(),
-            anti_pattern: "dynamic_growth".to_string(),
-            gas_impact: 1500,
-            examples: vec![
-                "Vectors with known size".to_string(),
-                "Maps with known key count".to_string(),
-            ],
-        });
+
+    fn initialize_rules() -> Vec<OptimizationRule> {
+        vec![
+            OptimizationRule {
+                rule_id: "storage_batching".to_string(),
+                pattern: Regex::new(r"env\.storage\(\)\.instance\(\)\.set").unwrap(),
+                suggestion_type: SuggestionType::StorageOptimization,
+                priority: Priority::High,
+                confidence_modifier: 0.1,
+                gas_savings_estimate: 3000,
+                conditions: vec!["count >= 3".to_string()],
+            },
+            OptimizationRule {
+                rule_id: "storage_in_loop".to_string(),
+                pattern: Regex::new(r"for.*\{[^}]*env\.storage\(\)").unwrap(),
+                suggestion_type: SuggestionType::LoopOptimization,
+                priority: Priority::Critical,
+                confidence_modifier: 0.15,
+                gas_savings_estimate: 5000,
+                conditions: vec![],
+            },
+            OptimizationRule {
+                rule_id: "repeated_timestamp".to_string(),
+                pattern: Regex::new(r"env\.ledger\(\)\.timestamp\(\)").unwrap(),
+                suggestion_type: SuggestionType::ConstantFolding,
+                priority: Priority::Medium,
+                confidence_modifier: 0.05,
+                gas_savings_estimate: 1500,
+                conditions: vec!["count >= 2".to_string()],
+            },
+            OptimizationRule {
+                rule_id: "vector_without_capacity".to_string(),
+                pattern: Regex::new(r"Vec::new\(&env\)").unwrap(),
+                suggestion_type: SuggestionType::MemoryOptimization,
+                priority: Priority::Medium,
+                confidence_modifier: 0.1,
+                gas_savings_estimate: 2000,
+                conditions: vec![],
+            },
+            OptimizationRule {
+                rule_id: "multiple_auth_calls".to_string(),
+                pattern: Regex::new(r"require_auth\(\)").unwrap(),
+                suggestion_type: SuggestionType::BatchOperations,
+                priority: Priority::Medium,
+                confidence_modifier: 0.05,
+                gas_savings_estimate: 2500,
+                conditions: vec!["count >= 3".to_string()],
+            },
+            OptimizationRule {
+                rule_id: "inefficient_arithmetic".to_string(),
+                pattern: Regex::new(r"\* 2").unwrap(),
+                suggestion_type: SuggestionType::ArithmeticOptimization,
+                priority: Priority::Low,
+                confidence_modifier: 0.05,
+                gas_savings_estimate: 100,
+                conditions: vec![],
+            },
+            OptimizationRule {
+                rule_id: "redundant_condition".to_string(),
+                pattern: Regex::new(r"if true").unwrap(),
+                suggestion_type: SuggestionType::DeadCodeElimination,
+                priority: Priority::Low,
+                confidence_modifier: 0.1,
+                gas_savings_estimate: 500,
+                conditions: vec![],
+            },
+        ]
     }
-    
-    fn compile_patterns(&mut self) {
-        for suggestion in &self.suggestions {
-            if let Ok(regex) = Regex::new(&suggestion.code_snippet) {
-                self.code_patterns.insert(suggestion.id.clone(), regex);
+
+    fn load_historical_data() -> HashMap<String, HistoricalOptimization> {
+        let mut data = HashMap::new();
+        
+        // Sample historical data
+        data.insert("storage_optimization_smart_contract".to_string(), HistoricalOptimization {
+            contract_type: "smart_contract".to_string(),
+            optimization_type: SuggestionType::StorageOptimization,
+            actual_gas_savings: 15000,
+            implementation_difficulty: Difficulty::Moderate,
+            success_rate: 0.92,
+            sample_size: 45,
+        });
+        
+        data.insert("loop_optimization_smart_contract".to_string(), HistoricalOptimization {
+            contract_type: "smart_contract".to_string(),
+            optimization_type: SuggestionType::LoopOptimization,
+            actual_gas_savings: 8000,
+            implementation_difficulty: Difficulty::Easy,
+            success_rate: 0.95,
+            sample_size: 67,
+        });
+        
+        data
+    }
+
+    pub fn analyze_contract(&self, contract_code: &str, contract_name: &str) -> OptimizationPlan {
+        println!("Analyzing contract: {}", contract_name);
+        
+        let mut suggestions = Vec::new();
+        let functions = self.extract_functions(contract_code);
+        
+        for (func_name, func_code) in functions {
+            let func_suggestions = self.analyze_function(&func_name, &func_code);
+            suggestions.extend(func_suggestions);
+        }
+        
+        // Sort suggestions by priority and estimated savings
+        suggestions.sort_by(|a, b| {
+            match (&a.priority, &b.priority) {
+                (Priority::Critical, Priority::Critical) => b.estimated_gas_savings.cmp(&a.estimated_gas_savings),
+                (Priority::Critical, _) => Ordering::Less,
+                (Priority::High, Priority::Critical) => Ordering::Greater,
+                (Priority::High, Priority::High) => b.estimated_gas_savings.cmp(&a.estimated_gas_savings),
+                (Priority::High, _) => Ordering::Less,
+                (Priority::Medium, Priority::Critical | Priority::High) => Ordering::Greater,
+                (Priority::Medium, Priority::Medium) => b.estimated_gas_savings.cmp(&a.estimated_gas_savings),
+                (Priority::Medium, _) => Ordering::Less,
+                (Priority::Low, _) => Ordering::Greater,
             }
+        });
+        
+        let total_gas_savings = suggestions.iter().map(|s| s.estimated_gas_savings).sum();
+        let total_implementation_time = self.estimate_total_implementation_time(&suggestions);
+        let risk_assessment = self.assess_risks(&suggestions);
+        let implementation_phases = self.create_implementation_phases(&suggestions);
+        let success_metrics = self.define_success_metrics(&suggestions);
+        
+        OptimizationPlan {
+            suggestions,
+            total_gas_savings,
+            total_implementation_time,
+            risk_assessment,
+            implementation_phases,
+            success_metrics,
         }
     }
-    
-    pub fn analyze_contract(&mut self, file_path: &str) -> Result<SuggestionReport, Box<dyn std::error::Error>> {
-        let source_code = fs::read_to_string(file_path)?;
-        let contract_name = Path::new(file_path)
-            .file_stem()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string();
+
+    fn extract_functions(&self, contract_code: &str) -> HashMap<String, String> {
+        let mut functions = HashMap::new();
+        let lines: Vec<&str> = contract_code.lines().collect();
+        let mut current_function = None;
+        let mut function_lines = Vec::new();
+        let mut brace_count = 0;
         
-        let mut applicable_suggestions = Vec::new();
-        let mut total_savings = 0u64;
-        let mut suggestions_by_category = HashMap::new();
-        let mut suggestions_by_severity = HashMap::new();
-        
-        // Analyze code for each suggestion
-        for suggestion in &self.suggestions {
-            if let Some(pattern) = self.code_patterns.get(&suggestion.id) {
-                let matches = pattern.find_iter(&source_code);
-                let match_count = matches.count();
+        for line in lines {
+            if let Some(captures) = Regex::new(r"\s*(pub\s+)?fn\s+(\w+)\s*\(")?.captures(line) {
+                if let Some(func_name) = current_function {
+                    functions.insert(func_name, function_lines.join("\n"));
+                }
                 
-                if match_count > 0 {
-                    let mut suggestion_clone = suggestion.clone();
-                    suggestion_clone.gas_savings *= match_count as u64;
-                    
-                    // Adjust confidence based on learning weights
-                    if let Some(&weight) = self.learning_weights.get(&suggestion.id) {
-                        suggestion_clone.confidence *= weight;
-                    }
-                    
-                    applicable_suggestions.push(suggestion_clone);
-                    total_savings += suggestion_clone.gas_savings;
-                    
-                    // Update category counts
-                    let category_name = format!("{:?}", suggestion_clone.category);
-                    *suggestions_by_category.entry(category_name).or_insert(0) += 1;
-                    
-                    // Update severity counts
-                    let severity_name = format!("{:?}", suggestion_clone.severity);
-                    *suggestions_by_severity.entry(severity_name).or_insert(0) += 1;
+                current_function = Some(captures[2].to_string());
+                function_lines = vec![line.to_string()];
+                brace_count = line.matches("{").count() as i32 - line.matches("}").count() as i32;
+                continue;
+            }
+            
+            if let Some(ref func_name) = current_function {
+                function_lines.push(line.to_string());
+                brace_count += line.matches("{").count() as i32 - line.matches("}").count() as i32;
+                
+                if brace_count == 0 {
+                    functions.insert(func_name.clone(), function_lines.join("\n"));
+                    current_function = None;
+                    function_lines.clear();
                 }
             }
         }
         
-        // Generate optimization roadmap
-        let roadmap = self.generate_roadmap(&applicable_suggestions);
+        if let Some(func_name) = current_function {
+            functions.insert(func_name, function_lines.join("\n"));
+        }
         
-        let report = SuggestionReport {
-            contract_name,
-            file_path: file_path.to_string(),
-            total_suggestions: applicable_suggestions.len(),
-            total_potential_savings: total_savings,
-            suggestions_by_category,
-            suggestions_by_severity,
-            suggestions: applicable_suggestions,
-            optimization_roadmap: roadmap,
-        };
-        
-        Ok(report)
+        functions
     }
-    
-    fn generate_roadmap(&self, suggestions: &[OptimizationSuggestion]) -> Vec<RoadmapItem> {
-        let mut roadmap = Vec::new();
+
+    fn analyze_function(&self, func_name: &str, func_code: &str) -> Vec<OptimizationSuggestion> {
+        let mut suggestions = Vec::new();
         
-        // Group suggestions by difficulty and impact
-        let mut easy_wins = Vec::new();
-        let mut medium_effort = Vec::new();
-        let mut complex_optimizations = Vec::new();
-        
-        for suggestion in suggestions {
-            match suggestion.implementation_difficulty {
-                ImplementationDifficulty::Easy => easy_wins.push(suggestion),
-                ImplementationDifficulty::Medium => medium_effort.push(suggestion),
-                ImplementationDifficulty::Hard | ImplementationDifficulty::Expert => complex_optimizations.push(suggestion),
+        // Apply optimization rules
+        for rule in &self.optimization_rules {
+            if let Some(suggestion) = self.apply_rule(rule, func_name, func_code) {
+                suggestions.push(suggestion);
             }
         }
         
-        // Priority 1: Easy wins with high impact
-        let priority1_suggestions: Vec<String> = easy_wins
-            .iter()
-            .filter(|s| s.gas_savings > 2000)
-            .map(|s| s.id.clone())
-            .collect();
+        // Apply advanced analysis
+        let advanced_suggestions = self.advanced_analysis(func_name, func_code);
+        suggestions.extend(advanced_suggestions);
         
-        if !priority1_suggestions.is_empty() {
-            let priority1_savings: u64 = easy_wins
-                .iter()
-                .filter(|s| s.gas_savings > 2000)
-                .map(|s| s.gas_savings)
-                .sum();
-            
-            roadmap.push(RoadmapItem {
-                priority: 1,
-                suggestion_ids: priority1_suggestions,
-                estimated_savings: priority1_savings,
-                estimated_effort: "Low (1-2 hours)".to_string(),
-                description: "Quick wins with high gas savings".to_string(),
-            });
-        }
-        
-        // Priority 2: Medium effort optimizations
-        let priority2_suggestions: Vec<String> = medium_effort
-            .iter()
-            .map(|s| s.id.clone())
-            .collect();
-        
-        if !priority2_suggestions.is_empty() {
-            let priority2_savings: u64 = medium_effort.iter().map(|s| s.gas_savings).sum();
-            
-            roadmap.push(RoadmapItem {
-                priority: 2,
-                suggestion_ids: priority2_suggestions,
-                estimated_savings: priority2_savings,
-                estimated_effort: "Medium (1-2 days)".to_string(),
-                description: "Medium effort optimizations with good returns".to_string(),
-            });
-        }
-        
-        // Priority 3: Complex optimizations
-        let priority3_suggestions: Vec<String> = complex_optimizations
-            .iter()
-            .map(|s| s.id.clone())
-            .collect();
-        
-        if !priority3_suggestions.is_empty() {
-            let priority3_savings: u64 = complex_optimizations.iter().map(|s| s.gas_savings).sum();
-            
-            roadmap.push(RoadmapItem {
-                priority: 3,
-                suggestion_ids: priority3_suggestions,
-                estimated_savings: priority3_savings,
-                estimated_effort: "High (3-5 days)".to_string(),
-                description: "Complex optimizations requiring significant refactoring".to_string(),
-            });
-        }
-        
-        // Priority 4: Remaining easy optimizations
-        let priority4_suggestions: Vec<String> = easy_wins
-            .iter()
-            .filter(|s| s.gas_savings <= 2000)
-            .map(|s| s.id.clone())
-            .collect();
-        
-        if !priority4_suggestions.is_empty() {
-            let priority4_savings: u64 = easy_wins
-                .iter()
-                .filter(|s| s.gas_savings <= 2000)
-                .map(|s| s.gas_savings)
-                .sum();
-            
-            roadmap.push(RoadmapItem {
-                priority: 4,
-                suggestion_ids: priority4_suggestions,
-                estimated_savings: priority4_savings,
-                estimated_effort: "Low (< 1 hour)".to_string(),
-                description: "Minor optimizations for incremental improvements".to_string(),
-            });
-        }
-        
-        roadmap.sort_by_key(|item| item.priority);
-        roadmap
+        suggestions
     }
-    
-    pub fn update_learning_weights(&mut self, feedback: &HashMap<String, bool>) {
-        for (suggestion_id, was_helpful) in feedback {
-            let current_weight = self.learning_weights.get(suggestion_id).unwrap_or(&1.0);
-            let new_weight = if *was_helpful {
-                (current_weight * 1.1).min(2.0) // Increase weight, max 2.0
-            } else {
-                (current_weight * 0.9).max(0.1) // Decrease weight, min 0.1
-            };
-            
-            self.learning_weights.insert(suggestion_id.clone(), new_weight);
-        }
-    }
-    
-    pub fn generate_report(&self, report: &SuggestionReport, format: &str) -> Result<String, Box<dyn std::error::Error>> {
-        match format.to_lowercase().as_str() {
-            "json" => Ok(serde_json::to_string_pretty(report)?),
-            "csv" => Ok(self.generate_csv_report(report)),
-            "markdown" => Ok(self.generate_markdown_report(report)),
-            _ => Err("Unsupported format".into()),
-        }
-    }
-    
-    fn generate_csv_report(&self, report: &SuggestionReport) -> String {
-        let mut csv = String::new();
+
+    fn apply_rule(&self, rule: &OptimizationRule, func_name: &str, func_code: &str) -> Option<OptimizationSuggestion> {
+        let matches: Vec<_> = rule.pattern.find_iter(func_code).collect();
+        let count = matches.len();
         
-        // Header
-        csv.push_str("ID,Title,Category,Severity,Gas Savings,Confidence,Difficulty\n");
-        
-        // Suggestions
-        for suggestion in &report.suggestions {
-            csv.push_str(&format!(
-                "{},{},{},{},{},{:.2},{}\n",
-                suggestion.id,
-                suggestion.title,
-                format!("{:?}", suggestion.category),
-                format!("{:?}", suggestion.severity),
-                suggestion.gas_savings,
-                suggestion.confidence,
-                format!("{:?}", suggestion.implementation_difficulty)
-            ));
+        // Check conditions
+        for condition in &rule.conditions {
+            if condition == "count >= 3" && count < 3 {
+                return None;
+            } else if condition == "count >= 2" && count < 2 {
+                return None;
+            }
         }
         
-        csv
-    }
-    
-    fn generate_markdown_report(&self, report: &SuggestionReport) -> String {
-        let mut md = format!(
-            "# Optimization Suggestions: {}\n\n",
-            report.contract_name
+        if count == 0 {
+            return None;
+        }
+        
+        let template = &self.suggestion_templates[&rule.suggestion_type];
+        let confidence = (template.base_confidence + rule.confidence_modifier).min(1.0);
+        
+        let suggestion = self.create_suggestion_from_rule(
+            rule,
+            func_name,
+            func_code,
+            count,
+            confidence,
+            template,
         );
         
-        // Summary
-        md.push_str("## Summary\n\n");
-        md.push_str(&format!(
-            "- **Total Suggestions:** {}\n\
-            - **Total Potential Gas Savings:** {:,}\n\
-            - **Average Savings per Suggestion:** {:,}\n\n",
-            report.total_suggestions,
-            report.total_potential_savings,
-            if report.total_suggestions > 0 {
-                report.total_potential_savings / report.total_suggestions as u64
-            } else {
-                0
-            }
-        ));
-        
-        // Suggestions by category
-        md.push_str("### Suggestions by Category\n\n");
-        for (category, count) in &report.suggestions_by_category {
-            md.push_str(&format!("- **{}:** {}\n", category, count));
-        }
-        md.push_str("\n");
-        
-        // Suggestions by severity
-        md.push_str("### Suggestions by Severity\n\n");
-        for (severity, count) in &report.suggestions_by_severity {
-            md.push_str(&format!("- **{}:** {}\n", severity, count));
-        }
-        md.push_str("\n");
-        
-        // Detailed suggestions
-        md.push_str("## Detailed Suggestions\n\n");
-        
-        for (i, suggestion) in report.suggestions.iter().enumerate() {
-            md.push_str(&format!(
-                "### {}. {} ({})\n\n",
-                i + 1,
-                suggestion.title,
-                format!("{:?}", suggestion.severity)
-            ));
-            
-            md.push_str(&format!("**Category:** {:?}\n\n", suggestion.category));
-            md.push_str(&format!("**Gas Savings:** {:,}\n\n", suggestion.gas_savings));
-            md.push_str(&format!("**Confidence:** {:.1}%\n\n", suggestion.confidence * 100.0));
-            md.push_str(&format!("**Difficulty:** {:?}\n\n", suggestion.implementation_difficulty));
-            
-            md.push_str("**Description:**\n");
-            md.push_str(&format!("{}\n\n", suggestion.description));
-            
-            md.push_str("**Current Code:**\n");
-            md.push_str(&format!("```rust\n{}\n```\n\n", suggestion.code_snippet));
-            
-            md.push_str("**Optimized Code:**\n");
-            md.push_str(&format!("```rust\n{}\n```\n\n", suggestion.optimized_snippet));
-            
-            md.push_str("**Explanation:**\n");
-            md.push_str(&format!("{}\n\n", suggestion.explanation));
-            
-            if !suggestion.references.is_empty() {
-                md.push_str("**References:**\n");
-                for reference in &suggestion.references {
-                    md.push_str(&format!("- {}\n", reference));
-                }
-                md.push_str("\n");
-            }
-            
-            md.push_str("---\n\n");
-        }
-        
-        // Optimization roadmap
-        md.push_str("## Optimization Roadmap\n\n");
-        
-        for item in &report.optimization_roadmap {
-            md.push_str(&format!(
-                "### Priority {}: {}\n\n",
-                item.priority, item.description
-            ));
-            
-            md.push_str(&format!(
-                "- **Estimated Savings:** {:,} gas\n\
-                - **Estimated Effort:** {}\n\
-                - **Suggestions:** {}\n\n",
-                item.estimated_savings,
-                item.estimated_effort,
-                item.suggestion_ids.len()
-            ));
-        }
-        
-        md
+        Some(suggestion)
     }
-    
-    pub fn analyze_directory(&mut self, dir_path: &str) -> Result<Vec<SuggestionReport>, Box<dyn std::error::Error>> {
-        let mut reports = Vec::new();
+
+    fn create_suggestion_from_rule(
+        &self,
+        rule: &OptimizationRule,
+        func_name: &str,
+        func_code: &str,
+        match_count: usize,
+        confidence: f64,
+        template: &SuggestionTemplate,
+    ) -> OptimizationSuggestion {
+        let title = template.title_template.replace("{function}", func_name);
+        let description = template.description_template
+            .replace("{function}", func_name)
+            .replace("{storage_ops}", &match_count.to_string())
+            .replace("{loop_count}", &match_count.to_string())
+            .replace("{allocation_count}", &match_count.to_string())
+            .replace("{repeated_ops}", &match_count.to_string())
+            .replace("{batchable_ops}", &match_count.to_string());
         
-        for entry in fs::read_dir(dir_path)? {
-            let entry = entry?;
-            let path = entry.path();
-            
-            if path.is_file() {
-                if let Some(extension) = path.extension() {
-                    if extension == "rs" {
-                        match self.analyze_contract(path.to_str().unwrap()) {
-                            Ok(report) => reports.push(report),
-                            Err(e) => eprintln!("Error analyzing {}: {}", path.display(), e),
-                        }
-                    }
-                }
-            }
+        let code_examples = self.generate_code_examples(&rule.suggestion_type, func_code);
+        let risks = self.generate_risks(&template.common_risks);
+        
+        OptimizationSuggestion {
+            id: format!("{}-{}", rule.rule_id, func_name),
+            title,
+            description,
+            suggestion_type: rule.suggestion_type.clone(),
+            priority: rule.priority.clone(),
+            confidence,
+            estimated_gas_savings: rule.gas_savings_estimate * match_count as u64,
+            implementation_difficulty: template.difficulty.clone(),
+            affected_functions: vec![func_name.to_string()],
+            code_examples,
+            prerequisites: vec![],
+            risks,
+            testing_requirements: template.testing_requirements.clone(),
+            performance_impact: self.calculate_performance_impact(&rule.suggestion_type),
+        }
+    }
+
+    fn advanced_analysis(&self, func_name: &str, func_code: &str) -> Vec<OptimizationSuggestion> {
+        let mut suggestions = Vec::new();
+        
+        // Analyze for algorithm improvements
+        if self.has_inefficient_algorithm(func_code) {
+            suggestions.push(self.create_algorithm_suggestion(func_name, func_code));
         }
         
-        Ok(reports)
+        // Analyze for data structure optimizations
+        if self.has_suboptimal_data_structures(func_code) {
+            suggestions.push(self.create_data_structure_suggestion(func_name, func_code));
+        }
+        
+        // Analyze for conditional optimizations
+        if self.has_optimizable_conditionals(func_code) {
+            suggestions.push(self.create_conditional_suggestion(func_name, func_code));
+        }
+        
+        suggestions
     }
-    
-    pub fn get_best_practices(&self) -> &[BestPractice] {
-        &self.best_practices
+
+    fn has_inefficient_algorithm(&self, func_code: &str) -> bool {
+        // Check for nested loops (potential O(n²) complexity)
+        let loop_count = func_code.matches("for ").count();
+        let nested_loops = func_code.lines().filter(|line| line.trim().starts_with("for ") && line.contains("for ")).count();
+        
+        nested_loops > 0 || loop_count > 2
     }
-    
-    pub fn search_suggestions(&self, query: &str) -> Vec<&OptimizationSuggestion> {
-        self.suggestions
-            .iter()
-            .filter(|s| {
-                s.title.to_lowercase().contains(&query.to_lowercase()) ||
-                s.description.to_lowercase().contains(&query.to_lowercase()) ||
-                format!("{:?}", s.category).to_lowercase().contains(&query.to_lowercase())
+
+    fn has_suboptimal_data_structures(&self, func_code: &str) -> bool {
+        // Check for linear search patterns
+        func_code.contains(".contains(") && func_code.contains("Vec")
+    }
+
+    fn has_optimizable_conditionals(&self, func_code: &str) -> bool {
+        // Check for redundant conditions or inefficient branching
+        func_code.matches("if ").count() > 5 || func_code.contains("&&") && func_code.contains("||")
+    }
+
+    fn create_algorithm_suggestion(&self, func_name: &str, func_code: &str) -> OptimizationSuggestion {
+        OptimizationSuggestion {
+            id: format!("algorithm_improvement-{}", func_name),
+            title: format!("Improve Algorithm Efficiency in {}", func_name),
+            description: format!("Optimize the algorithm in {} to reduce time complexity. Current implementation shows signs of inefficient algorithms that can be improved.", func_name),
+            suggestion_type: SuggestionType::AlgorithmImprovement,
+            priority: Priority::High,
+            confidence: 0.7,
+            estimated_gas_savings: 10000,
+            implementation_difficulty: Difficulty::Hard,
+            affected_functions: vec![func_name.to_string()],
+            code_examples: self.generate_algorithm_examples(func_code),
+            prerequisites: vec!["Algorithm analysis".to_string(), "Performance testing".to_string()],
+            risks: self.generate_risks(&[RiskType::Functional, RiskType::Performance]),
+            testing_requirements: vec![
+                "Algorithm correctness tests".to_string(),
+                "Performance benchmarks".to_string(),
+                "Complexity analysis".to_string(),
+            ],
+            performance_impact: PerformanceImpact {
+                gas_efficiency_improvement: 25.0,
+                execution_time_improvement: 40.0,
+                memory_usage_change: -10.0,
+                code_size_impact: 15.0,
+            },
+        }
+    }
+
+    fn create_data_structure_suggestion(&self, func_name: &str, func_code: &str) -> OptimizationSuggestion {
+        OptimizationSuggestion {
+            id: format!("data_structure_optimization-{}", func_name),
+            title: format!("Optimize Data Structures in {}", func_name),
+            description: format!("Replace inefficient data structures in {} with more optimal alternatives. Current implementation uses linear search patterns that can be improved.", func_name),
+            suggestion_type: SuggestionType::DataStructureOptimization,
+            priority: Priority::Medium,
+            confidence: 0.8,
+            estimated_gas_savings: 5000,
+            implementation_difficulty: Difficulty::Moderate,
+            affected_functions: vec![func_name.to_string()],
+            code_examples: self.generate_data_structure_examples(func_code),
+            prerequisites: vec!["Data structure analysis".to_string()],
+            risks: self.generate_risks(&[RiskType::Functional]),
+            testing_requirements: vec![
+                "Data structure tests".to_string(),
+                "Search performance tests".to_string(),
+                "Memory usage tests".to_string(),
+            ],
+            performance_impact: PerformanceImpact {
+                gas_efficiency_improvement: 20.0,
+                execution_time_improvement: 30.0,
+                memory_usage_change: 5.0,
+                code_size_impact: 10.0,
+            },
+        }
+    }
+
+    fn create_conditional_suggestion(&self, func_name: &str, func_code: &str) -> OptimizationSuggestion {
+        OptimizationSuggestion {
+            id: format!("conditional_optimization-{}", func_name),
+            title: format!("Optimize Conditional Logic in {}", func_name),
+            description: format!("Optimize conditional logic in {} to reduce branching overhead and improve readability. Current implementation has complex conditional patterns.", func_name),
+            suggestion_type: SuggestionType::ConditionalOptimization,
+            priority: Priority::Medium,
+            confidence: 0.75,
+            estimated_gas_savings: 3000,
+            implementation_difficulty: Difficulty::Easy,
+            affected_functions: vec![func_name.to_string()],
+            code_examples: self.generate_conditional_examples(func_code),
+            prerequisites: vec!["Logic analysis".to_string()],
+            risks: self.generate_risks(&[RiskType::Functional]),
+            testing_requirements: vec![
+                "Conditional logic tests".to_string(),
+                "Edge case tests".to_string(),
+                "Truth table tests".to_string(),
+            ],
+            performance_impact: PerformanceImpact {
+                gas_efficiency_improvement: 15.0,
+                execution_time_improvement: 20.0,
+                memory_usage_change: 0.0,
+                code_size_impact: -5.0,
+            },
+        }
+    }
+
+    fn generate_code_examples(&self, suggestion_type: &SuggestionType, func_code: &str) -> Vec<CodeExample> {
+        match suggestion_type {
+            SuggestionType::StorageOptimization => vec![
+                CodeExample {
+                    language: "rust".to_string(),
+                    before_code: "env.storage().instance().set(&key1, &value1);\nenv.storage().instance().set(&key2, &value2);".to_string(),
+                    after_code: "// Batch storage operations\nlet batch_data = vec![(key1, value1), (key2, value2)];\nfor (key, value) in batch_data {\n    env.storage().instance().set(&key, &value);\n}".to_string(),
+                    explanation: "Batch multiple storage operations to reduce overhead".to_string(),
+                    gas_savings: 2000,
+                },
+            ],
+            SuggestionType::LoopOptimization => vec![
+                CodeExample {
+                    language: "rust".to_string(),
+                    before_code: "for i in 1..=count {\n    if let Some(proof) = env.storage().instance().get(&DataKey::Proof(i)) {\n        // process proof\n    }\n}".to_string(),
+                    after_code: "// Cache storage values before loop\nlet cached_proofs: Vec<Proof> = (1..=count)\n    .filter_map(|i| env.storage().instance().get(&DataKey::Proof(i)))\n    .collect();\n\nfor proof in cached_proofs {\n    // process proof\n}".to_string(),
+                    explanation: "Cache storage values to avoid repeated expensive reads".to_string(),
+                    gas_savings: 3000,
+                },
+            ],
+            SuggestionType::MemoryOptimization => vec![
+                CodeExample {
+                    language: "rust".to_string(),
+                    before_code: "let mut results = Vec::new(&env);".to_string(),
+                    after_code: "let mut results = Vec::with_capacity(&env, estimated_size);".to_string(),
+                    explanation: "Pre-allocate vector capacity to avoid reallocations".to_string(),
+                    gas_savings: 1500,
+                },
+            ],
+            SuggestionType::ConstantFolding => vec![
+                CodeExample {
+                    language: "rust".to_string(),
+                    before_code: "let timestamp1 = env.ledger().timestamp();\nlet timestamp2 = env.ledger().timestamp();".to_string(),
+                    after_code: "let timestamp = env.ledger().timestamp(); // Cache timestamp\nlet timestamp1 = timestamp;\nlet timestamp2 = timestamp;".to_string(),
+                    explanation: "Cache repeated expensive computations".to_string(),
+                    gas_savings: 1000,
+                },
+            ],
+            _ => vec![],
+        }
+    }
+
+    fn generate_algorithm_examples(&self, func_code: &str) -> Vec<CodeExample> {
+        vec![
+            CodeExample {
+                language: "rust".to_string(),
+                before_code: "// O(n²) nested loop\nfor i in 0..items.len() {\n    for j in 0..items.len() {\n        if items[i] == items[j] && i != j {\n            return true;\n        }\n    }\n}".to_string(),
+                after_code: "// O(n) using hash set\nlet mut seen = HashSet::new();\nfor item in items {\n    if seen.contains(&item) {\n        return true;\n    }\n    seen.insert(item);\n}".to_string(),
+                explanation: "Replace nested loops with hash set for O(n) complexity".to_string(),
+                gas_savings: 8000,
+            },
+        ]
+    }
+
+    fn generate_data_structure_examples(&self, func_code: &str) -> Vec<CodeExample> {
+        vec![
+            CodeExample {
+                language: "rust".to_string(),
+                before_code: "// Linear search in vector\nif vector.contains(&item) {\n    // do something\n}".to_string(),
+                after_code: "// O(1) lookup in hash set\nif hash_set.contains(&item) {\n    // do something\n}".to_string(),
+                explanation: "Replace vector linear search with hash set for O(1) lookup".to_string(),
+                gas_savings: 5000,
+            },
+        ]
+    }
+
+    fn generate_conditional_examples(&self, func_code: &str) -> Vec<CodeExample> {
+        vec![
+            CodeExample {
+                language: "rust".to_string(),
+                before_code: "if condition1 {\n    if condition2 {\n        if condition3 {\n            do_something();\n        }\n    }\n}".to_string(),
+                after_code: "if condition1 && condition2 && condition3 {\n    do_something();\n}".to_string(),
+                explanation: "Combine nested conditions into single compound condition".to_string(),
+                gas_savings: 2000,
+            },
+        ]
+    }
+
+    fn generate_risks(&self, risk_types: &[RiskType]) -> Vec<Risk> {
+        risk_types.iter().map(|risk_type| {
+            match risk_type {
+                RiskType::Functional => Risk {
+                    risk_type: risk_type.clone(),
+                    description: "Changes may affect function behavior".to_string(),
+                    probability: 0.3,
+                    impact: "Medium".to_string(),
+                    mitigation: "Comprehensive testing and validation".to_string(),
+                },
+                RiskType::Performance => Risk {
+                    risk_type: risk_type.clone(),
+                    description: "May impact performance characteristics".to_string(),
+                    probability: 0.2,
+                    impact: "Low".to_string(),
+                    mitigation: "Performance benchmarking".to_string(),
+                },
+                RiskType::Security => Risk {
+                    risk_type: risk_type.clone(),
+                    description: "May introduce security vulnerabilities".to_string(),
+                    probability: 0.1,
+                    impact: "High".to_string(),
+                    mitigation: "Security audit and testing".to_string(),
+                },
+                RiskType::Compatibility => Risk {
+                    risk_type: risk_type.clone(),
+                    description: "May break compatibility with existing code".to_string(),
+                    probability: 0.4,
+                    impact: "Medium".to_string(),
+                    mitigation: "Backward compatibility testing".to_string(),
+                },
+                RiskType::Maintainability => Risk {
+                    risk_type: risk_type.clone(),
+                    description: "May affect code maintainability".to_string(),
+                    probability: 0.2,
+                    impact: "Low".to_string(),
+                    mitigation: "Code review and documentation".to_string(),
+                },
+            }
+        }).collect()
+    }
+
+    fn calculate_performance_impact(&self, suggestion_type: &SuggestionType) -> PerformanceImpact {
+        match suggestion_type {
+            SuggestionType::StorageOptimization => PerformanceImpact {
+                gas_efficiency_improvement: 30.0,
+                execution_time_improvement: 25.0,
+                memory_usage_change: -5.0,
+                code_size_impact: 10.0,
+            },
+            SuggestionType::LoopOptimization => PerformanceImpact {
+                gas_efficiency_improvement: 40.0,
+                execution_time_improvement: 35.0,
+                memory_usage_change: 10.0,
+                code_size_impact: 5.0,
+            },
+            SuggestionType::MemoryOptimization => PerformanceImpact {
+                gas_efficiency_improvement: 25.0,
+                execution_time_improvement: 20.0,
+                memory_usage_change: -20.0,
+                code_size_impact: 0.0,
+            },
+            SuggestionType::ConstantFolding => PerformanceImpact {
+                gas_efficiency_improvement: 10.0,
+                execution_time_improvement: 15.0,
+                memory_usage_change: 0.0,
+                code_size_impact: -5.0,
+            },
+            SuggestionType::AlgorithmImprovement => PerformanceImpact {
+                gas_efficiency_improvement: 50.0,
+                execution_time_improvement: 60.0,
+                memory_usage_change: 15.0,
+                code_size_impact: 20.0,
+            },
+            _ => PerformanceImpact {
+                gas_efficiency_improvement: 15.0,
+                execution_time_improvement: 15.0,
+                memory_usage_change: 0.0,
+                code_size_impact: 5.0,
+            },
+        }
+    }
+
+    fn estimate_total_implementation_time(&self, suggestions: &[OptimizationSuggestion]) -> u64 {
+        let difficulty_hours = match Difficulty::Trivial { 1 }, Difficulty::Easy { 4 }, Difficulty::Moderate { 8 }, Difficulty::Hard { 16 }, Difficulty::Expert { 32 }, _ => 8;
+        
+        suggestions.iter()
+            .map(|s| {
+                let base_hours = match s.implementation_difficulty {
+                    Difficulty::Trivial => 1,
+                    Difficulty::Easy => 4,
+                    Difficulty::Moderate => 8,
+                    Difficulty::Hard => 16,
+                    Difficulty::Expert => 32,
+                };
+                // Add testing and review time
+                base_hours + (base_hours / 2)
             })
-            .collect()
+            .sum()
     }
-    
-    pub fn export_suggestions(&self, format: &str) -> Result<String, Box<dyn std::error::Error>> {
-        match format.to_lowercase().as_str() {
-            "json" => Ok(serde_json::to_string_pretty(&self.suggestions)?),
-            "csv" => {
-                let mut csv = String::new();
-                csv.push_str("ID,Title,Category,Severity,Gas Savings,Confidence,Difficulty,Description\n");
-                
-                for suggestion in &self.suggestions {
-                    csv.push_str(&format!(
-                        "{},{},{},{},{},{:.2},{},{}\n",
-                        suggestion.id,
-                        suggestion.title,
-                        format!("{:?}", suggestion.category),
-                        format!("{:?}", suggestion.severity),
-                        suggestion.gas_savings,
-                        suggestion.confidence,
-                        format!("{:?}", suggestion.implementation_difficulty),
-                        suggestion.description.replace(',', ";")
-                    ));
-                }
-                
-                Ok(csv)
-            }
-            _ => Err("Unsupported format".into()),
-        }
-    }
-}
 
-fn main() {
-    let matches = Command::new("optimization_suggester")
-        .version("1.0")
-        .about("Intelligent optimization suggester for Verinode smart contracts")
-        .arg(
-            Arg::new("input")
-                .short('i')
-                .long("input")
-                .value_name("FILE_OR_DIR")
-                .help("Input file or directory to analyze")
-                .required(true),
-        )
-        .arg(
-            Arg::new("output")
-                .short('o')
-                .long("output")
-                .value_name("FILE")
-                .help("Output file for the report"),
-        )
-        .arg(
-            Arg::new("format")
-                .short('f')
-                .long("format")
-                .value_name("FORMAT")
-                .help("Output format (json, csv, markdown)")
-                .default_value("markdown"),
-        )
-        .arg(
-            Arg::new("search")
-                .short('s')
-                .long("search")
-                .value_name("QUERY")
-                .help("Search for specific optimization suggestions"),
-        )
-        .arg(
-            Arg::new("best-practices")
-                .short('b')
-                .long("best-practices")
-                .help("Display best practices"),
-        )
-        .get_matches();
-    
-    let mut suggester = OptimizationSuggester::new();
-    
-    // Handle search
-    if let Some(query) = matches.get_one::<String>("search") {
-        let results = suggester.search_suggestions(query);
+    fn assess_risks(&self, suggestions: &[OptimizationSuggestion]) -> RiskAssessment {
+        let high_risk_suggestions: Vec<String> = suggestions.iter()
+            .filter(|s| matches!(s.priority, Priority::Critical) || s.confidence < 0.7)
+            .map(|s| s.id.clone())
+            .collect();
         
-        if results.is_empty() {
-            println!("No suggestions found for: {}", query);
+        let overall_risk_level = if high_risk_suggestions.len() > suggestions.len() / 2 {
+            Priority::High
+        } else if high_risk_suggestions.len() > 0 {
+            Priority::Medium
         } else {
-            println!("Found {} suggestions for '{}':", results.len(), query);
-            for (i, suggestion) in results.iter().enumerate() {
-                println!("{}. {} ({:?})", i + 1, suggestion.title, suggestion.category);
-                println!("   Savings: {:,} gas | Confidence: {:.1}%", 
-                    suggestion.gas_savings, suggestion.confidence * 100.0);
-                println!("   {}", suggestion.description);
-                println!();
-            }
-        }
-        return;
-    }
-    
-    // Handle best practices
-    if matches.get_flag("best-practices") {
-        println!("=== Best Practices ===");
-        for practice in suggester.get_best_practices() {
-            println!("\n## {}", practice.name);
-            println!("{}", practice.description);
-            println!("Gas Impact: {:,}", practice.gas_impact);
-            if !practice.examples.is_empty() {
-                println!("Examples:");
-                for example in &practice.examples {
-                    println!("- {}", example);
-                }
-            }
-        }
-        return;
-    }
-    
-    let input = matches.get_one::<String>("input").unwrap();
-    let format = matches.get_one::<String>("format").unwrap();
-    
-    // Analyze input
-    let reports = if Path::new(input).is_dir() {
-        suggester.analyze_directory(input).unwrap_or_else(|e| {
-            eprintln!("Error analyzing directory: {}", e);
-            Vec::new()
-        })
-    } else {
-        match suggester.analyze_contract(input) {
-            Ok(report) => vec![report],
-            Err(e) => {
-                eprintln!("Error analyzing contract: {}", e);
-                Vec::new()
-            }
-        }
-    };
-    
-    if reports.is_empty() {
-        eprintln!("No contracts were successfully analyzed");
-        return;
-    }
-    
-    // Generate reports
-    for report in &reports {
-        let report_text = suggester.generate_report(report, format).unwrap();
+            Priority::Low
+        };
         
-        if let Some(output_file) = matches.get_one::<String>("output") {
-            let file_path = if reports.len() == 1 {
-                output_file.to_string()
-            } else {
-                format!("{}_{}", output_file, report.contract_name)
-            };
-            
-            fs::write(&file_path, report_text).unwrap_or_else(|e| {
-                eprintln!("Error writing report to {}: {}", file_path, e);
-            });
-            
-            println!("Report saved to: {}", file_path);
-        } else {
-            println!("\n=== Optimization Report for {} ===", report.contract_name);
-            println!("{}", report_text);
-        }
-    }
-    
-    // Summary
-    let total_suggestions: usize = reports.iter().map(|r| r.total_suggestions).sum();
-    let total_savings: u64 = reports.iter().map(|r| r.total_potential_savings).sum();
-    
-    println!("\n=== Summary ===");
-    println!("Total contracts analyzed: {}", reports.len());
-    println!("Total suggestions: {}", total_suggestions);
-    println!("Total potential gas savings: {:,}", total_savings);
-    
-    if total_suggestions > 0 {
-        println!("Average savings per suggestion: {:,}", total_savings / total_suggestions as u64);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    
-    #[test]
-    fn test_suggester_creation() {
-        let suggester = OptimizationSuggester::new();
-        assert!(!suggester.suggestions.is_empty());
-        assert!(!suggester.best_practices.is_empty());
-    }
-    
-    #[test]
-    fn test_suggestion_search() {
-        let suggester = OptimizationSuggester::new();
-        let results = suggester.search_suggestions("storage");
-        assert!(!results.is_empty());
-        
-        for suggestion in results {
-            assert!(suggestion.title.to_lowercase().contains("storage") ||
-                   suggestion.description.to_lowercase().contains("storage"));
-        }
-    }
-    
-    #[test]
-    fn test_roadmap_generation() {
-        let suggester = OptimizationSuggester::new();
-        let suggestions = vec![
-            suggester.suggestions[0].clone(),
-            suggester.suggestions[1].clone(),
+        let mitigation_strategies = vec![
+            "Implement comprehensive testing suite".to_string(),
+            "Use feature flags for gradual rollout".to_string(),
+            "Maintain detailed documentation of changes".to_string(),
+            "Establish rollback procedures".to_string(),
         ];
         
-        let roadmap = suggester.generate_roadmap(&suggestions);
-        assert!(!roadmap.is_empty());
+        let rollback_plan = RollbackPlan {
+            checkpoints: vec![
+                "Before each optimization phase".to_string(),
+                "After critical function changes".to_string(),
+            ],
+            rollback_triggers: vec![
+                "Test failures".to_string(),
+                "Performance degradation > 10%".to_string(),
+                "Functional regressions".to_string(),
+            ],
+            rollback_procedures: vec![
+                "Revert to previous commit".to_string(),
+                "Restore backup of contract state".to_string(),
+                "Notify stakeholders of rollback".to_string(),
+            ],
+        };
         
-        // Check that roadmap is sorted by priority
-        for i in 1..roadmap.len() {
-            assert!(roadmap[i].priority >= roadmap[i-1].priority);
+        RiskAssessment {
+            overall_risk_level,
+            high_risk_suggestions,
+            mitigation_strategies,
+            rollback_plan,
         }
     }
+
+    fn create_implementation_phases(&self, suggestions: &[OptimizationSuggestion]) -> Vec<ImplementationPhase> {
+        let mut phases = Vec::new();
+        
+        // Phase 1: Low-risk, high-confidence optimizations
+        let phase1_suggestions: Vec<String> = suggestions.iter()
+            .filter(|s| matches!(s.implementation_difficulty, Difficulty::Trivial | Difficulty::Easy) && s.confidence > 0.8)
+            .map(|s| s.id.clone())
+            .collect();
+        
+        if !phase1_suggestions.is_empty() {
+            phases.push(ImplementationPhase {
+                phase_number: 1,
+                name: "Quick Wins".to_string(),
+                description: "Implement low-risk, high-confidence optimizations".to_string(),
+                suggestions: phase1_suggestions,
+                estimated_duration: 8,
+                dependencies: vec![],
+                deliverables: vec![
+                    "Constant folding optimizations".to_string(),
+                    "Memory preallocation improvements".to_string(),
+                    "Simple arithmetic optimizations".to_string(),
+                ],
+            });
+        }
+        
+        // Phase 2: Medium-risk optimizations
+        let phase2_suggestions: Vec<String> = suggestions.iter()
+            .filter(|s| matches!(s.implementation_difficulty, Difficulty::Moderate) && s.confidence > 0.7)
+            .map(|s| s.id.clone())
+            .collect();
+        
+        if !phase2_suggestions.is_empty() {
+            phases.push(ImplementationPhase {
+                phase_number: 2,
+                name: "Core Optimizations".to_string(),
+                description: "Implement medium-complexity optimizations".to_string(),
+                suggestions: phase2_suggestions,
+                estimated_duration: 16,
+                dependencies: vec!["Phase 1 completion".to_string()],
+                deliverables: vec![
+                    "Storage optimizations".to_string(),
+                    "Loop improvements".to_string(),
+                    "Batch operations".to_string(),
+                ],
+            });
+        }
+        
+        // Phase 3: High-risk, high-impact optimizations
+        let phase3_suggestions: Vec<String> = suggestions.iter()
+            .filter(|s| matches!(s.implementation_difficulty, Difficulty::Hard | Difficulty::Expert) || 
+                   matches!(s.suggestion_type, SuggestionType::AlgorithmImprovement))
+            .map(|s| s.id.clone())
+            .collect();
+        
+        if !phase3_suggestions.is_empty() {
+            phases.push(ImplementationPhase {
+                phase_number: 3,
+                name: "Advanced Optimizations".to_string(),
+                description: "Implement complex, high-impact optimizations".to_string(),
+                suggestions: phase3_suggestions,
+                estimated_duration: 32,
+                dependencies: vec!["Phase 2 completion".to_string()],
+                deliverables: vec![
+                    "Algorithm improvements".to_string(),
+                    "Data structure optimizations".to_string(),
+                    "Complex refactoring".to_string(),
+                ],
+            });
+        }
+        
+        phases
+    }
+
+    fn define_success_metrics(&self, suggestions: &[OptimizationSuggestion]) -> Vec<SuccessMetric> {
+        vec![
+            SuccessMetric {
+                metric_name: "Total Gas Savings".to_string(),
+                target_value: suggestions.iter().map(|s| s.estimated_gas_savings as f64).sum(),
+                measurement_method: "Gas profiling before and after optimization".to_string(),
+                success_criteria: "Achieve at least 80% of estimated gas savings".to_string(),
+            },
+            SuccessMetric {
+                metric_name: "Performance Improvement".to_string(),
+                target_value: 25.0,
+                measurement_method: "Benchmarking execution time".to_string(),
+                success_criteria: "Reduce execution time by at least 25%".to_string(),
+            },
+            SuccessMetric {
+                metric_name: "Test Coverage".to_string(),
+                target_value: 90.0,
+                measurement_method: "Code coverage analysis".to_string(),
+                success_criteria: "Maintain test coverage above 90%".to_string(),
+            },
+            SuccessMetric {
+                metric_name: "Code Quality".to_string(),
+                target_value: 85.0,
+                measurement_method: "Static code analysis".to_string(),
+                success_criteria: "Maintain code quality score above 85".to_string(),
+            },
+        ]
+    }
+
+    pub fn generate_report(&self, plan: &OptimizationPlan) -> String {
+        let mut report = String::new();
+        
+        report.push_str("# Optimization Suggestion Report\n\n");
+        report.push_str(&format!("**Total Gas Savings:** {:,}\n", plan.total_gas_savings));
+        report.push_str(&format!("**Implementation Time:** {} hours\n", plan.total_implementation_time));
+        report.push_str(&format!("**Risk Level:** {:?}\n", plan.risk_assessment.overall_risk_level));
+        report.push_str(&format!("**Number of Suggestions:** {}\n\n", plan.suggestions.len()));
+        
+        // Executive summary
+        report.push_str("## Executive Summary\n\n");
+        let critical_suggestions = plan.suggestions.iter().filter(|s| matches!(s.priority, Priority::Critical)).count();
+        let high_suggestions = plan.suggestions.iter().filter(|s| matches!(s.priority, Priority::High)).count();
+        
+        report.push_str(&format!("- **Critical Priority:** {} suggestions\n", critical_suggestions));
+        report.push_str(&format!("- **High Priority:** {} suggestions\n", high_suggestions));
+        report.push_str(&format!("- **Average Confidence:** {:.1}%\n", plan.suggestions.iter().map(|s| s.confidence).sum::<f64>() / plan.suggestions.len() as f64 * 100.0));
+        report.push_str(&format!("- **Implementation Phases:** {}\n\n", plan.implementation_phases.len()));
+        
+        // Top suggestions
+        report.push_str("## Top Optimization Suggestions\n\n");
+        for (i, suggestion) in plan.suggestions.iter().take(10).enumerate() {
+            report.push_str(&format!("### {}. {} - {:?}\n\n", i + 1, suggestion.title, suggestion.priority));
+            report.push_str(&format!("**Description:** {}\n\n", suggestion.description));
+            report.push_str(&format!("**Estimated Gas Savings:** {:,}\n", suggestion.estimated_gas_savings));
+            report.push_str(&format!("**Confidence:** {:.1}%\n", suggestion.confidence * 100.0));
+            report.push_str(&format!("**Difficulty:** {:?}\n", suggestion.implementation_difficulty));
+            report.push_str(&format!("**Performance Impact:**\n"));
+            report.push_str(&format!("- Gas Efficiency: +{:.1}%\n", suggestion.performance_impact.gas_efficiency_improvement));
+            report.push_str(&format!("- Execution Time: +{:.1}%\n", suggestion.performance_impact.execution_time_improvement));
+            report.push_str(&format!("- Memory Usage: {:+.1}%\n\n", suggestion.performance_impact.memory_usage_change));
+            
+            if !suggestion.code_examples.is_empty() {
+                report.push_str("**Code Example:**\n```rust\n");
+                report.push_str(&format!("Before:\n{}\n\nAfter:\n{}\n```\n\n", 
+                    suggestion.code_examples[0].before_code, 
+                    suggestion.code_examples[0].after_code));
+            }
+        }
+        
+        // Implementation plan
+        report.push_str("## Implementation Plan\n\n");
+        for phase in &plan.implementation_phases {
+            report.push_str(&format!("### Phase {}: {}\n\n", phase.phase_number, phase.name));
+            report.push_str(&format!("**Description:** {}\n", phase.description));
+            report.push_str(&format!("**Estimated Duration:** {} hours\n", phase.estimated_duration));
+            report.push_str(&format!("**Suggestions:** {}\n", phase.suggestions.len()));
+            report.push_str("**Deliverables:**\n");
+            for deliverable in &phase.deliverables {
+                report.push_str(&format!("- {}\n", deliverable));
+            }
+            report.push_str("\n");
+        }
+        
+        // Risk assessment
+        report.push_str("## Risk Assessment\n\n");
+        report.push_str(&format!("**Overall Risk Level:** {:?}\n\n", plan.risk_assessment.overall_risk_level));
+        
+        if !plan.risk_assessment.high_risk_suggestions.is_empty() {
+            report.push_str("**High-Risk Suggestions:**\n");
+            for suggestion_id in &plan.risk_assessment.high_risk_suggestions {
+                report.push_str(&format!("- {}\n", suggestion_id));
+            }
+            report.push_str("\n");
+        }
+        
+        report.push_str("**Mitigation Strategies:**\n");
+        for strategy in &plan.risk_assessment.mitigation_strategies {
+            report.push_str(&format!("- {}\n", strategy));
+        }
+        report.push_str("\n");
+        
+        // Success metrics
+        report.push_str("## Success Metrics\n\n");
+        for metric in &plan.success_metrics {
+            report.push_str(&format!("### {}\n", metric.metric_name));
+            report.push_str(&format!("- **Target:** {:.1}\n", metric.target_value));
+            report.push_str(&format!("- **Measurement:** {}\n", metric.measurement_method));
+            report.push_str(&format!("- **Success Criteria:** {}\n\n", metric.success_criteria));
+        }
+        
+        report
+    }
+
+    pub fn export_json(&self, plan: &OptimizationPlan) -> Result<String, Box<dyn std::error::Error>> {
+        Ok(serde_json::to_string_pretty(plan)?)
+    }
+
+    pub fn save_plan(&self, plan: &OptimizationPlan, filepath: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let json_data = self.export_json(plan)?;
+        fs::write(filepath, json_data)?;
+        Ok(())
+    }
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let suggester = OptimizationSuggester::new();
+    
+    // Example usage
+    let sample_contract = r#"
+    pub fn expensive_function(env: Env, data: Vec<Bytes>) -> Vec<Bytes> {
+        let mut results = Vec::new(&env);
+        
+        for i in 0..data.len() {
+            let timestamp = env.ledger().timestamp();
+            let proof = env.storage().instance().get(&DataKey::Proof(i as u64));
+            
+            if let Some(p) = proof {
+                if p.verified == true {
+                    results.push_back(p.event_data.clone());
+                    env.storage().instance().set(&DataKey::Result(i as u64), &timestamp);
+                }
+            }
+        }
+        
+        results
+    }
+    
+    pub fn another_function(env: Env) -> u64 {
+        let timestamp1 = env.ledger().timestamp();
+        let timestamp2 = env.ledger().timestamp();
+        timestamp1 + timestamp2
+    }
+    "#;
+    
+    let plan = suggester.analyze_contract(sample_contract, "SampleContract");
+    
+    // Generate report
+    let report = suggester.generate_report(&plan);
+    println!("{}", report);
+    
+    // Save plan
+    suggester.save_plan(&plan, "optimization_plan.json")?;
+    
+    println!("Optimization suggestion completed successfully!");
+    Ok(())
 }

@@ -1,0 +1,206 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Verinode - System Overview",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "tags": ["system", "infrastructure", "verinode"],
+    "panels": [
+      {
+        "type": "stat",
+        "id": 1,
+        "title": "System Uptime",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "time() - node_boot_time_seconds",
+            "legendFormat": "Uptime"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "type": "stat",
+        "id": 2,
+        "title": "CPU Usage",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "CPU Usage %"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "type": "stat",
+        "id": 3,
+        "title": "Memory Usage",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "((node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes) * 100",
+            "legendFormat": "Memory Usage %"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "type": "stat",
+        "id": 4,
+        "title": "Disk Usage",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "((node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_free_bytes{mountpoint=\"/\"}) / node_filesystem_size_bytes{mountpoint=\"/\"}) * 100",
+            "legendFormat": "Disk Usage %"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value",
+          "graphMode": "area"
+        }
+      },
+      {
+        "type": "timeseries",
+        "id": 5,
+        "title": "CPU Usage by Mode",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "avg(rate(node_cpu_seconds_total[5m])) by (mode) * 100",
+            "legendFormat": "{{mode}}"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 6,
+        "title": "Memory Usage",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "node_memory_MemTotal_bytes",
+            "legendFormat": "Total Memory"
+          },
+          {
+            "expr": "node_memory_MemAvailable_bytes",
+            "legendFormat": "Available Memory"
+          },
+          {
+            "expr": "node_memory_MemUsed_bytes",
+            "legendFormat": "Used Memory"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 7,
+        "title": "Network Traffic",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(node_network_receive_bytes_total[5m])",
+            "legendFormat": "Received - {{device}}"
+          },
+          {
+            "expr": "rate(node_network_transmit_bytes_total[5m])",
+            "legendFormat": "Transmitted - {{device}}"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 8,
+        "title": "Disk I/O",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(node_disk_read_bytes_total[5m])",
+            "legendFormat": "Read - {{device}}"
+          },
+          {
+            "expr": "rate(node_disk_written_bytes_total[5m])",
+            "legendFormat": "Write - {{device}}"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 9,
+        "title": "Load Average",
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "node_load1",
+            "legendFormat": "1 min"
+          },
+          {
+            "expr": "node_load5",
+            "legendFormat": "5 min"
+          },
+          {
+            "expr": "node_load15",
+            "legendFormat": "15 min"
+          }
+        ]
+      },
+      {
+        "type": "gauge",
+        "id": 10,
+        "title": "Filesystem Usage",
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 20},
+        "targets": [
+          {
+            "expr": "((node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes) * 100",
+            "legendFormat": "{{mountpoint}}"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "id": 11,
+        "title": "System Information",
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 20},
+        "targets": [
+          {
+            "expr": "node_uname_info",
+            "legendFormat": "{{nodename}} - {{release}}"
+          }
+        ]
+      }
+    ]
+  }
+}

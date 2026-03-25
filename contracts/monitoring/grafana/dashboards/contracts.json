@@ -1,0 +1,193 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Verinode - Smart Contract Monitoring",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "30s",
+    "tags": ["blockchain", "smart-contracts", "stellar", "verinode"],
+    "panels": [
+      {
+        "type": "stat",
+        "id": 1,
+        "title": "Stellar Node Sync Status",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "stellar_node_synced",
+            "legendFormat": "Sync Status"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "textMode": "auto",
+          "colorMode": "value"
+        }
+      },
+      {
+        "type": "stat",
+        "id": 2,
+        "title": "Contract Invocations/sec",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(contract_invocations_total[5m])",
+            "legendFormat": "Invocations/sec"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 3,
+        "title": "Transaction Success Rate",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "(rate(stellar_transactions_success_total[5m]) / rate(stellar_transactions_total[5m])) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 4,
+        "title": "Current Ledger Height",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "stellar_ledger_height",
+            "legendFormat": "Ledger Height"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 5,
+        "title": "Stellar Network Activity",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(stellar_transactions_total[5m])",
+            "legendFormat": "Transactions/sec"
+          },
+          {
+            "expr": "rate(stellar_operations_total[5m])",
+            "legendFormat": "Operations/sec"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 6,
+        "title": "Transaction Status",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(stellar_transactions_success_total[5m])",
+            "legendFormat": "Successful"
+          },
+          {
+            "expr": "rate(stellar_transaction_failures_total[5m])",
+            "legendFormat": "Failed"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 7,
+        "title": "Contract Invocation Metrics",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(contract_invocations_total[5m])",
+            "legendFormat": "Total Invocations"
+          },
+          {
+            "expr": "rate(contract_invocation_errors_total[5m])",
+            "legendFormat": "Invocation Errors"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 8,
+        "title": "Gas Usage",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(contract_gas_used_total[5m])",
+            "legendFormat": "Gas Used"
+          },
+          {
+            "expr": "contract_gas_limit",
+            "legendFormat": "Gas Limit"
+          }
+        ]
+      },
+      {
+        "type": "stat",
+        "id": 9,
+        "title": "Contract Statistics",
+        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "contract_deployed_count",
+            "legendFormat": "Deployed Contracts"
+          },
+          {
+            "expr": "contract_active_count",
+            "legendFormat": "Active Contracts"
+          }
+        ]
+      },
+      {
+        "type": "gauge",
+        "id": 10,
+        "title": "Network Peers",
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 20},
+        "targets": [
+          {
+            "expr": "stellar_node_peers",
+            "legendFormat": "Connected Peers"
+          }
+        ]
+      },
+      {
+        "type": "table",
+        "id": 11,
+        "title": "Recent Contract Events",
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 20},
+        "targets": [
+          {
+            "expr": "contract_events_total",
+            "legendFormat": "{{event_type}} - {{contract_name}}"
+          }
+        ]
+      },
+      {
+        "type": "timeseries",
+        "id": 12,
+        "title": "Proof Verification on Chain",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 26},
+        "targets": [
+          {
+            "expr": "rate(onchain_proof_verifications_total[5m])",
+            "legendFormat": "Verifications/sec"
+          },
+          {
+            "expr": "rate(onchain_proof_verification_success_total[5m])",
+            "legendFormat": "Successful Verifications"
+          },
+          {
+            "expr": "rate(onchain_proof_verification_failures_total[5m])",
+            "legendFormat": "Failed Verifications"
+          }
+        ]
+      }
+    ]
+  }
+}

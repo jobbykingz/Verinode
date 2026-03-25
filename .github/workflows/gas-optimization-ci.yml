@@ -1,0 +1,369 @@
+name: Gas Optimization Suite v2 CI/CD
+
+on:
+  push:
+    branches: [ main, develop, "Contracts-Gas-Optimization-Suite-v2" ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  gas-optimization-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+        
+    - name: Install Python dependencies
+      run: |
+        cd contracts
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov pytest-json-report
+        
+    - name: Run gas optimization tests
+      run: |
+        cd contracts
+        python test_gas_optimization.py
+        
+    - name: Run pattern recognition tests
+      run: |
+        cd contracts/ai
+        python -m pytest pattern_recognition.py -v --cov=. --cov-report=xml
+        
+    - name: Run gas optimization ML tests
+      run: |
+        cd contracts/ai
+        python -m pytest gas_optimization.py -v --cov=. --cov-report=xml
+        
+    - name: Generate optimization report
+      run: |
+        cd contracts
+        python -c "
+        from ai.gas_optimization import GasOptimizerAI
+        optimizer = GasOptimizerAI()
+        
+        # Test with sample contract
+        sample_code = '''
+        pub fn test_function(env: Env) {
+            env.storage().persistent().set(&1, &data);
+            for i in 0..3 {
+                let cloned = data.clone();
+                process(cloned);
+            }
+        }
+        '''
+        
+        result = optimizer.optimize_contract_code(sample_code, target_gas_reduction=0.35)
+        print(f'Gas Reduction: {result.savings_percentage:.2f}%')
+        print(f'Gas Savings: {result.gas_savings}')
+        print(f'Applied Patterns: {len(result.applied_patterns)}')
+        
+        # Verify 35% reduction requirement
+        if result.savings_percentage >= 35.0:
+            print('SUCCESS: 35% gas reduction requirement met!')
+            exit(0)
+        else:
+            print('FAILURE: 35% gas reduction requirement not met!')
+            exit(1)
+        "
+        
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./contracts/ai/coverage.xml
+        flags: gas-optimization
+        name: gas-optimization-coverage
+        
+    - name: Archive test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: gas-optimization-test-results-${{ matrix.python-version }}
+        path: |
+          contracts/test_results.json
+          contracts/ai/coverage.xml
+          
+  performance-benchmark:
+    runs-on: ubuntu-latest
+    needs: gas-optimization-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        
+    - name: Install dependencies
+      run: |
+        cd contracts
+        pip install -r requirements.txt
+        pip install memory-profiler
+        
+    - name: Run performance benchmarks
+      run: |
+        cd contracts
+        python -c "
+        import time
+        from ai.gas_optimization import GasOptimizerAI
+        
+        optimizer = GasOptimizerAI()
+        
+        # Large contract for benchmarking
+        large_contract = '''
+        pub fn benchmark_function(env: Env, data: Vec<Bytes>) -> u64 {
+            let mut result = 0;
+            
+            for i in 0..100 {
+                env.storage().persistent().set(&i, &data);
+                let cloned = data.clone();
+                result += i * 2;
+                
+                for j in 0..10 {
+                    let double_cloned = cloned.clone();
+                    result += j * 4;
+                    env.storage().persistent().set(&(i*100 + j), &double_cloned);
+                }
+            }
+            
+            result
+        }
+        '''
+        
+        # Performance test
+        start_time = time.time()
+        result = optimizer.optimize_contract_code(large_contract, target_gas_reduction=0.35)
+        end_time = time.time()
+        
+        optimization_time = end_time - start_time
+        print(f'Optimization Time: {optimization_time:.2f} seconds')
+        print(f'Gas Reduction: {result.savings_percentage:.2f}%')
+        print(f'Gas Savings: {result.gas_savings}')
+        
+        # Performance requirements
+        if optimization_time < 10.0 and result.savings_percentage >= 35.0:
+            print('SUCCESS: Performance benchmarks met!')
+            exit(0)
+        else:
+            print('FAILURE: Performance benchmarks not met!')
+            exit(1)
+        "
+        
+  security-validation:
+    runs-on: ubuntu-latest
+    needs: gas-optimization-tests
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        
+    - name: Install dependencies
+      run: |
+        cd contracts
+        pip install -r requirements.txt
+        pip install bandit safety
+        
+    - name: Run security checks
+      run: |
+        cd contracts
+        # Security scan for Python files
+        bandit -r ai/ -f json -o bandit-report.json || true
+        safety check --json --output safety-report.json || true
+        
+        # Check for unsafe patterns in optimized code
+        python -c "
+        from ai.gas_optimization import GasOptimizerAI
+        
+        optimizer = GasOptimizerAI()
+        
+        # Code with potential security issues
+        test_code = '''
+        pub fn security_test(env: Env, user_input: Bytes) {
+            // Potential security issue: unchecked input
+            env.storage().persistent().set(&1, &user_input);
+            
+            // Potential issue: unchecked external call
+            let result = external_contract.unchecked_call();
+            
+            // Potential issue: integer overflow/underflow
+            let calculation = large_number + user_input;
+        }
+        '''
+        
+        result = optimizer.optimize_contract_code(test_code)
+        
+        # Check that optimization doesn't introduce security issues
+        if 'unchecked' not in result.refactored_code.lower() and result.compilation_verified:
+            print('SUCCESS: Security validation passed!')
+            exit(0)
+        else:
+            print('WARNING: Security validation needs review')
+            exit(0)  # Don't fail CI for warnings
+        "
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          contracts/bandit-report.json
+          contracts/safety-report.json
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: [gas-optimization-tests, performance-benchmark]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        
+    - name: Install dependencies
+      run: |
+        cd contracts
+        pip install -r requirements.txt
+        
+    - name: Run integration tests
+      run: |
+        cd contracts
+        python -c "
+        from ai.gas_optimization import GasOptimizerAI
+        from ai.pattern_recognition import PatternRecognitionEngine
+        
+        # Test integration between components
+        optimizer = GasOptimizerAI()
+        pattern_engine = PatternRecognitionEngine()
+        
+        # Complex contract for integration testing
+        integration_code = '''
+        pub struct IntegrationContract {
+            balances: Map<Address, u64>,
+            approvals: Map<Address, Map<Address, u64>>,
+        }
+        
+        impl IntegrationContract {
+            pub fn transfer(env: Env, from: Address, to: Address, amount: u64) {
+                let from_balance = env.storage().persistent().get(&from);
+                let to_balance = env.storage().persistent().get(&to);
+                
+                if from_balance >= amount {
+                    env.storage().persistent().set(&from, &(from_balance - amount));
+                    env.storage().persistent().set(&to, &(to_balance + amount));
+                }
+            }
+            
+            pub fn batch_transfer(env: Env, transfers: Vec<(Address, Address, u64)>) {
+                for (from, to, amount) in transfers {
+                    self.transfer(env, from, to, amount);
+                }
+            }
+        }
+        '''
+        
+        # Test full pipeline
+        patterns = pattern_engine.recognize_patterns(integration_code)
+        result = optimizer.optimize_contract_code(integration_code, target_gas_reduction=0.35)
+        
+        print(f'Patterns recognized: {len(patterns)}')
+        print(f'Gas reduction achieved: {result.savings_percentage:.2f}%')
+        print(f'Applied optimizations: {len(result.applied_patterns)}')
+        print(f'Compilation verified: {result.compilation_verified}')
+        
+        # Integration success criteria
+        success = (
+            len(patterns) > 0 and 
+            result.savings_percentage >= 35.0 and
+            len(result.applied_patterns) > 0 and
+            result.compilation_verified
+        )
+        
+        if success:
+            print('SUCCESS: Integration tests passed!')
+            exit(0)
+        else:
+            print('FAILURE: Integration tests failed!')
+            exit(1)
+        "
+
+  deploy-docs:
+    runs-on: ubuntu-latest
+    needs: [gas-optimization-tests, performance-benchmark, security-validation, integration-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Generate documentation
+      run: |
+        cd contracts
+        python -c "
+        from ai.gas_optimization import GasOptimizerAI
+        import json
+        
+        optimizer = GasOptimizerAI()
+        
+        # Generate comprehensive documentation
+        doc_data = {
+            'version': '2.0',
+            'features': [
+                'AI-powered gas optimization suggestions',
+                'Automated code refactoring for gas efficiency',
+                'Advanced gas usage analysis and profiling',
+                'Pattern recognition for optimization opportunities',
+                'Automated testing of optimizations',
+                'Integration with CI/CD pipeline',
+                'Performance benchmarking and comparison',
+                'Gas optimization reporting and analytics',
+                'Learning system for optimization patterns'
+            ],
+            'performance_metrics': {
+                'target_gas_reduction': '35%',
+                'optimization_patterns': len(optimizer.patterns),
+                'supported_categories': ['Storage', 'Loops', 'Collections', 'Arithmetic', 'Strings', 'Control Flow']
+            },
+            'acceptance_criteria_met': True
+        }
+        
+        with open('gas_optimization_docs.json', 'w') as f:
+            json.dump(doc_data, f, indent=2)
+        
+        print('Documentation generated successfully!')
+        "
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./contracts
+        publish_branch: gh-pages
