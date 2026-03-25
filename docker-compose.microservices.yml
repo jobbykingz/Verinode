@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - GATEWAY_PORT=4000
+    networks:
+      - verinode-network
+    depends_on:
+      - auth-service
+      - user-service
+      - proof-service
+      - verification-service
+      - notification-service
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "4001:4001"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/verinode-auth
+    networks:
+      - verinode-network
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "4002:4002"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/verinode-users
+    networks:
+      - verinode-network
+
+  proof-service:
+    build: ./services/proof-service
+    ports:
+      - "4003:4003"
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017/verinode-proofs
+      - STELLAR_NETWORK=pubnet
+    networks:
+      - verinode-network
+
+  verification-service:
+    build: ./services/verification-service
+    ports:
+      - "4004:4004"
+    networks:
+      - verinode-network
+
+  notification-service:
+    build: ./services/notification-service
+    ports:
+      - "4005:4005"
+    networks:
+      - verinode-network
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      - verinode-network
+    volumes:
+      - mongo-data:/data/db
+
+networks:
+  verinode-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
