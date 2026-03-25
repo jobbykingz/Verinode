@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
 import WalletDemo from './pages/WalletDemo';
+import VisualizationDashboard from './pages/VisualizationDashboard';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import { performanceMetrics, preloadCriticalResources } from './utils/performance';
 // Import accessibility components
@@ -77,6 +78,7 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/search" element={<Search />} />
               <Route path="/wallet-demo" element={<WalletDemo />} />
+              <Route path="/visualization" element={<VisualizationDashboard />} />
             </Routes>
           </main>
           <Toaster position="top-right" />
