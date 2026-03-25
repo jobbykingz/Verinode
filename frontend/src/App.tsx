@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import IssueProof from './pages/IssueProof';
 import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
+import RBACDashboard from './pages/Admin/RBACDashboard';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -15,7 +16,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-black">
           <Navbar />
           <main className="container mx-auto px-4 py-8">
             <Routes>
@@ -23,9 +24,15 @@ function App() {
               <Route path="/issue" element={<IssueProof />} />
               <Route path="/verify" element={<VerifyProof />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin/rbac" element={<RBACDashboard />} />
             </Routes>
           </main>
-          <Toaster position="top-right" />
+          <Toaster 
+            position="top-right" 
+            toastOptions={{
+              className: 'bg-gray-900 text-white border border-gray-800 rounded-2xl p-4 shadow-2xl backdrop-blur-3xl'
+            }}
+          />
         </div>
       </Router>
     </QueryClientProvider>
