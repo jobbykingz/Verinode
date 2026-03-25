@@ -13,6 +13,10 @@ mod bridges {
     pub mod event_relay;
     pub mod sync_manager;
 }
+mod encryption {
+    pub mod homomorphic_ops;
+    pub mod encrypted_proof;
+}
 
 pub mod proof_verifier;
 
