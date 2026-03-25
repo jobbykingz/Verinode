@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
+const config = require('../config/appConfig');
 
 // Mock user storage - replace with database
 const users = [];
@@ -36,7 +37,7 @@ router.post('/register', [
 
     users.push(user);
     
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret');
+    const token = jwt.sign({ userId: user.id }, config.auth.jwtSecret || 'fallback_secret');
     
     res.status(201).json({
       success: true,
@@ -70,7 +71,7 @@ router.post('/login', [
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'fallback_secret');
+    const token = jwt.sign({ userId: user.id }, config.auth.jwtSecret || 'fallback_secret');
     
     res.json({
       success: true,

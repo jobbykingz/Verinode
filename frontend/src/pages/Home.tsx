@@ -1,8 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, CheckCircle, Zap, Lock } from 'lucide-react';
+import { trackEvent } from '../analytics/ga';
 
 const Home = () => {
+  const handleCtaClick = (label: string) => {
+    trackEvent({
+      action: 'cta_click',
+      category: 'Home',
+      label,
+    });
+  };
+
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -16,12 +25,14 @@ const Home = () => {
         <div className="flex justify-center space-x-4">
           <Link
             to="/issue"
+            onClick={() => handleCtaClick('hero_issue_proof')}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
           >
             Issue Proof
           </Link>
           <Link
             to="/verify"
+            onClick={() => handleCtaClick('hero_verify_proof')}
             className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors"
           >
             Verify Proof

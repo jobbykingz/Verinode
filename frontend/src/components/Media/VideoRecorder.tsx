@@ -463,6 +463,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           muted={recordingState === 'recording'}
           className="w-full h-full object-cover"
           onPlay={applyWatermark}
+          loading="lazy"
         />
 
         {/* Watermark Canvas (overlay) */}
@@ -500,6 +501,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
             src={URL.createObjectURL(recordedBlob)}
             controls
             className="w-full h-full"
+            loading="lazy"
           />
         )}
 

@@ -1,1 +1,67 @@
-{"name":"verinode","version":"0.1.0","description":"Verinode - Web3 infrastructure for issuing and verifying cryptographic proofs on Stellar","scripts":{"install:all":"npm install && cd contracts && cargo build && cd ../backend && npm install && cd ../frontend && npm install","build":"npm run build:contracts && npm run build:backend && npm run build:frontend","build:contracts":"cd contracts && cargo build --release","build:backend":"cd backend && npm run build","build:frontend":"cd frontend && npm run build","test":"npm run test:contracts && npm run test:backend && npm run test:frontend","test:contracts":"cd contracts && cargo test","test:backend":"cd backend && npm test","test:frontend":"cd frontend && npm test","dev":"concurrently \"npm run dev:backend\" \"npm run dev:frontend\"","dev:backend":"cd backend && npm run dev","dev:frontend":"cd frontend && npm start","deploy:local":"cd contracts && soroban contract deploy --network standalone","deploy:testnet":"cd contracts && soroban contract deploy --network testnet","lint":"npm run lint:backend && npm run lint:frontend","lint:backend":"cd backend && npm run lint","lint:frontend":"cd frontend && npm run lint"},"devDependencies":{"concurrently":"^8.2.0"},"keywords":["stellar","soroban","web3","blockchain","verification","proofs","cryptographic"],"author":"Verinode Team","license":"MIT","repository":{"type":"git","url":"https://github.com/jobbykingz/Verinode.git"},"bugs":{"url":"https://github.com/jobbykingz/Verinode/issues"},"homepage":"https://github.com/jobbykingz/Verinode#readme","dependencies":{"express-validator":"^7.3.1"}}
+{
+    "name": "verinode",
+    "version": "0.1.0",
+    "description": "Verinode - Web3 infrastructure for issuing and verifying cryptographic proofs on Stellar",
+    "scripts": {
+        "install:all": "npm install && cd contracts && cargo build && cd ../backend && npm install && cd ../frontend && npm install",
+        "build": "npm run build:contracts && npm run build:backend && npm run build:frontend",
+        "build:contracts": "cd contracts && cargo build --release",
+        "build:backend": "cd backend && npm run build",
+        "build:frontend": "cd frontend && npm run build",
+        "test": "npm run test:contracts && npm run test:backend && npm run test:frontend",
+        "test:contracts": "cd contracts && cargo test",
+        "test:backend": "cd backend && npm test",
+        "test:frontend": "cd frontend && npm test",
+        "test:config": "jest src/config",
+        "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+        "dev:backend": "cd backend && npm run dev",
+        "dev:frontend": "cd frontend && npm start",
+        "deploy:local": "cd contracts && soroban contract deploy --network standalone",
+        "deploy:testnet": "cd contracts && soroban contract deploy --network testnet",
+        "lint": "npm run lint:backend && npm run lint:frontend",
+        "lint:backend": "cd backend && npm run lint",
+        "lint:frontend": "cd frontend && npm run lint"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/express-rate-limit": "^5.1.3",
+        "@types/jest": "^30.0.0",
+        "@types/node": "^25.3.0",
+        "concurrently": "^8.2.0",
+        "jest": "^30.2.0",
+        "ts-jest": "^29.4.6"
+    },
+    "keywords": [
+        "stellar",
+        "soroban",
+        "web3",
+        "blockchain",
+        "verification",
+        "proofs",
+        "cryptographic"
+    ],
+    "author": "Verinode Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jobbykingz/Verinode.git"
+    },
+    "bugs": {
+        "url": "https://github.com/jobbykingz/Verinode/issues"
+    },
+    "homepage": "https://github.com/jobbykingz/Verinode#readme",
+    "dependencies": {
+        "apollo-server-express": "^3.13.0",
+        "cors": "^2.8.6",
+        "dotenv": "^17.3.1",
+        "ethers": "^5.7.2",
+        "express": "^5.2.1",
+        "express-rate-limit": "^8.2.1",
+        "express-validator": "^7.3.1",
+        "graphql": "^16.13.0",
+        "helmet": "^8.1.0",
+        "subscriptions-transport-ws": "^0.11.0",
+        "zod": "^4.3.6"
+    }
+}

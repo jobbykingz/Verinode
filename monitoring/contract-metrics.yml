@@ -132,6 +132,12 @@ network:
     delay: 1000
     backoff_multiplier: 2
 
+  # Circuit Breaker configuration
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    reset_timeout: 30000
+
 # Logging configuration
 logging:
   level: "info"

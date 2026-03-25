@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { config } from '../../config';
 
 export interface BridgeTransfer {
   transferId: string;
@@ -57,14 +58,18 @@ export class BridgeService {
   private transferHistory: BridgeTransfer[] = [];
 
   constructor() {
-    this.initializeBridgeConfigs();
+    if (config.features.enableCrossChainBridge) {
+      this.initializeBridgeConfigs();
+    } else {
+      console.log('Cross-chain bridge is disabled via feature flag');
+    }
   }
 
   private initializeBridgeConfigs(): void {
     const configs: BridgeConfig[] = [
       {
         chainId: 1, // Ethereum
-        bridgeAddress: '0x1234567890123456789012345678901234567890',
+        bridgeAddress: config.blockchain.ethereum.bridgeAddress,
         routerAddress: '0x1234567890123456789012345678901234567890',
         wrapperAddress: '0x1234567890123456789012345678901234567890',
         feeRate: 0.001, // 0.1%
@@ -78,7 +83,7 @@ export class BridgeService {
       },
       {
         chainId: 137, // Polygon
-        bridgeAddress: '0x1234567890123456789012345678901234567890',
+        bridgeAddress: config.blockchain.polygon.bridgeAddress,
         routerAddress: '0x1234567890123456789012345678901234567890',
         wrapperAddress: '0x1234567890123456789012345678901234567890',
         feeRate: 0.0005, // 0.05%
@@ -92,7 +97,7 @@ export class BridgeService {
       },
       {
         chainId: 56, // BSC
-        bridgeAddress: '0x1234567890123456789012345678901234567890',
+        bridgeAddress: config.blockchain.bsc.bridgeAddress,
         routerAddress: '0x1234567890123456789012345678901234567890',
         wrapperAddress: '0x1234567890123456789012345678901234567890',
         feeRate: 0.0008, // 0.08%
@@ -114,9 +119,9 @@ export class BridgeService {
 
   private initializeProvider(chainId: number): void {
     const rpcUrls: { [key: number]: string } = {
-      1: 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
-      137: 'https://polygon-rpc.com',
-      56: 'https://bsc-dataseed.binance.org'
+      1: config.blockchain.ethereum.rpcUrl,
+      137: config.blockchain.polygon.rpcUrl,
+      56: config.blockchain.bsc.rpcUrl
     };
 
     const rpcUrl = rpcUrls[chainId];
@@ -124,10 +129,10 @@ export class BridgeService {
       const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
       this.providers.set(chainId, provider);
 
-      const config = this.bridgeConfigs.get(chainId);
-      if (config) {
+      const bridgeConfig = this.bridgeConfigs.get(chainId);
+      if (bridgeConfig) {
         const bridgeContract = new ethers.Contract(
-          config.bridgeAddress,
+          bridgeConfig.bridgeAddress,
           this.getBridgeABI(),
           provider
         );
@@ -343,6 +348,7 @@ export class BridgeService {
       const fee = await bridgeContract.estimateFee(amountWei, toChain);
       return ethers.utils.formatEther(fee);
     } catch (error) {
+      const amountWei = ethers.utils.parseUnits(amount, 18);
       const fallbackFee = amountWei.mul(Math.floor(config.feeRate * 10000)).div(10000);
       return ethers.utils.formatEther(fallbackFee);
     }

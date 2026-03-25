@@ -106,7 +106,11 @@ const AdvancedFilters = ({
   if (!show) return null;
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+    <div
+      className="bg-white rounded-xl shadow-lg border border-gray-200 p-6"
+      role="region"
+      aria-label="Advanced search filters"
+    >
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -114,6 +118,7 @@ const AdvancedFilters = ({
           <button
             onClick={onCancel}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close advanced filters"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -269,6 +274,7 @@ const AdvancedFilters = ({
                     type="button"
                     onClick={() => handleRemoveTag(tag)}
                     className="ml-2 text-blue-600 hover:text-blue-800"
+                    aria-label={`Remove tag ${tag}`}
                   >
                     ×
                   </button>

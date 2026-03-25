@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { trackEvent } from '../analytics/ga';
 
 const VerifyProof = () => {
   const [proofId, setProofId] = useState('');
@@ -10,18 +11,39 @@ const VerifyProof = () => {
     e.preventDefault();
     setIsVerifying(true);
 
+    trackEvent({
+      action: 'form_submit',
+      category: 'VerifyProof',
+      label: 'search_proof',
+    });
+
     try {
       // Mock API call - replace with actual Stellar integration
       const response = await fetch(`/api/proofs/${proofId}`);
       const data = await response.json();
 
       if (response.ok) {
+        trackEvent({
+          action: 'form_submit_success',
+          category: 'VerifyProof',
+          label: 'search_proof',
+        });
         setProof(data.proof);
         toast.success('Proof retrieved successfully!');
       } else {
+        trackEvent({
+          action: 'form_submit_error',
+          category: 'VerifyProof',
+          label: `search_proof_http_${response.status}`,
+        });
         toast.error('Proof not found');
       }
-    } catch (error) {
+    } catch {
+      trackEvent({
+        action: 'form_submit_error',
+        category: 'VerifyProof',
+        label: 'search_proof_exception',
+      });
       toast.error('Error verifying proof');
     } finally {
       setIsVerifying(false);
@@ -30,6 +52,11 @@ const VerifyProof = () => {
 
   const handleVerifyOnChain = async () => {
     setIsVerifying(true);
+    trackEvent({
+      action: 'cta_click',
+      category: 'VerifyProof',
+      label: 'verify_on_chain',
+    });
     try {
       // Mock on-chain verification
       const response = await fetch(`/api/proofs/verify/${proofId}`, {
@@ -37,12 +64,27 @@ const VerifyProof = () => {
       });
 
       if (response.ok) {
+        trackEvent({
+          action: 'form_submit_success',
+          category: 'VerifyProof',
+          label: 'verify_on_chain',
+        });
         toast.success('Proof verified on-chain!');
         setProof(prev => ({ ...prev, verified: true }));
       } else {
+        trackEvent({
+          action: 'form_submit_error',
+          category: 'VerifyProof',
+          label: `verify_on_chain_http_${response.status}`,
+        });
         toast.error('Verification failed');
       }
-    } catch (error) {
+    } catch {
+      trackEvent({
+        action: 'form_submit_error',
+        category: 'VerifyProof',
+        label: 'verify_on_chain_exception',
+      });
       toast.error('Error during on-chain verification');
     } finally {
       setIsVerifying(false);
