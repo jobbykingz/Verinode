@@ -1,7 +1,7 @@
-import Role from '../../models/Role.ts';
-import Permission from '../../models/Permission.ts';
-import UserRole from '../../models/UserRole.ts';
-import { RBACService } from './RBACService.ts';
+import Role from '../../models/Role';
+import Permission from '../../models/Permission';
+import UserRole from '../../models/UserRole';
+import { RBACService } from './RBACService';
 
 /**
  * Service to manage roles, permissions, and user role assignments.

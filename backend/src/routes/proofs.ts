@@ -1,17 +1,24 @@
-const express = require('express');
-const router = express.Router();
-const { body, validationResult } = require('express-validator');
-const StellarSDK = require('@stellar/stellar-sdk');
+import express, { Request, Response, Router } from 'express';
+import { body, validationResult } from 'express-validator';
+import { enforceQuota } from '../middleware/quota';
+import { ResourceType } from '../models/ResourceQuota';
+import UsageTrackingService from '../services/tenant/UsageTrackingService';
 
-// Mock storage - replace with database
-let proofs = [];
+const router: Router = express.Router();
+
+// Mock storage - replace with database or persistent model
+let proofs: any[] = [];
 let proofIdCounter = 1;
 
-// Issue a new proof
+/**
+ * @route POST /api/proofs/issue
+ * @desc Issue a new proof (Protected by Quota)
+ */
 router.post('/issue', [
+  enforceQuota(ResourceType.PROOFS),
   body('eventData').notEmpty().withMessage('Event data is required'),
   body('hash').isLength({ min: 64 }).withMessage('Hash must be at least 64 characters')
-], async (req, res) => {
+], async (req: Request, res: Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -19,7 +26,10 @@ router.post('/issue', [
     }
 
     const { eventData, hash, issuerAddress } = req.body;
-    
+    const user = (req as any).user;
+    const tenantId = user?.tenantId || user?.id;
+
+    // 1. Create the proof object
     const proof = {
       id: proofIdCounter++,
       issuer: issuerAddress,
@@ -31,19 +41,27 @@ router.post('/issue', [
     };
 
     proofs.push(proof);
+
+    // 2. Track usage (Increment the counter)
+    if (tenantId) {
+      await UsageTrackingService.trackUsage(tenantId.toString(), ResourceType.PROOFS, 1);
+    }
     
     res.status(201).json({
       success: true,
       proof,
-      message: 'Proof issued successfully'
+      message: 'Proof issued successfully',
+      quotaRemaining: (req as any).quotaStatus?.remaining
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Get proof by ID
-router.get('/:id', (req, res) => {
+/**
+ * @route GET /api/proofs/:id
+ */
+router.get('/:id', (req: Request, res: Response) => {
   const proof = proofs.find(p => p.id === parseInt(req.params.id));
   if (!proof) {
     return res.status(404).json({ error: 'Proof not found' });
@@ -51,8 +69,10 @@ router.get('/:id', (req, res) => {
   res.json({ proof });
 });
 
-// Get all proofs
-router.get('/', (req, res) => {
+/**
+ * @route GET /api/proofs
+ */
+router.get('/', (req: Request, res: Response) => {
   const { issuer, verified } = req.query;
   let filteredProofs = proofs;
   
@@ -67,15 +87,17 @@ router.get('/', (req, res) => {
   res.json({ proofs: filteredProofs });
 });
 
-// Verify a proof
-router.post('/verify/:id', async (req, res) => {
+/**
+ * @route POST /api/proofs/verify/:id
+ */
+router.post('/verify/:id', async (req: Request, res: Response) => {
   try {
     const proof = proofs.find(p => p.id === parseInt(req.params.id));
     if (!proof) {
       return res.status(404).json({ error: 'Proof not found' });
     }
 
-    // Mock verification - implement actual Stellar transaction
+    // Mock verification
     proof.verified = true;
     proof.verifiedAt = new Date().toISOString();
     
@@ -84,9 +106,9 @@ router.post('/verify/:id', async (req, res) => {
       proof,
       message: 'Proof verified successfully'
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+export default router;

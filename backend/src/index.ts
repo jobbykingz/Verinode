@@ -4,11 +4,12 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { authenticate } from './middleware/auth.ts';
-import rbacRoutes from './routes/rbac.ts';
+import { authenticate } from './middleware/auth';
+import rbacRoutes from './routes/rbac';
+import quotaRoutes from './routes/quotas';
+import proofRoutes from './routes/proofs';
 
-// Import JS routes (using require for compatibility with existing JS files)
-const proofRoutes = require('./routes/proofs.js');
+// Import JS routes
 const authRoutes = require('./routes/auth.js');
 const stellarRoutes = require('./routes/stellar.js');
 
@@ -42,6 +43,7 @@ app.use('/api/auth', authRoutes); // Login/Register (Public)
 app.use('/api/proofs', authenticate, proofRoutes);
 app.use('/api/stellar', authenticate, stellarRoutes);
 app.use('/api/rbac', authenticate, rbacRoutes);
+app.use('/api/quotas', authenticate, quotaRoutes);
 
 // Health check
 app.get('/health', (req: Request, res: Response) => {
