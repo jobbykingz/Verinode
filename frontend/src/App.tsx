@@ -8,6 +8,7 @@ import IssueProof from './pages/IssueProof';
 import VerifyProof from './pages/VerifyProof';
 import Dashboard from './pages/Dashboard';
 import RBACDashboard from './pages/Admin/RBACDashboard';
+import DashboardBuilder from './components/Dashboard/DashboardBuilder';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ function App() {
               <Route path="/verify" element={<VerifyProof />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/admin/rbac" element={<RBACDashboard />} />
+              <Route path="/dashboard/custom" element={<DashboardBuilder />} />
             </Routes>
           </main>
           <Toaster 
