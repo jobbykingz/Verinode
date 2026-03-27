@@ -41,3 +41,5 @@ export class WinstonLogger {
     this.logger.debug(message, meta);
   }
 }
+
+export const logger = new WinstonLogger();
