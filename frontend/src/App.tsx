@@ -11,10 +11,15 @@ import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
 import WalletDemo from './pages/WalletDemo';
-import FormBuilderPage from './pages/FormBuilderPage';
-import FormTemplatesPage from './pages/FormTemplatesPage';
+import VisualizationDashboard from './pages/VisualizationDashboard';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import { performanceMetrics, preloadCriticalResources } from './utils/performance';
+// Import accessibility components
+import { ScreenReader } from './components/Accessibility/ScreenReader';
+import { KeyboardNavigation } from './components/Accessibility/KeyboardNavigation';
+import { VoiceCommands } from './components/Accessibility/VoiceCommands';
+import { HighContrast } from './components/Accessibility/HighContrast';
+import { accessibilityService } from './services/accessibilityService';
 import './App.css';
 
 const queryClient = new QueryClient();
@@ -24,6 +29,9 @@ function App() {
     // Initialize performance optimizations
     preloadCriticalResources();
     performanceMetrics.lazyLoadImages();
+
+    // Initialize accessibility service
+    // The service is already initialized in its constructor
 
     // Measure page load performance
     const metrics = performanceMetrics.measurePageLoad();
@@ -46,6 +54,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <RouteChangeTracker />
+        {/* Accessibility Components */}
+        <ScreenReader />
+        <KeyboardNavigation enableShortcuts={true} showHelp={true} />
+        <VoiceCommands showIndicator={true} />
+        <HighContrast showToggle={true} colorBlindSupport={true} />
+        
         <div className="min-h-screen bg-gray-50">
           <a href="#main-content" className="skip-link">
             Skip to main content
@@ -64,8 +78,7 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/search" element={<Search />} />
               <Route path="/wallet-demo" element={<WalletDemo />} />
-              <Route path="/form-builder" element={<FormBuilderPage />} />
-              <Route path="/form-templates" element={<FormTemplatesPage />} />
+              <Route path="/visualization" element={<VisualizationDashboard />} />
             </Routes>
           </main>
           <Toaster position="top-right" />

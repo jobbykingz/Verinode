@@ -1,0 +1,369 @@
+/* Mobile-first responsive styles for Verinode */
+
+/* Base mobile styles */
+@media (max-width: 768px) {
+  /* Container and layout */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    max-width: 100%;
+  }
+
+  /* Navigation */
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  /* Touch-friendly buttons */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+
+  .btn-small {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* Form inputs */
+  .form-input {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  .form-select {
+    font-size: 16px;
+    padding: 12px;
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  /* Cards and content */
+  .card {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  /* Tables */
+  .table {
+    font-size: 14px;
+  display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.75rem;
+    min-width: 120px;
+  }
+
+  /* Proof verification specific */
+  .verification-step {
+    min-height: 100vh;
+    padding: 1rem;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  .step-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin: 0 4px;
+  }
+
+  .step-dot.active {
+    background-color: #3b82f6;
+  }
+
+  .step-dot.completed {
+    background-color: #10b981;
+  }
+
+  /* Touch gestures */
+  .swipe-hint {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 1000;
+    animation: fadeInOut 2s ease-in-out;
+  }
+
+  /* File upload */
+  .file-upload-area {
+    min-height: 120px;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .file-upload-area:active {
+    background-color: #f3f4f6;
+    border-color: #3b82f6;
+  }
+
+  /* Loading states */
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+  }
+
+  /* Error states */
+  .error-message {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Success states */
+  .success-message {
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .card {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-input {
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .desktop-nav {
+    display: block;
+  }
+
+  .mobile-nav {
+    display: none;
+  }
+
+  .card {
+    margin-bottom: 2rem;
+  }
+
+  .form-input {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover,
+  .btn:focus {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+  }
+
+  .card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .btn {
+    border-width: 0.5px;
+  }
+
+  .form-input {
+    border-width: 0.5px;
+  }
+}
+
+/* Landscape orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+  .verification-step {
+    min-height: 100vh;
+  }
+
+  .step-indicator {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+  }
+}
+
+/* Small screens */
+@media (max-width: 480px) {
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .card {
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  .form-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.5rem;
+    min-width: 80px;
+  }
+}
+
+/* Animations */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+/* Utility classes */
+.mobile-only {
+  display: block;
+}
+
+.tablet-up {
+  display: none;
+}
+
+.desktop-up {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-up {
+    display: block;
+  }
+}
+
+@media (min-width: 1025px) {
+  .desktop-up {
+    display: block;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .mobile-nav,
+  .btn,
+  .file-upload-area {
+    display: none;
+  }
+
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}

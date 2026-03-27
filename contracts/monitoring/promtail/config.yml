@@ -1,0 +1,116 @@
+# Promtail Configuration for Verinode
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Application logs
+  - job_name: application
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: verinode-backend
+          __path__: /var/log/verinode/*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+      - labels:
+          level:
+          service:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # System logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          __path__: /var/log/*.log
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\S+ \S+) (?P<hostname>\S+) (?P<service>\S+): (?P<message>.*)$'
+      - labels:
+          service:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05"
+
+  # Contract monitor logs
+  - job_name: contract-monitor
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: contract-monitor
+          __path__: /var/log/verinode/contract-monitor*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            service: service
+      - labels:
+          level:
+          service:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # Error logs
+  - job_name: errors
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: errors
+          __path__: /var/log/verinode/*error*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            level: level
+            message: message
+            error: error
+      - labels:
+          level:
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+  # Security logs
+  - job_name: security
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: security
+          __path__: /var/log/verinode/security*.log
+    pipeline_stages:
+      - json:
+          expressions:
+            timestamp: timestamp
+            event: event
+            user_id: user_id
+            ip: ip
+            action: action
+      - labels:
+          event:
+          action:
+      - timestamp:
+          source: timestamp
+          format: RFC3339

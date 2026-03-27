@@ -11,7 +11,7 @@ export class WinstonLogger {
         winston.format.errors({ stack: true }),
         winston.format.json()
       ),
-      defaultMeta: { service: 'analytics-service' },
+      defaultMeta: { service: 'verinode-backend' },
       transports: [
         new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
         new winston.transports.File({ filename: 'logs/combined.log' }),
@@ -42,4 +42,5 @@ export class WinstonLogger {
   }
 }
 
+// Export a singleton instance
 export const logger = new WinstonLogger();

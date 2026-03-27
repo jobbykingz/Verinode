@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-03-25T10:22:00.000Z",
+  "contracts": [
+    {
+      "contract_name": "atomicSwap",
+      "functions": [
+        {
+          "function_name": "initialize",
+          "original_gas": 8000,
+          "optimized_gas": 6200,
+          "savings_percentage": 22.5,
+          "optimization_techniques": ["STORAGE_PACKING", "CALL_OPTIMIZATION"]
+        },
+        {
+          "function_name": "swap",
+          "original_gas": 15000,
+          "optimized_gas": 11250,
+          "savings_percentage": 25.0,
+          "optimization_techniques": ["LOOP_OPTIMIZATION", "CALL_BATCHING"]
+        },
+        {
+          "function_name": "refund",
+          "original_gas": 6000,
+          "optimized_gas": 4800,
+          "savings_percentage": 20.0,
+          "optimization_techniques": ["STORAGE_PACKING"]
+        }
+      ],
+      "total_savings": 6750,
+      "average_savings_percentage": 22.5,
+      "profile_date": "2026-03-25T10:22:00.000Z"
+    },
+    {
+      "contract_name": "chainVerifier",
+      "functions": [
+        {
+          "function_name": "verify_proof",
+          "original_gas": 12000,
+          "optimized_gas": 9600,
+          "savings_percentage": 20.0,
+          "optimization_techniques": ["LOOP_OPTIMIZATION", "CACHE_ARRAY_ACCESS"]
+        },
+        {
+          "function_name": "add_signature",
+          "original_gas": 5000,
+          "optimized_gas": 3750,
+          "savings_percentage": 25.0,
+          "optimization_techniques": ["STORAGE_PACKING"]
+        }
+      ],
+      "total_savings": 3650,
+      "average_savings_percentage": 22.5,
+      "profile_date": "2026-03-25T10:22:00.000Z"
+    },
+    {
+      "contract_name": "crossChainBridge",
+      "functions": [
+        {
+          "function_name": "bridge_tokens",
+          "original_gas": 20000,
+          "optimized_gas": 15000,
+          "savings_percentage": 25.0,
+          "optimization_techniques": ["CALL_BATCHING", "CALL_CACHING", "LOOP_OPTIMIZATION"]
+        },
+        {
+          "function_name": "release_tokens",
+          "original_gas": 10000,
+          "optimized_gas": 7500,
+          "savings_percentage": 25.0,
+          "optimization_techniques": ["CALL_OPTIMIZATION", "STORAGE_PACKING"]
+        }
+      ],
+      "total_savings": 7500,
+      "average_savings_percentage": 25.0,
+      "profile_date": "2026-03-25T10:22:00.000Z"
+    }
+  ],
+  "summary": {
+    "total_contracts": 3,
+    "total_functions": 7,
+    "total_original_gas": 76000,
+    "total_optimized_gas": 58050,
+    "total_savings": 17950,
+    "average_savings_percentage": 23.62,
+    "target_met": true
+  }
+}

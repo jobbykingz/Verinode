@@ -1,0 +1,30 @@
+{
+  "name": "verinode-deployment-scripts",
+  "version": "1.0.0",
+  "description": "Deployment scripts for Verinode Soroban smart contracts",
+  "main": "deploy_proof_verifier.js",
+  "scripts": {
+    "deploy:testnet": "node deploy_proof_verifier.js testnet",
+    "deploy:futurenet": "node deploy_proof_verifier.js futurenet",
+    "deploy:standalone": "node deploy_proof_verifier.js standalone",
+    "test:deployment": "node deploy_proof_verifier.js testnet"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^12.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  },
+  "keywords": [
+    "stellar",
+    "soroban",
+    "blockchain",
+    "smart-contracts",
+    "deployment"
+  ],
+  "author": "Verinode Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

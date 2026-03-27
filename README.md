@@ -16,7 +16,7 @@ A verification node system with both REST and GraphQL APIs for managing user pro
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v20 or higher)
 - npm or yarn
 
 ### Installation

@@ -1,0 +1,125 @@
+name: Gas Optimization Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  gas-optimization:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install TypeScript
+      run: npm install -g typescript ts-node
+      
+    - name: Build contracts
+      run: |
+        cd contracts
+        cargo build --release
+        
+    - name: Run optimization tests
+      run: |
+        cd contracts
+        cargo test gas_optimization_test --lib -- --nocapture
+        
+    - name: Run gas profiler
+      run: |
+        cd contracts/tools
+        cargo build --release
+        ./target/release/gas_profiler profile --contracts ../src --output ../../gas_profiles
+        
+    - name: Check gas regression
+      run: |
+        cd contracts/tools
+        if [ -f "../../gas_profiles/baseline.json" ]; then
+          ./target/release/gas_profiler compare ../../gas_profiles/baseline.json ../../gas_profiles/gas_profile_report.json
+        else
+          echo "No baseline found, creating one..."
+          cp ../../gas_profiles/gas_profile_report.json ../../gas_profiles/baseline.json
+        fi
+        
+    - name: Run optimization suggestions
+      run: |
+        cd contracts/tools
+        ./target/release/optimization_suggestions analyze --project ../src --output ../../optimization_reports
+        
+    - name: Run gas analysis script
+      run: |
+        cd contracts/scripts
+        ts-node gas_analysis.ts
+        
+    - name: Verify gas reduction target
+      run: |
+        cd contracts
+        cargo test test_integrated_gas_optimization --lib -- --nocapture
+        
+    - name: Upload gas profiles
+      uses: actions/upload-artifact@v3
+      with:
+        name: gas-profiles
+        path: |
+          gas_profiles/
+          optimization_reports/
+        retention-days: 30
+        
+    - name: Comment PR with gas analysis
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = './gas_profiles/gas_profile_report.json';
+          
+          if (fs.existsSync(path)) {
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const summary = report.summary;
+            
+            const comment = `
+## 🔍 Gas Optimization Analysis
+            
+**Summary:**
+- Total Contracts: ${summary.total_contracts}
+- Total Functions: ${summary.total_functions}
+- Average Savings: ${summary.average_savings_percentage.toFixed(2)}%
+- Target Met (20%): ${summary.target_met ? '✅ YES' : '❌ NO'}
+
+**Gas Usage:**
+- Original: ${summary.total_original_gas.toLocaleString()}
+- Optimized: ${summary.total_optimized_gas.toLocaleString()}
+- Savings: ${summary.total_savings.toLocaleString()}
+
+${summary.target_met ? '🎉 Gas optimization target achieved!' : '⚠️ Gas optimization target not met. Consider applying the suggested optimizations.'}
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }
