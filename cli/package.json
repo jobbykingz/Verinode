@@ -1,0 +1,29 @@
+{
+  "name": "verinode-cli",
+  "version": "1.0.0",
+  "description": "Command-line interface for Verinode platform",
+  "main": "dist/index.js",
+  "bin": {
+    "verinode": "./bin/verinode"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": ["verinode", "cli", "proof", "blockchain"],
+  "author": "Verinode Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^10.0.0",
+    "axios": "^1.4.0",
+    "ora": "^6.3.1",
+    "chalk": "^5.2.0",
+    "inquirer": "^9.2.0",
+    "fs-extra": "^11.1.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
