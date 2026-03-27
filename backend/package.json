@@ -39,7 +39,11 @@
     "multihashes": "^4.0.3",
     "it-all": "^3.0.4",
     "it-buffer": "^0.1.6",
-    "uint8arrays": "^5.0.1"
+    "uint8arrays": "^5.0.1",
+    "@elastic/elasticsearch": "^8.11.0",
+    "elasticsearch": "^16.7.3",
+    "lunr": "^2.3.9",
+    "fuse.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
