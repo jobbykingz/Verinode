@@ -1,0 +1,113 @@
+# Alertmanager Configuration for Verinode
+global:
+  resolve_timeout: 5m
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'alerts@verinode.com'
+  smtp_auth_username: 'alerts@verinode.com'
+  smtp_auth_password: 'your-app-password'
+  smtp_require_tls: true
+
+# Route configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  receiver: 'default-receiver'
+  
+  # Child routes
+  routes:
+    # Critical alerts - immediate notification
+    - matchers:
+        - severity =~ "critical"
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 30m
+      receiver: 'critical-alerts'
+      
+    # High severity alerts
+    - matchers:
+        - severity =~ "high"
+      group_wait: 30s
+      group_interval: 10m
+      repeat_interval: 2h
+      receiver: 'high-alerts'
+      
+    # Medium severity alerts
+    - matchers:
+        - severity =~ "medium"
+      group_wait: 1m
+      group_interval: 30m
+      repeat_interval: 6h
+      receiver: 'medium-alerts'
+      
+    # Low severity alerts
+    - matchers:
+        - severity =~ "low"
+      group_wait: 5m
+      group_interval: 1h
+      repeat_interval: 12h
+      receiver: 'low-alerts'
+
+# Inhibition rules
+inhibit_rules:
+  # If a critical alert is firing, inhibit related high alerts
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "high"
+    equal: ['alertname', 'cluster', 'service']
+    
+  # If a high alert is firing, inhibit related medium alerts
+  - source_matchers:
+      - severity = "high"
+    target_matchers:
+      - severity = "medium"
+    equal: ['alertname', 'cluster', 'service']
+
+# Receivers configuration
+receivers:
+  # Default receiver
+  - name: 'default-receiver'
+    email_configs:
+      - to: 'devops@verinode.com'
+        send_resolved: true
+        
+  # Critical alerts - multiple channels
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'devops@verinode.com'
+        send_resolved: true
+      - to: 'management@verinode.com'
+        send_resolved: true
+    webhook_configs:
+      - url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        send_resolved: true
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        send_resolved: true
+        
+  # High severity alerts
+  - name: 'high-alerts'
+    email_configs:
+      - to: 'devops@verinode.com'
+        send_resolved: true
+    webhook_configs:
+      - url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        send_resolved: true
+        
+  # Medium severity alerts
+  - name: 'medium-alerts'
+    email_configs:
+      - to: 'devops@verinode.com'
+        send_resolved: true
+        
+  # Low severity alerts
+  - name: 'low-alerts'
+    email_configs:
+      - to: 'devops@verinode.com'
+        send_resolved: true
+
+# Templates for alert formatting
+templates:
+  - '/etc/alertmanager/template/*.tmpl'

@@ -22,11 +22,25 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+// Advanced Security Features Imports
+import { TimeLock, TimeLockConfig, TimeLockOperation, TimeLockStats } from '../../../contracts/src/security/TimeLock';
+import { EmergencyPauseManager, EmergencyConfig, EmergencyPause, EmergencyAction } from '../../../contracts/src/security/EmergencyPause';
+import { AdvancedAccessControl, AccessControlConfig, User, Role } from '../../../contracts/src/security/AdvancedAccessControl';
+import { SecurityAudit, AuditConfig, AuditEntry, AuditReport } from '../../../contracts/src/security/SecurityAudit';
+import { MultiSigSecurity, MultiSigConfig, MultiSigTransaction } from '../../../contracts/src/security/MultiSigSecurity';
+
 @Injectable()
 export class ContractSecurityService {
   private readonly logger = new Logger(ContractSecurityService.name);
   private readonly scanQueue: Map<string, SecurityScanRequest> = new Map();
   private readonly activeScans: Map<string, boolean> = new Map();
+
+  // Advanced Security Components
+  private timeLock: TimeLock;
+  private emergencyPause: EmergencyPauseManager;
+  private accessControl: AdvancedAccessControl;
+  private securityAudit: SecurityAudit;
+  private multiSigSecurity: MultiSigSecurity;
 
   constructor(
     private configService: ConfigService,
@@ -38,7 +52,89 @@ export class ContractSecurityService {
     private vulnerabilityRepository: Repository<VulnerabilityEntity>,
     @InjectRepository(SecurityRuleEntity)
     private securityRuleRepository: Repository<SecurityRuleEntity>,
-  ) {}
+  ) {
+    // Initialize advanced security components
+    this.initializeAdvancedSecurity();
+  }
+
+  /**
+   * Initialize advanced security components
+   */
+  private initializeAdvancedSecurity(): void {
+    try {
+      // Initialize TimeLock with default configuration
+      const timeLockConfig: TimeLockConfig = {
+        minDelay: { secs: 3600, nanos: 0 }, // 1 hour
+        maxDelay: { secs: 30 * 24 * 3600, nanos: 0 }, // 30 days
+        defaultDelay: { secs: 24 * 3600, nanos: 0 }, // 24 hours
+        adminAddresses: this.configService.get<string[]>('SECURITY_ADMIN_ADDRESSES') || [],
+        emergencyAddresses: this.configService.get<string[]>('SECURITY_EMERGENCY_ADDRESSES') || [],
+      };
+      this.timeLock = new TimeLock(timeLockConfig);
+
+      // Initialize Emergency Pause Manager
+      const emergencyConfig: EmergencyConfig = {
+        emergencyAddresses: this.configService.get<string[]>('SECURITY_EMERGENCY_ADDRESSES') || [],
+        adminAddresses: this.configService.get<string[]>('SECURITY_ADMIN_ADDRESSES') || [],
+        guardianAddresses: this.configService.get<string[]>('SECURITY_GUARDIAN_ADDRESSES') || [],
+        maxPauseDuration: 7 * 24 * 3600, // 7 days
+        defaultPauseDuration: 24 * 3600, // 24 hours
+        autoResumeEnabled: this.configService.get<boolean>('SECURITY_AUTO_RESUME') || false,
+        notificationAddresses: this.configService.get<string[]>('SECURITY_NOTIFICATION_ADDRESSES') || [],
+        criticalActionThreshold: this.configService.get<number>('SECURITY_CRITICAL_THRESHOLD') || 3,
+      };
+      this.emergencyPause = new EmergencyPauseManager(emergencyConfig);
+
+      // Initialize Access Control
+      const accessControlConfig: AccessControlConfig = {
+        adminAddress: this.configService.get<string>('SECURITY_ADMIN_ADDRESS') || '',
+        defaultSessionDuration: this.configService.get<number>('SESSION_DEFAULT_DURATION') || 3600,
+        maxSessionDuration: this.configService.get<number>('SESSION_MAX_DURATION') || 24 * 3600,
+        requireMultiAdmin: this.configService.get<boolean>('REQUIRE_MULTI_ADMIN') || false,
+        auditAccess: true,
+        ipWhitelistEnabled: this.configService.get<boolean>('IP_WHITELIST_ENABLED') || false,
+        sessionTimeoutEnabled: this.configService.get<boolean>('SESSION_TIMEOUT_ENABLED') || true,
+      };
+      this.accessControl = new AdvancedAccessControl(accessControlConfig);
+
+      // Initialize Security Audit
+      const auditConfig: AuditConfig = {
+        maxEntries: this.configService.get<number>('AUDIT_MAX_ENTRIES') || 100000,
+        retentionPeriod: this.configService.get<number>('AUDIT_RETENTION_PERIOD') || 90 * 24 * 3600,
+        autoCleanup: this.configService.get<boolean>('AUDIT_AUTO_CLEANUP') || true,
+        compressionEnabled: this.configService.get<boolean>('AUDIT_COMPRESSION_ENABLED') || true,
+        encryptionEnabled: this.configService.get<boolean>('AUDIT_ENCRYPTION_ENABLED') || true,
+        backupEnabled: this.configService.get<boolean>('AUDIT_BACKUP_ENABLED') || true,
+        realTimeMonitoring: this.configService.get<boolean>('AUDIT_REAL_TIME_MONITORING') || true,
+        alertThresholds: {
+          criticalEventsPerHour: this.configService.get<number>('ALERT_CRITICAL_PER_HOUR') || 5,
+          failedAttemptsPerHour: this.configService.get<number>('ALERT_FAILED_ATTEMPTS_PER_HOUR') || 10,
+          unusualActivityThreshold: this.configService.get<number>('ALERT_UNUSUAL_ACTIVITY_THRESHOLD') || 2.0,
+          concurrentSessionsPerUser: this.configService.get<number>('ALERT_CONCURRENT_SESSIONS') || 3,
+        },
+      };
+      this.securityAudit = new SecurityAudit(auditConfig);
+
+      // Initialize Multi-Signature Security
+      const multiSigConfig: MultiSigConfig = {
+        signers: new Map(), // Will be populated from database
+        threshold: this.configService.get<number>('MULTISIG_THRESHOLD') || 2,
+        nonce: 0,
+        transactionTimeout: this.configService.get<number>('MULTISIG_TRANSACTION_TIMEOUT') || 7 * 24 * 3600,
+        maxSigners: this.configService.get<number>('MULTISIG_MAX_SIGNERS') || 10,
+        requireAllForEmergency: this.configService.get<boolean>('MULTISIG_REQUIRE_ALL_EMERGENCY') || true,
+        autoCleanup: this.configService.get<boolean>('MULTISIG_AUTO_CLEANUP') || true,
+        maxTransactionValue: this.configService.get<number>('MULTISIG_MAX_TRANSACTION_VALUE') ? 
+          BigInt(this.configService.get<number>('MULTISIG_MAX_TRANSACTION_VALUE')) : undefined,
+      };
+      this.multiSigSecurity = new MultiSigSecurity(multiSigConfig);
+
+      this.logger.log('Advanced security components initialized successfully');
+    } catch (error) {
+      this.logger.error(`Failed to initialize advanced security components: ${error.message}`);
+      throw error;
+    }
+  }
 
   /**
    * Initiates a security scan for a smart contract
@@ -691,5 +787,575 @@ export class ContractSecurityService {
     if (securityScore < 70) return 'High';
     if (securityScore < 85) return 'Medium';
     return 'Low';
+  }
+
+  // ==================== ADVANCED SECURITY FEATURES ====================
+
+  /**
+   * TimeLock Operations
+   */
+  async createTimeLockOperation(
+    id: string,
+    operationType: string,
+    targetAddress: string,
+    data: Buffer,
+    executor: string,
+    delay?: number,
+    expiresAt?: number,
+    priority?: number
+  ): Promise<{ operationId: string; unlockTime: number }> {
+    try {
+      // Check access control
+      const hasPermission = await this.accessControl.has_permission(executor, { ContractExecute: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions for time lock operation');
+      }
+
+      // Log the attempt
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { Medium: null },
+        `Create time lock operation: ${id}`,
+        executor,
+        targetAddress,
+        new Map([['operationType', operationType]]),
+        true,
+        null
+      );
+
+      const operationId = this.timeLock.create_time_lock(
+        id,
+        { Custom: operationType },
+        targetAddress,
+        Array.from(data),
+        executor,
+        delay ? { secs: delay, nanos: 0 } : undefined,
+        expiresAt,
+        priority || 1
+      );
+
+      const operation = this.timeLock.get_operation(&operationId);
+      return {
+        operationId,
+        unlockTime: operation?.unlock_time || 0
+      };
+    } catch (error) {
+      this.logger.error(`Failed to create time lock operation: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async executeTimeLockOperation(operationId: string, executor: string): Promise<TimeLockOperation> {
+    try {
+      // Check access control
+      const hasPermission = await this.accessControl.has_permission(executor, { ContractExecute: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions to execute time lock operation');
+      }
+
+      const result = this.timeLock.execute_operation(&operationId, executor);
+
+      // Log the execution
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { High: null },
+        `Execute time lock operation: ${operationId}`,
+        executor,
+        null,
+        new Map([['operationId', operationId]]),
+        true,
+        null
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to execute time lock operation: ${error.message}`);
+      throw error;
+    }
+  }
+
+  getTimeLockStats(): TimeLockStats {
+    return this.timeLock.get_stats();
+  }
+
+  /**
+   * Emergency Pause Operations
+   */
+  async emergencyPause(
+    reason: string,
+    emergencyLevel: 'Low' | 'Medium' | 'High' | 'Critical',
+    duration?: number,
+    executor: string
+  ): Promise<void> {
+    try {
+      // Check access control
+      const hasPermission = await this.accessControl.has_permission(executor, { EmergencyPause: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions for emergency pause');
+      }
+
+      const level = emergencyLevel === 'Low' ? { Low: null } :
+                   emergencyLevel === 'Medium' ? { Medium: null } :
+                   emergencyLevel === 'High' ? { High: null } :
+                   { Critical: null };
+
+      this.emergencyPause.emergency_pause(
+        reason,
+        level,
+        duration,
+        executor
+      );
+
+      // Log the emergency pause
+      await this.securityAudit.log_event(
+        { EmergencyAction: null },
+        { Critical: null },
+        `Emergency pause: ${reason}`,
+        executor,
+        null,
+        new Map([
+          ['reason', reason],
+          ['level', emergencyLevel],
+          ['duration', duration?.toString() || '']
+        ]),
+        true,
+        null
+      );
+
+      this.logger.warn(`Emergency pause activated by ${executor}: ${reason}`);
+    } catch (error) {
+      this.logger.error(`Failed to execute emergency pause: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async emergencyResume(executor: string): Promise<void> {
+    try {
+      // Check access control
+      const hasPermission = await this.accessControl.has_permission(executor, { EmergencyResume: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions for emergency resume');
+      }
+
+      this.emergencyPause.resume(executor);
+
+      // Log the resume
+      await this.securityAudit.log_event(
+        { EmergencyAction: null },
+        { High: null },
+        'Emergency resume',
+        executor,
+        null,
+        new Map([]),
+        true,
+        null
+      );
+
+      this.logger.info(`Emergency resumed by ${executor}`);
+    } catch (error) {
+      this.logger.error(`Failed to execute emergency resume: ${error.message}`);
+      throw error;
+    }
+  }
+
+  getEmergencyPauseStatus(): EmergencyPause {
+    return this.emergencyPause.get_pause_state().clone();
+  }
+
+  /**
+   * Access Control Operations
+   */
+  async createUser(userId: string, address: string, executor: string): Promise<void> {
+    try {
+      const hasPermission = await this.accessControl.has_permission(executor, { UserManagement: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions for user management');
+      }
+
+      this.accessControl.create_user(userId, address, executor);
+
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { Medium: null },
+        `Create user: ${userId}`,
+        executor,
+        userId,
+        new Map([['address', address]]),
+        true,
+        null
+      );
+    } catch (error) {
+      this.logger.error(`Failed to create user: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async assignRoleToUser(userId: string, roleId: string, executor: string): Promise<void> {
+    try {
+      const hasPermission = await this.accessControl.has_permission(executor, { RoleManagement: null });
+      if (!hasPermission) {
+        throw new BadRequestException('Insufficient permissions for role management');
+      }
+
+      this.accessControl.assign_role_to_user(userId, roleId, executor);
+
+      await this.securityAudit.log_event(
+        { AccessControl: null },
+        { Medium: null },
+        `Assign role ${roleId} to user ${userId}`,
+        executor,
+        userId,
+        new Map([['roleId', roleId]]),
+        true,
+        null
+      );
+    } catch (error) {
+      this.logger.error(`Failed to assign role to user: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async createSession(userId: string, ipAddress?: string, userAgent?: string): Promise<string> {
+    try {
+      const sessionToken = this.accessControl.create_session(userId, ipAddress, userAgent, undefined);
+
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { Low: null },
+        `Create session for user: ${userId}`,
+        userId,
+        null,
+        new Map([
+          ['ipAddress', ipAddress || ''],
+          ['userAgent', userAgent || '']
+        ]),
+        true,
+        null
+      );
+
+      return sessionToken;
+    } catch (error) {
+      this.logger.error(`Failed to create session: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async checkAccess(sessionToken: string, permission: string, resource: string, ipAddress?: string): Promise<boolean> {
+    try {
+      const permissionEnum = this.mapPermissionString(permission);
+      const hasAccess = this.accessControl.check_access(sessionToken, permissionEnum, resource, ipAddress);
+
+      // Log access check
+      await this.securityAudit.log_event(
+        { AccessControl: null },
+        { Low: null },
+        `Access check for permission: ${permission}`,
+        null,
+        resource,
+        new Map([
+          ['permission', permission],
+          ['granted', hasAccess.toString()]
+        ]),
+        true,
+        null
+      );
+
+      return hasAccess;
+    } catch (error) {
+      this.logger.error(`Failed to check access: ${error.message}`);
+      return false;
+    }
+  }
+
+  private mapPermissionString(permission: string): any {
+    const permissionMap: { [key: string]: any } = {
+      'contract_deploy': { ContractDeploy: null },
+      'contract_upgrade': { ContractUpgrade: null },
+      'contract_pause': { ContractPause: null },
+      'contract_execute': { ContractExecute: null },
+      'transfer': { Transfer: null },
+      'approve_transfer': { ApproveTransfer: null },
+      'mint': { Mint: null },
+      'burn': { Burn: null },
+      'user_management': { UserManagement: null },
+      'role_management': { RoleManagement: null },
+      'permission_management': { PermissionManagement: null },
+      'emergency_pause': { EmergencyPause: null },
+      'emergency_resume': { EmergencyResume: null },
+      'security_audit': { SecurityAudit: null },
+      'vulnerability_report': { VulnerabilityReport: null },
+      'system_config': { SystemConfig: null },
+      'system_monitor': { SystemMonitor: null },
+      'system_backup': { SystemBackup: null },
+    };
+
+    return permissionMap[permission] || { Custom: permission };
+  }
+
+  /**
+   * Security Audit Operations
+   */
+  async generateAuditReport(
+    filters: any,
+    generatedBy: string
+  ): Promise<AuditReport> {
+    try {
+      const auditFilter = {
+        start_time: filters.startTime,
+        end_time: filters.endTime,
+        event_types: filters.eventTypes,
+        severity_levels: filters.severityLevels,
+        user_ids: filters.userIds,
+        resources: filters.resources,
+        success_only: filters.successOnly,
+        ip_addresses: filters.ipAddresses,
+        contract_addresses: filters.contractAddresses,
+        limit: filters.limit,
+        offset: filters.offset,
+      };
+
+      const report = this.securityAudit.generate_report(auditFilter, generatedBy);
+
+      await this.securityAudit.log_event(
+        { SecurityAudit: null },
+        { Medium: null },
+        'Generate audit report',
+        generatedBy,
+        null,
+        new Map([
+          ['reportId', report.id],
+          ['totalEntries', report.total_entries.toString()]
+        ]),
+        true,
+        null
+      );
+
+      return report;
+    } catch (error) {
+      this.logger.error(`Failed to generate audit report: ${error.message}`);
+      throw error;
+    }
+  }
+
+  getSecurityMetrics(): any {
+    return this.securityAudit.get_metrics();
+  }
+
+  async exportAuditLog(filters: any, format: 'JSON' | 'CSV'): Promise<string> {
+    try {
+      const auditFilter = {
+        start_time: filters.startTime,
+        end_time: filters.endTime,
+        event_types: filters.eventTypes,
+        severity_levels: filters.severityLevels,
+        user_ids: filters.userIds,
+        resources: filters.resources,
+        success_only: filters.successOnly,
+        ip_addresses: filters.ipAddresses,
+        contract_addresses: filters.contractAddresses,
+        limit: filters.limit,
+        offset: filters.offset,
+      };
+
+      const exportFormat = format === 'JSON' ? { JSON: null } : { CSV: null };
+      return this.securityAudit.export_audit_log(auditFilter, exportFormat);
+    } catch (error) {
+      this.logger.error(`Failed to export audit log: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Multi-Signature Operations
+   */
+  async createMultiSigTransaction(
+    destination: string,
+    value: number,
+    data: Buffer,
+    transactionType: string,
+    requiredSignatures?: number,
+    expiresIn?: number,
+    metadata?: { [key: string]: string },
+    creator: string
+  ): Promise<string> {
+    try {
+      const txType = transactionType === 'Transfer' ? { Transfer: null } :
+                    transactionType === 'ContractCall' ? { ContractCall: null } :
+                    transactionType === 'ContractDeployment' ? { ContractDeployment: null } :
+                    transactionType === 'ParameterChange' ? { ParameterChange: null } :
+                    transactionType === 'EmergencyAction' ? { EmergencyAction: null } :
+                    { Custom: transactionType };
+
+      const metadataMap = new Map(Object.entries(metadata || {}));
+
+      const transactionId = this.multiSigSecurity.create_transaction(
+        destination,
+        BigInt(value),
+        Array.from(data),
+        txType,
+        requiredSignatures,
+        expiresIn,
+        metadataMap,
+        creator
+      );
+
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { High: null },
+        `Create multi-sig transaction: ${transactionId}`,
+        creator,
+        destination,
+        new Map([
+          ['transactionId', transactionId],
+          ['value', value.toString()],
+          ['type', transactionType]
+        ]),
+        true,
+        null
+      );
+
+      return transactionId;
+    } catch (error) {
+      this.logger.error(`Failed to create multi-sig transaction: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async signMultiSigTransaction(
+    transactionId: string,
+    signer: string,
+    signature: Buffer,
+    messageHash: Buffer
+  ): Promise<void> {
+    try {
+      this.multiSigSecurity.sign_transaction(
+        transactionId,
+        signer,
+        Array.from(signature),
+        Array.from(messageHash)
+      );
+
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { Medium: null },
+        `Sign multi-sig transaction: ${transactionId}`,
+        signer,
+        null,
+        new Map([['transactionId', transactionId]]),
+        true,
+        null
+      );
+    } catch (error) {
+      this.logger.error(`Failed to sign multi-sig transaction: ${error.message}`);
+      throw error;
+    }
+  }
+
+  async executeMultiSigTransaction(transactionId: string, executor: string): Promise<MultiSigTransaction> {
+    try {
+      const result = this.multiSigSecurity.execute_transaction(transactionId, executor);
+
+      await this.securityAudit.log_event(
+        { UserAction: null },
+        { High: null },
+        `Execute multi-sig transaction: ${transactionId}`,
+        executor,
+        result.destination,
+        new Map([
+          ['transactionId', transactionId],
+          ['value', result.value.toString()]
+        ]),
+        true,
+        null
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to execute multi-sig transaction: ${error.message}`);
+      throw error;
+    }
+  }
+
+  getMultiSigStats(): any {
+    return this.multiSigSecurity.get_stats();
+  }
+
+  /**
+   * Integrated Security Operations
+   */
+  async performComprehensiveSecurityCheck(
+    contractAddress: string,
+    executor: string
+  ): Promise<{
+    securityScore: number;
+    vulnerabilities: any[];
+    recommendations: string[];
+    auditTrail: any[];
+    complianceStatus: any;
+  }> {
+    try {
+      // Check if system is paused
+      if (this.emergencyPause.is_paused()) {
+        throw new BadRequestException('System is currently under emergency pause');
+      }
+
+      // Perform security scan
+      const securityMetrics = await this.getSecurityMetrics(contractAddress);
+      
+      // Get audit trail
+      const auditReport = await this.generateAuditReport(
+        {
+          contractAddresses: [contractAddress],
+          limit: 100
+        },
+        executor
+      );
+
+      // Get compliance status
+      const complianceStatus = await this.getComplianceStatus(contractAddress);
+
+      // Generate comprehensive recommendations
+      const recommendations = this.generateIntegratedRecommendations(
+        securityMetrics,
+        auditReport,
+        complianceStatus
+      );
+
+      return {
+        securityScore: securityMetrics.averageSecurityScore,
+        vulnerabilities: [], // Would be populated from detailed scan
+        recommendations,
+        auditTrail: auditReport.entries,
+        complianceStatus,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to perform comprehensive security check: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private generateIntegratedRecommendations(
+    securityMetrics: any,
+    auditReport: any,
+    complianceStatus: any
+  ): string[] {
+    const recommendations: string[] = [];
+
+    // Security score based recommendations
+    if (securityMetrics.averageSecurityScore < 70) {
+      recommendations.push('Security score is below optimal levels - consider comprehensive security review');
+    }
+
+    // Audit based recommendations
+    if (auditReport.summary.critical_events > 0) {
+      recommendations.push('Critical security events detected - immediate investigation required');
+    }
+
+    // Compliance based recommendations
+    if (!complianceStatus.overallCompliant) {
+      recommendations.push('Compliance issues found - address missing requirements');
+    }
+
+    return recommendations;
   }
 }
