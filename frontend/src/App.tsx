@@ -11,6 +11,8 @@ import Dashboard from './pages/Dashboard';
 import Marketplace from './pages/Marketplace';
 import Search from './pages/Search';
 import WalletDemo from './pages/WalletDemo';
+import FormBuilderPage from './pages/FormBuilderPage';
+import FormTemplatesPage from './pages/FormTemplatesPage';
 import RouteChangeTracker from './analytics/RouteChangeTracker';
 import { performanceMetrics, preloadCriticalResources } from './utils/performance';
 import './App.css';
@@ -62,6 +64,8 @@ function App() {
               <Route path="/marketplace" element={<Marketplace />} />
               <Route path="/search" element={<Search />} />
               <Route path="/wallet-demo" element={<WalletDemo />} />
+              <Route path="/form-builder" element={<FormBuilderPage />} />
+              <Route path="/form-templates" element={<FormTemplatesPage />} />
             </Routes>
           </main>
           <Toaster position="top-right" />
