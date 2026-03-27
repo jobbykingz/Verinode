@@ -1,81 +1,18 @@
 {
   "name": "Verinode - Cryptographic Proof Verification",
   "short_name": "Verinode",
-  "description": "Web3 infrastructure for issuing and verifying cryptographic proofs on Stellar",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
-  "orientation": "portrait-primary",
-  "scope": "/",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "48x48",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "logo512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["business", "productivity", "utilities"],
-  "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false,
+
   "shortcuts": [
     {
       "name": "Verify Proof",
       "short_name": "Verify",
-      "description": "Verify a cryptographic proof",
-      "url": "/verify",
-      "icons": [
-        {
-          "src": "logo192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Issue Proof",
-      "short_name": "Issue",
-      "description": "Issue a new cryptographic proof",
-      "url": "/issue",
-      "icons": [
-        {
-          "src": "logo192.png",
-          "sizes": "192x192"
+
         }
       ]
     }
   ],
   "screenshots": [
     {
-      "src": "screenshot1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshot2.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "related_applications": [],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "focus-existing"
+
   }
 }
