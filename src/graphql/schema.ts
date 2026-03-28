@@ -2,33 +2,200 @@ import { gql } from 'apollo-server-express';
 
 export const typeDefs = gql`
   scalar DateTime
+  scalar JSON
 
-  type User {
-    id: ID!
-    email: String!
-    username: String!
-    createdAt: DateTime!
-    updatedAt: DateTime!
+  # Compliance Types
+  enum RequestType {
+    ACCESS
+    PORTABILITY
+    ERASURE
+    RECTIFICATION
+    RESTRICTION
   }
 
-  type Proof {
-    id: ID!
-    userId: ID!
-    title: String!
-    description: String!
-    status: ProofStatus!
-    createdAt: DateTime!
-    updatedAt: DateTime!
-    metadata: JSON
-  }
-
-  enum ProofStatus {
+  enum DataSubjectRequestStatus {
     PENDING
-    VERIFIED
+    IN_PROGRESS
+    COMPLETED
     REJECTED
   }
 
-  scalar JSON
+  enum KYCLevel {
+    BASIC
+    ENHANCED
+    PREMIUM
+  }
+
+  enum KYCStatus {
+    NOT_STARTED
+    INITIATED
+    IN_PROGRESS
+    APPROVED
+    REJECTED
+  }
+
+  enum RiskLevel {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+  }
+
+  enum ComplianceRegion {
+    EU
+    UK
+    US
+    CN
+    IN
+  }
+
+  type DataSubjectRequest {
+    requestId: ID!
+    userId: ID!
+    requestType: RequestType!
+    status: DataSubjectRequestStatus!
+    createdAt: DateTime!
+    deadline: DateTime!
+    completedAt: DateTime
+    result: JSON
+  }
+
+  type ConsentRecord {
+    consentId: ID!
+    userId: ID!
+    purpose: String!
+    explicit: Boolean!
+    grantedAt: DateTime!
+    withdrawn: Boolean!
+    withdrawnAt: DateTime
+    expirationDate: DateTime
+  }
+
+  type KYCSession {
+    verificationId: ID!
+    userId: ID!
+    provider: String!
+    level: KYCLevel!
+    status: String!
+    applicantUrl: String
+    completedAt: DateTime
+    riskLevel: RiskLevel
+  }
+
+  type AMLScreeningResult {
+    screeningId: ID!
+    matches: [AMLMatch!]!
+    riskScore: Int!
+    riskLevel: RiskLevel!
+    cleared: Boolean!
+  }
+
+  type AMLMatch {
+    name: String!
+    type: String!
+    source: String!
+    matchStrength: Float!
+    details: JSON
+  }
+
+  type ResidencyInfo {
+    region: ComplianceRegion!
+    dataCenters: [String!]!
+    regulations: [String!]!
+    restrictions: ResidencyRestrictions!
+  }
+
+  type ResidencyRestrictions {
+    requireLocalStorage: Boolean!
+    allowCrossBorderTransfer: Boolean!
+    requireAdequacyDecision: Boolean
+  }
+
+  type ComplianceDashboard {
+    timestamp: DateTime!
+    timeRange: String!
+    overview: ComplianceOverview!
+    gdprMetrics: GDPRMetrics!
+    kycAmlMetrics: KYCAMLMetrics!
+    residencyMetrics: ResidencyMetrics!
+    alerts: ComplianceAlerts!
+    trends: ComplianceTrends!
+  }
+
+  type ComplianceOverview {
+    totalRequests: Int!
+    completedRequests: Int!
+    pendingRequests: Int!
+    averageCompletionTime: Float!
+    complianceRate: Float!
+  }
+
+  type GDPRMetrics {
+    dataSubjectRequests: Int!
+    averageResponseTime: Float!
+    slaComplianceRate: Float!
+    consentsGranted: Int!
+    consentsWithdrawn: Int!
+    erasureRequestsCompleted: Int!
+  }
+
+  type KYCAMLMetrics {
+    kycVerificationsCompleted: Int!
+    averageVerificationTime: Float!
+    approvalRate: Float!
+    amlScreeningsPerformed: Int!
+    highRiskMatches: Int!
+    ongoingMonitoringAlerts: Int!
+  }
+
+  type ResidencyMetrics {
+    usersByRegion: JSON!
+    dataByRegion: JSON!
+    crossBorderTransfers: Int!
+    residencyViolations: Int!
+    complianceRate: Float!
+  }
+
+  type ComplianceAlerts {
+    critical: Int!
+    high: Int!
+    medium: Int!
+    openInvestigations: Int!
+  }
+
+  type ComplianceTrends {
+    requestVolume: [DataPoint!]!
+    complianceScores: [DataPoint!]!
+    responseTimes: [DataPoint!]!
+    violationRates: [DataPoint!]!
+  }
+
+  type DataPoint {
+    timestamp: DateTime!
+    value: Float!
+  }
+
+  type ComplianceReport {
+    reportId: ID!
+    reportType: String!
+    period: JSON!
+    scope: String!
+    generatedAt: DateTime!
+    overallScore: Float!
+    executiveSummary: JSON!
+    detailedFindings: [Finding!]!
+    metrics: JSON!
+    recommendations: [String!]!
+  }
+
+  type Finding {
+    category: String!
+    severity: String!
+    description: String!
+    evidence: [String!]!
+    recommendation: String!
+    status: String!
+  }
 
   type ChainConfig {
     chainId: Int!
@@ -164,6 +331,16 @@ export const typeDefs = gql`
     atomicSwap(swapId: String!): AtomicSwap
     atomicSwaps(status: SwapStatus, first: Int, after: String): [AtomicSwap!]!
     optimizeGas(fromChain: Int!, toChain: Int!, amount: String!): GasOptimization!
+
+    # Compliance queries
+    getDataSubjectRequest(requestId: ID!): DataSubjectRequest
+    myDataSubjectRequests: [DataSubjectRequest!]!
+    kycStatus: KYCSession
+    consentStatus(purpose: String!): Boolean!
+    dataResidencyInfo: ResidencyInfo
+    complianceDashboard(timeRange: String, includeDetails: Boolean): ComplianceDashboard!
+    complianceKPIs: JSON!
+    complianceReports(first: Int, after: String): [ComplianceReport!]!
   }
 
   type Mutation {
@@ -213,6 +390,17 @@ export const typeDefs = gql`
     refundAtomicSwap(swapId: String!): AtomicSwap!
     
     switchChain(targetChainId: Int!): WalletInfo!
+
+    # Compliance mutations
+    createDataSubjectRequest(requestType: RequestType!, requestData: JSON): DataSubjectRequest!
+    initiateKYC(level: KYCLevel, provider: String): KYCSession!
+    submitKYCDocuments(documentType: String!, documentImages: [String!]!): AMLScreeningResult!
+    performAMLScreening(personalData: JSON!): AMLScreeningResult!
+    recordConsent(purpose: String!, explicit: Boolean, expirationDate: DateTime): ConsentRecord!
+    withdrawConsent(purpose: String!): ConsentRecord!
+    requestDataMigration(targetRegion: ComplianceRegion!): JSON!
+    generateComplianceReport(reportType: String!, period: JSON!, scope: String): ComplianceReport!
+    exportComplianceData(format: String!, period: JSON!, options: JSON): JSON!
   }
 
   type Subscription {
