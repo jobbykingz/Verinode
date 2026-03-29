@@ -1,0 +1,177 @@
+# Prometheus Alerting Rules for Verinode
+
+groups:
+  # System Health Alerts
+  - name: system-health
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "High CPU usage detected on {{ $labels.instance }}"
+          description: "CPU usage is above 85% for more than 2 minutes"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 90% for more than 2 minutes"
+
+      # Disk space running low
+      - alert: LowDiskSpace
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: high
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }} mountpoint {{ $labels.mountpoint }}"
+          description: "Disk usage is above 85% for more than 5 minutes"
+
+      # Node down
+      - alert: NodeDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} is down"
+          description: "Node has been unreachable for more than 1 minute"
+
+  # Application Performance Alerts
+  - name: application-performance
+    rules:
+      # High response time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "High response time for {{ $labels.handler }}"
+          description: "95th percentile response time is above 2 seconds"
+
+      # High error rate
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) * 100 > 5
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "High error rate for {{ $labels.handler }}"
+          description: "Error rate is above 5% for more than 1 minute"
+
+      # Service down
+      - alert: ServiceDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "Service health check is failing"
+
+      # High request rate
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[5m]) > 1000
+        for: 1m
+        labels:
+          severity: medium
+        annotations:
+          summary: "High request rate for {{ $labels.handler }}"
+          description: "Request rate exceeds 1000 requests per second"
+
+  # Database Alerts
+  - name: database
+    rules:
+      # Database connection issues
+      - alert: DatabaseConnectionIssues
+        expr: mongodb_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB database is unreachable"
+
+      # High database connection count
+      - alert: HighDatabaseConnections
+        expr: mongodb_connections > 1000
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "High database connections"
+          description: "Database connection count is above 1000"
+
+      # Slow database queries
+      - alert: SlowDatabaseQueries
+        expr: rate(mongodb_query_time_seconds_sum[5m]) / rate(mongodb_query_time_seconds_count[5m]) > 1
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "Slow database queries detected"
+          description: "Average query time is above 1 second"
+
+  # Blockchain/Smart Contract Alerts
+  - name: blockchain
+    rules:
+      # Stellar node sync issues
+      - alert: StellarNodeOutOfSync
+        expr: stellar_node_synced == 0
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "Stellar node is out of sync"
+          description: "Stellar node is not synchronized with the network"
+
+      # High transaction failure rate
+      - alert: HighTransactionFailureRate
+        expr: rate(stellar_transaction_failures_total[5m]) / rate(stellar_transactions_total[5m]) * 100 > 10
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "High transaction failure rate"
+          description: "Transaction failure rate is above 10%"
+
+      # Contract invocation errors
+      - alert: ContractInvocationErrors
+        expr: rate(contract_invocation_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "Smart contract invocation errors"
+          description: "Contract invocation errors detected"
+
+  # Business Metrics Alerts
+  - name: business-metrics
+    rules:
+      # Low user activity
+      - alert: LowUserActivity
+        expr: rate(user_activity_events_total[1h]) < 10
+        for: 10m
+        labels:
+          severity: medium
+        annotations:
+          summary: "Low user activity detected"
+          description: "User activity rate is below 10 events per hour"
+
+      # High proof verification failures
+      - alert: HighProofVerificationFailures
+        expr: rate(proof_verification_failures_total[5m]) / rate(proof_verifications_total[5m]) * 100 > 15
+        for: 1m
+        labels:
+          severity: high
+        annotations:
+          summary: "High proof verification failure rate"
+          description: "Proof verification failure rate is above 15%"

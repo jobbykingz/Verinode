@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { batchService } from '../services/batchService';
-import { queueService } from '../services/queueService';
+import { queueService } from '../services/queues/QueueService';
 
 export class BatchController {
   /**
@@ -251,7 +251,9 @@ export class BatchController {
       const { queueName } = req.params;
 
       if (queueName) {
-        const status = queueService.getQueueStatus(queueName);
+        const statuses = await queueService.getAllStatuses();
+        const status = statuses.find(s => s.name === queueName);
+        
         if (!status) {
           res.status(404).json({
             success: false,
@@ -265,7 +267,7 @@ export class BatchController {
           status
         });
       } else {
-        const statuses = queueService.getAllQueueStatuses();
+        const statuses = await queueService.getAllStatuses();
         res.json({
           success: true,
           queues: statuses
