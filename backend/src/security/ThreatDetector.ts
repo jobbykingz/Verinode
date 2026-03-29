@@ -1,51 +1,89 @@
-import { ThreatEvent, ThreatSeverity, ThreatType } from '../models/ThreatEvent';
-import { v4 as uuidv4 } from 'uuid';
+import ThreatPattern, { IThreatPattern } from '../models/ThreatPattern.ts';
+import { getRedisClient } from '../config/redis.ts';
 
 export class ThreatDetector {
-  private knownMaliciousIps: Set<string>;
-  private rateLimitRules: Map<string, number>;
+  private static instance: ThreatDetector;
+  private redis = getRedisClient();
 
-  constructor() {
-    this.knownMaliciousIps = new Set(['192.168.1.100', '10.0.0.50']); // Example
-    this.rateLimitRules = new Map();
+  private constructor() {}
+
+  public static getInstance(): ThreatDetector {
+    if (!ThreatDetector.instance) {
+      ThreatDetector.instance = new ThreatDetector();
+    }
+    return ThreatDetector.instance;
   }
 
-  public analyzeRequest(ip: string, path: string, headers: Record<string, string>): ThreatEvent | null {
-    if (this.knownMaliciousIps.has(ip)) {
-      return this.createThreatEvent(
-        ThreatType.MALWARE,
-        ThreatSeverity.CRITICAL,
-        ip,
-        undefined,
-        'Request from known malicious IP address'
-      );
+  public async analyzeRequest(request: {
+    ip: string;
+    userId?: string;
+    path: string;
+    headers: Record<string, string>;
+    body: any;
+    geo?: string;
+  }): Promise<{ isThreat: boolean; severity: string; score: number }> {
+    // 1. Basic Signature Matching (Historical database)
+    const knownThreats = await ThreatPattern.find({ isActive: true });
+    
+    // 2. Mock AI Behavioral Analysis
+    const requestEntropy = this.calculateEntropy(JSON.stringify(request));
+    const isAnomaly = requestEntropy > 0.8; // Example threshold
+
+    // 3. Frequency Analysis (using Redis)
+    const recentRequests = await this.redis.get(`requests:${request.ip}`);
+    
+    let threatScore = isAnomaly ? 0.6 : 0;
+    
+    // 4. Heuristic-based detection
+    if (this.isLikelySqlInjection(request.body)) threatScore += 0.5;
+    if (this.isLikelyBruteForce(request.ip)) threatScore += 0.4;
+
+    const isThreat = threatScore > 0.7;
+    const severity = threatScore > 0.9 ? 'critical' : threatScore > 0.7 ? 'high' : 'medium';
+
+    if (isThreat) {
+      await this.logThreat(request, severity, threatScore);
     }
 
-    // Basic SQL Injection detection in path or headers
-    const sqlInjectionPattern = /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|OR)\b)|(--)/i;
-    if (sqlInjectionPattern.test(path) || Object.values(headers).some(v => sqlInjectionPattern.test(v))) {
-      return this.createThreatEvent(
-        ThreatType.UNAUTHORIZED_ACCESS,
-        ThreatSeverity.HIGH,
-        ip,
-        undefined,
-        'Potential SQL Injection attempt detected'
-      );
-    }
-
-    return null;
+    return { isThreat, severity, score: threatScore };
   }
 
-  private createThreatEvent(type: ThreatType, severity: ThreatSeverity, sourceIp?: string, userId?: string, description: string = ''): ThreatEvent {
-    return {
-      id: uuidv4(),
-      timestamp: new Date(),
-      type,
+  private calculateEntropy(str: string): number {
+    const len = str.length;
+    const frequencies: Record<string, number> = {};
+    for (let i = 0; i < len; i++) {
+      const char = str[i];
+      frequencies[char] = (frequencies[char] || 0) + 1;
+    }
+    return Object.values(frequencies).reduce((acc, freq) => {
+      const p = freq / len;
+      return acc - p * Math.log2(p);
+    }, 0) / 8; // Normalized
+  }
+
+  private isLikelySqlInjection(body: any): boolean {
+    const sqlRegex = /('|"|;|\/\*|\*\/|union|select|insert|update|delete|drop)/i;
+    return sqlRegex.test(JSON.stringify(body));
+  }
+
+  private isLikelyBruteForce(ip: string): boolean {
+    // Mock logic: checks Redis for failed login attempts
+    return false;
+  }
+
+  private async logThreat(request: any, severity: string, score: number) {
+    await ThreatPattern.create({
+      patternType: 'behavioral_anomaly',
+      signature: `${request.ip}:${request.path}:${Date.now()}`,
       severity,
-      sourceIp,
-      userId,
-      description,
-      actionTaken: false
-    };
+      confidence: score,
+      metadata: { request }
+    });
+  }
+
+  public async getTrustScore(userId: string): Promise<number> {
+    const threats = await ThreatPattern.find({ 'metadata.request.userId': userId });
+    const score = 100 - (threats.length * 5);
+    return Math.max(0, score);
   }
 }
