@@ -47,7 +47,6 @@ export class StorageOptimizer {
   }
 
   public shouldOptimize(metrics: StorageMetrics): boolean {
-    const currentTier = this.determineTier(metrics);
     // Logic to decide if a migration is worth the API overhead
     const daysOld = (new Date().getTime() - metrics.lastAccessed.getTime()) / (1000 * 3600 * 24);
     return daysOld > this.HOT_THRESHOLD_DAYS;
