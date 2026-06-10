@@ -25,9 +25,42 @@ export enum EventType {
   DATA_EXPORT_REQUEST = 'DATA_EXPORT_REQUEST'
 }
 
+export enum AuditSeverity {
+  CRITICAL = 'CRITICAL',
+  HIGH = 'HIGH',
+  MEDIUM = 'MEDIUM',
+  LOW = 'LOW',
+  INFO = 'INFO'
+}
+
+export enum AuditEventType {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  DATA_EXPORT = 'DATA_EXPORT',
+  BLOCKED_REQUEST = 'BLOCKED_REQUEST',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  SECURITY_BREACH = 'SECURITY_BREACH',
+  CONFIG_CHANGE = 'CONFIG_CHANGE',
+  USER_REGISTER = 'USER_REGISTER',
+  USER_SUSPENDED = 'USER_SUSPENDED'
+}
+
+export enum AuditStatus {
+  SUCCESS = 'SUCCESS',
+  FAILURE = 'FAILURE',
+  PARTIAL = 'PARTIAL',
+  WARNING = 'WARNING',
+  PENDING = 'PENDING'
+}
+
 export interface IAuditLog extends Document {
   eventId: string;
+  auditId: string;
   eventType: EventType;
+  severity: AuditSeverity;
+  userId: string;
   actor: {
     id: string;
     type: 'USER' | 'SYSTEM' | 'SERVICE' | 'EXTERNAL';
@@ -40,8 +73,14 @@ export interface IAuditLog extends Document {
     type?: string;
     name?: string;
   };
+  resourceType?: string;
+  resourceId?: string;
   action: string;
   eventData?: any;
+  ipAddress?: string;
+  userAgent?: string;
+  endpoint?: string;
+  method?: string;
   compliance: {
     gdprRelevant: boolean;
     hipaaRelevant: boolean;
@@ -71,6 +110,7 @@ export interface IAuditLog extends Document {
     stackTrace?: string;
   };
   isImmutable: boolean;
+  verifyIntegrity?(): boolean;
 }
 
 const AuditLogSchema: Schema = new Schema({

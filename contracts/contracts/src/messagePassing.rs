@@ -1,4 +1,5 @@
 #![no_std]
+#[macro_use] extern crate alloc;
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Bytes, Env, String, Vec, Map, U256};
 
 #[contracttype]

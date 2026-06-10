@@ -160,7 +160,7 @@ impl CustomTemplateContract {
     ) -> String {
         let creator = e.invoker();
         let template_count: u64 = e.storage().instance().get(&TEMPLATE_COUNT).unwrap_or(0);
-        let template_id = format!("tpl_{}", template_count);
+        let template_id = alloc::format!("tpl_{}", template_count);
         
         let template = CustomTemplate {
             id: template_id.clone(),

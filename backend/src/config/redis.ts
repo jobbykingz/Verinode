@@ -1,0 +1,1 @@
+export const getRedisClient = () => null;

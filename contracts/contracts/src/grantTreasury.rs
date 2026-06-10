@@ -187,7 +187,7 @@ impl GrantTreasury {
 
         // In a real implementation, this would interact with the liquidity pool contract
         // For now, we simulate the investment
-        env.logs().add(&format!("Invested {} lumens in liquidity pool", amount));
+        env.logs().add(&alloc::format!("Invested {} lumens in liquidity pool", amount));
     }
 
     /// Divest funds from liquidity pool
@@ -248,7 +248,7 @@ impl GrantTreasury {
         available_balance += amount + current_yield;
         env.storage().instance().set(&DataKey::AvailableBalance, &available_balance);
 
-        env.logs().add(&format!("Divested {} lumens from liquidity pool", amount));
+        env.logs().add(&alloc::format!("Divested {} lumens from liquidity pool", amount));
     }
 
     /// Allocate grant to grantee
@@ -295,7 +295,7 @@ impl GrantTreasury {
         available_balance -= amount;
         env.storage().instance().set(&DataKey::AvailableBalance, &available_balance);
 
-        env.logs().add(&format!("Allocated {} lumens to grantee {}", amount, grantee));
+        env.logs().add(&alloc::format!("Allocated {} lumens to grantee {}", amount, grantee));
     }
 
     /// Allow grantee to withdraw allocated funds
@@ -342,7 +342,7 @@ impl GrantTreasury {
         available_balance -= allocation.amount;
         env.storage().instance().set(&DataKey::AvailableBalance, &available_balance);
 
-        env.logs().add(&format!("Grantee {} withdrew {} lumens", grantee, allocation.amount));
+        env.logs().add(&alloc::format!("Grantee {} withdrew {} lumens", grantee, allocation.amount));
     }
 
     /// Claim yield from investments
@@ -410,7 +410,7 @@ impl GrantTreasury {
         counter += 1;
         env.storage().instance().set(&DataKey::YieldClaimCounter, &counter);
 
-        env.logs().add(&format!("Claimed {} lumens in yield", total_yield));
+        env.logs().add(&alloc::format!("Claimed {} lumens in yield", total_yield));
     }
 
     /// Auto-invest idle funds
