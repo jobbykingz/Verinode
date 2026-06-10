@@ -92,7 +92,7 @@ export class PluginError extends Error {
   constructor(
     message: string,
     public code: string,
-    public pluginId?: string
+    public pluginId?: string,
   ) {
     super(message);
     this.name = 'PluginError';

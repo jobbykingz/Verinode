@@ -15,7 +15,9 @@ jest.mock('recharts', () => ({
   CartesianGrid: () => <div data-testid="cartesian-grid"></div>,
   Tooltip: () => <div data-testid="tooltip"></div>,
   Legend: () => <div data-testid="legend"></div>,
-  ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
+  ResponsiveContainer: ({ children }: any) => (
+    <div data-testid="responsive-container">{children}</div>
+  ),
 }));
 
 // Mock fetch
@@ -28,14 +30,16 @@ describe('BehaviorInsights Component', () => {
 
   it('renders behavior insights component', () => {
     render(<BehaviorInsights />);
-    
+
     expect(screen.getByText('User Behavior Insights')).toBeInTheDocument();
-    expect(screen.getByText('Understand how users interact with your platform')).toBeInTheDocument();
+    expect(
+      screen.getByText('Understand how users interact with your platform'),
+    ).toBeInTheDocument();
   });
 
   it('renders view tabs', () => {
     render(<BehaviorInsights />);
-    
+
     expect(screen.getByText('Segments')).toBeInTheDocument();
     expect(screen.getByText('Features')).toBeInTheDocument();
     expect(screen.getByText('Patterns')).toBeInTheDocument();
@@ -43,26 +47,26 @@ describe('BehaviorInsights Component', () => {
 
   it('displays segments view by default', () => {
     render(<BehaviorInsights />);
-    
+
     const segmentsTab = screen.getByText('Segments');
     expect(segmentsTab).toHaveClass('bg-blue-600', 'text-white');
   });
 
   it('switches to features view when clicked', () => {
     render(<BehaviorInsights />);
-    
+
     const featuresTab = screen.getByText('Features');
     fireEvent.click(featuresTab);
-    
+
     expect(featuresTab).toHaveClass('bg-blue-600', 'text-white');
   });
 
   it('switches to patterns view when clicked', () => {
     render(<BehaviorInsights />);
-    
+
     const patternsTab = screen.getByText('Patterns');
     fireEvent.click(patternsTab);
-    
+
     expect(patternsTab).toHaveClass('bg-blue-600', 'text-white');
   });
 
@@ -77,22 +81,22 @@ describe('BehaviorInsights Component', () => {
             userCount: 450,
             loginFrequency: 8.5,
             sessionDuration: 2400,
-            featureUsage: { 'proof_creation': 15 }
-          }
+            featureUsage: { proof_creation: 15 },
+          },
         ],
         featureUsage: [
           {
             featureName: 'Proof Creation',
             usageCount: 15420,
             uniqueUsers: 3200,
-            adoptionRate: 85.5
-          }
-        ]
-      })
+            adoptionRate: 85.5,
+          },
+        ],
+      }),
     });
 
     render(<BehaviorInsights />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Total Users')).toBeInTheDocument();
       expect(screen.getByText('Avg Session')).toBeInTheDocument();
@@ -107,15 +111,15 @@ describe('BehaviorInsights Component', () => {
       ok: true,
       json: async () => ({
         segments: [],
-        featureUsage: []
-      })
+        featureUsage: [],
+      }),
     });
 
     render(<BehaviorInsights />);
-    
+
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/analytics/user-behavior?userId=undefined&timeframe=30d'
+        '/api/analytics/user-behavior?userId=undefined&timeframe=30d',
       );
     });
   });
@@ -131,15 +135,15 @@ describe('BehaviorInsights Component', () => {
             userCount: 450,
             loginFrequency: 8.5,
             sessionDuration: 2400,
-            featureUsage: { 'proof_creation': 15 }
-          }
+            featureUsage: { proof_creation: 15 },
+          },
         ],
-        featureUsage: []
-      })
+        featureUsage: [],
+      }),
     });
 
     render(<BehaviorInsights />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('User Segments')).toBeInTheDocument();
       expect(screen.getByText('Segment Details')).toBeInTheDocument();
@@ -157,17 +161,17 @@ describe('BehaviorInsights Component', () => {
             featureName: 'Proof Creation',
             usageCount: 15420,
             uniqueUsers: 3200,
-            adoptionRate: 85.5
-          }
-        ]
-      })
+            adoptionRate: 85.5,
+          },
+        ],
+      }),
     });
 
     render(<BehaviorInsights />);
-    
+
     const featuresTab = screen.getByText('Features');
     fireEvent.click(featuresTab);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Feature Usage')).toBeInTheDocument();
     });
@@ -179,15 +183,15 @@ describe('BehaviorInsights Component', () => {
       ok: true,
       json: async () => ({
         segments: [],
-        featureUsage: []
-      })
+        featureUsage: [],
+      }),
     });
 
     render(<BehaviorInsights />);
-    
+
     const patternsTab = screen.getByText('Patterns');
     fireEvent.click(patternsTab);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Behavior Patterns')).toBeInTheDocument();
       expect(screen.getByText('Time-based Patterns')).toBeInTheDocument();
@@ -200,7 +204,7 @@ describe('BehaviorInsights Component', () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
     render(<BehaviorInsights />);
-    
+
     // Should not crash and should still render the component
     expect(screen.getByText('User Behavior Insights')).toBeInTheDocument();
   });

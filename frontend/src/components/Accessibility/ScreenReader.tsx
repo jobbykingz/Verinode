@@ -25,16 +25,11 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
   children,
   className = '',
   announcements = true,
-  autoDetect = true
+  autoDetect = true,
 }) => {
-  const { 
-    isScreenReaderActive, 
-    announce, 
-    preferences,
-    updatePreference,
-    generateId 
-  } = useAccessibility();
-  
+  const { isScreenReaderActive, announce, preferences, updatePreference, generateId } =
+    useAccessibility();
+
   const [announcementQueue, setAnnouncementQueue] = useState<Announcement[]>([]);
   const politeRegionRef = useRef<HTMLDivElement | null>(null);
   const assertiveRegionRef = useRef<HTMLDivElement | null>(null);
@@ -90,14 +85,15 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
 
     const timer = setTimeout(() => {
       const [currentAnnouncement, ...remaining] = announcementQueue;
-      
-      const region = currentAnnouncement.priority === 'assertive' 
-        ? assertiveRegionRef.current 
-        : politeRegionRef.current;
+
+      const region =
+        currentAnnouncement.priority === 'assertive'
+          ? assertiveRegionRef.current
+          : politeRegionRef.current;
 
       if (region) {
         region.textContent = currentAnnouncement.message;
-        
+
         // Clear after announcement
         setTimeout(() => {
           region.textContent = '';
@@ -116,10 +112,10 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
       id: generateId('announcement'),
       message,
       priority,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
-    setAnnouncementQueue(prev => [...prev, announcement]);
+    setAnnouncementQueue((prev) => [...prev, announcement]);
   };
 
   // Expose announcement method globally
@@ -141,7 +137,7 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
 
     // Listen for navigation events
     window.addEventListener('popstate', handleRouteChange);
-    
+
     return () => {
       window.removeEventListener('popstate', handleRouteChange);
     };
@@ -187,7 +183,7 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
     };
 
     setupLandmarks();
-    
+
     // Watch for dynamic content changes
     const observer = new MutationObserver(() => {
       setupLandmarks();
@@ -195,7 +191,7 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
 
     return () => observer.disconnect();
@@ -207,22 +203,27 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
       const form = event.target as HTMLFormElement;
       if (!form.checkValidity()) {
         const invalidFields = form.querySelectorAll(':invalid');
-        const fieldNames = Array.from(invalidFields).map(field => {
+        const fieldNames = Array.from(invalidFields).map((field) => {
           const label = document.querySelector(`label[for="${field.id}"]`);
-          return label?.textContent || field.getAttribute('placeholder') || field.getAttribute('name') || 'Field';
+          return (
+            label?.textContent ||
+            field.getAttribute('placeholder') ||
+            field.getAttribute('name') ||
+            'Field'
+          );
         });
-        
+
         if (fieldNames.length > 0) {
           addAnnouncement(
             `Form validation failed. Please check: ${fieldNames.join(', ')}`,
-            'assertive'
+            'assertive',
           );
         }
       }
     };
 
     document.addEventListener('submit', handleFormSubmit);
-    
+
     return () => {
       document.removeEventListener('submit', handleFormSubmit);
     };
@@ -234,7 +235,7 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
   }
 
   return (
-    <div 
+    <div
       className={`screen-reader-support ${className}`}
       role="region"
       aria-label="Screen reader support"
@@ -247,11 +248,13 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
 
       {/* Screen reader controls */}
       {(preferences.screenReader || isDetected) && (
-        <div className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 
+        <div
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 
                         focus:bg-white focus:border-2 focus:border-blue-600 focus:rounded-lg 
                         focus:p-4 focus:shadow-lg"
-             role="group"
-             aria-label="Screen reader controls">
+          role="group"
+          aria-label="Screen reader controls"
+        >
           <h3 className="font-bold mb-2">Screen Reader Controls</h3>
           <button
             onClick={() => updatePreference('announcements', !preferences.announcements)}

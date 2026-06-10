@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 
-const SearchFilter = ({ 
-  onSearch, 
-  onFilterChange, 
-  initialFilters = {},
-  categories = [] 
-}) => {
+const SearchFilter = ({ onSearch, onFilterChange, initialFilters = {}, categories = [] }) => {
   const [searchQuery, setSearchQuery] = useState(initialFilters.search || '');
   const [selectedCategory, setSelectedCategory] = useState(initialFilters.category || '');
   const [minPrice, setMinPrice] = useState(initialFilters.minPrice || '');
@@ -22,7 +17,7 @@ const SearchFilter = ({
       minPrice: minPrice ? parseFloat(minPrice) : undefined,
       maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
       minRating: minRating ? parseFloat(minRating) : undefined,
-      tags: selectedTags
+      tags: selectedTags,
     };
 
     onSearch(searchQuery, filters);
@@ -38,7 +33,7 @@ const SearchFilter = ({
   };
 
   const handleRemoveTag = (tagToRemove) => {
-    const newTags = selectedTags.filter(tag => tag !== tagToRemove);
+    const newTags = selectedTags.filter((tag) => tag !== tagToRemove);
     setSelectedTags(newTags);
     onFilterChange({ ...getFilters(), tags: newTags });
   };
@@ -49,7 +44,7 @@ const SearchFilter = ({
     minPrice: minPrice ? parseFloat(minPrice) : undefined,
     maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
     minRating: minRating ? parseFloat(minRating) : undefined,
-    tags: selectedTags
+    tags: selectedTags,
   });
 
   const handleFilterChange = (filterName, value) => {
@@ -69,8 +64,16 @@ const SearchFilter = ({
   };
 
   const commonTags = [
-    'identity', 'kyc', 'credential', 'document', 'verification', 
-    'proof', 'authentication', 'blockchain', 'stellar', 'digital'
+    'identity',
+    'kyc',
+    'credential',
+    'document',
+    'verification',
+    'proof',
+    'authentication',
+    'blockchain',
+    'stellar',
+    'digital',
   ];
 
   return (
@@ -115,7 +118,7 @@ const SearchFilter = ({
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">All Categories</option>
-            {categories.map(category => (
+            {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
@@ -125,9 +128,7 @@ const SearchFilter = ({
 
         {/* Price Range */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price Range (XLM)
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Price Range (XLM)</label>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <input
@@ -135,7 +136,10 @@ const SearchFilter = ({
                 value={minPrice}
                 onChange={(e) => {
                   setMinPrice(e.target.value);
-                  handleFilterChange('minPrice', e.target.value ? parseFloat(e.target.value) : undefined);
+                  handleFilterChange(
+                    'minPrice',
+                    e.target.value ? parseFloat(e.target.value) : undefined,
+                  );
                 }}
                 placeholder="Min"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -149,7 +153,10 @@ const SearchFilter = ({
                 value={maxPrice}
                 onChange={(e) => {
                   setMaxPrice(e.target.value);
-                  handleFilterChange('maxPrice', e.target.value ? parseFloat(e.target.value) : undefined);
+                  handleFilterChange(
+                    'maxPrice',
+                    e.target.value ? parseFloat(e.target.value) : undefined,
+                  );
                 }}
                 placeholder="Max"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -170,7 +177,10 @@ const SearchFilter = ({
             value={minRating}
             onChange={(e) => {
               setMinRating(e.target.value);
-              handleFilterChange('minRating', e.target.value ? parseFloat(e.target.value) : undefined);
+              handleFilterChange(
+                'minRating',
+                e.target.value ? parseFloat(e.target.value) : undefined,
+              );
             }}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
@@ -184,14 +194,12 @@ const SearchFilter = ({
 
         {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tags
-          </label>
-          
+          <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+
           {/* Selected Tags */}
           {selectedTags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {selectedTags.map(tag => (
+              {selectedTags.map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -232,7 +240,7 @@ const SearchFilter = ({
           <div>
             <p className="text-xs text-gray-500 mb-2">Common tags:</p>
             <div className="flex flex-wrap gap-2">
-              {commonTags.map(tag => (
+              {commonTags.map((tag) => (
                 <button
                   key={tag}
                   type="button"

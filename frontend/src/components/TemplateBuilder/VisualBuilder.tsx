@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Save, 
-  Eye, 
-  EyeOff, 
-  Trash2, 
-  Copy, 
-  Download, 
+import {
+  Plus,
+  Save,
+  Eye,
+  EyeOff,
+  Trash2,
+  Copy,
+  Download,
   Upload,
   Settings,
   Palette,
   Share2,
   Check,
-  X
+  X,
 } from 'lucide-react';
 import FieldDefinitions from './FieldDefinitions';
 import ValidationRules from './ValidationRules';
@@ -101,7 +101,7 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
   initialTemplate,
   onSave,
   onCancel,
-  isLoading = false
+  isLoading = false,
 }) => {
   const [template, setTemplate] = useState<CustomTemplate>(
     initialTemplate || {
@@ -117,16 +117,16 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
           primaryColor: '#3b82f6',
           secondaryColor: '#6b7280',
           backgroundColor: '#ffffff',
-          textColor: '#1f2937'
-        }
+          textColor: '#1f2937',
+        },
       },
       templateSchema: {},
       isPublic: false,
       tags: [],
       price: 0,
       requiresEncryption: false,
-      privacyLevel: 'public'
-    }
+      privacyLevel: 'public',
+    },
   );
 
   const [activeTab, setActiveTab] = useState<'builder' | 'preview' | 'settings'>('builder');
@@ -137,17 +137,19 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
   // Initialize with a default section if none exists
   useEffect(() => {
     if (template.layout.sections.length === 0) {
-      setTemplate(prev => ({
+      setTemplate((prev) => ({
         ...prev,
         layout: {
           ...prev.layout,
-          sections: [{
-            id: 'main',
-            title: 'Main Information',
-            fields: [],
-            order: 0
-          }]
-        }
+          sections: [
+            {
+              id: 'main',
+              title: 'Main Information',
+              fields: [],
+              order: 0,
+            },
+          ],
+        },
       }));
     }
   }, [template.layout.sections.length]);
@@ -186,11 +188,9 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
   };
 
   const handleFieldChange = (fieldId: string, updates: Partial<TemplateField>) => {
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      fields: prev.fields.map(field => 
-        field.id === fieldId ? { ...field, ...updates } : field
-      )
+      fields: prev.fields.map((field) => (field.id === fieldId ? { ...field, ...updates } : field)),
     }));
   };
 
@@ -198,77 +198,77 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
     const newField: TemplateField = {
       ...field,
       id: `field_${Date.now()}`,
-      order: template.fields.length
+      order: template.fields.length,
     };
 
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      fields: [...prev.fields, newField]
+      fields: [...prev.fields, newField],
     }));
 
     // Add field to the first section
     if (template.layout.sections.length > 0) {
       const firstSection = template.layout.sections[0];
-      setTemplate(prev => ({
+      setTemplate((prev) => ({
         ...prev,
         layout: {
           ...prev.layout,
-          sections: prev.layout.sections.map(section => 
+          sections: prev.layout.sections.map((section) =>
             section.id === firstSection.id
               ? {
                   ...section,
-                  fields: [...section.fields, { fieldId: newField.id, width: 'full' }]
+                  fields: [...section.fields, { fieldId: newField.id, width: 'full' }],
                 }
-              : section
-          )
-        }
+              : section,
+          ),
+        },
       }));
     }
   };
 
   const handleRemoveField = (fieldId: string) => {
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      fields: prev.fields.filter(field => field.id !== fieldId),
-      validationRules: prev.validationRules.filter(rule => rule.fieldId !== fieldId),
+      fields: prev.fields.filter((field) => field.id !== fieldId),
+      validationRules: prev.validationRules.filter((rule) => rule.fieldId !== fieldId),
       layout: {
         ...prev.layout,
-        sections: prev.layout.sections.map(section => ({
+        sections: prev.layout.sections.map((section) => ({
           ...section,
-          fields: section.fields.filter(f => f.fieldId !== fieldId)
-        }))
-      }
+          fields: section.fields.filter((f) => f.fieldId !== fieldId),
+        })),
+      },
     }));
   };
 
   const handleAddValidationRule = (rule: Omit<ValidationRule, 'id'>) => {
     const newRule: ValidationRule = {
       ...rule,
-      id: `rule_${Date.now()}`
+      id: `rule_${Date.now()}`,
     };
 
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      validationRules: [...prev.validationRules, newRule]
+      validationRules: [...prev.validationRules, newRule],
     }));
   };
 
   const handleRemoveValidationRule = (ruleId: string) => {
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      validationRules: prev.validationRules.filter(rule => rule.id !== ruleId)
+      validationRules: prev.validationRules.filter((rule) => rule.id !== ruleId),
     }));
   };
 
   const handleLayoutChange = (layout: TemplateLayout) => {
-    setTemplate(prev => ({
+    setTemplate((prev) => ({
       ...prev,
-      layout
+      layout,
     }));
   };
 
   const getFieldById = (fieldId: string) => {
-    return template.fields.find(field => field.id === fieldId);
+    return template.fields.find((field) => field.id === fieldId);
   };
 
   return (
@@ -289,7 +289,11 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
               onClick={() => setIsPreviewMode(!isPreviewMode)}
               className="flex items-center px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              {isPreviewMode ? <EyeOff className="w-4 h-4 mr-2" /> : <Eye className="w-4 h-4 mr-2" />}
+              {isPreviewMode ? (
+                <EyeOff className="w-4 h-4 mr-2" />
+              ) : (
+                <Eye className="w-4 h-4 mr-2" />
+              )}
               {isPreviewMode ? 'Edit' : 'Preview'}
             </button>
             <button
@@ -319,8 +323,8 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
               {[
                 { id: 'builder', label: 'Builder', icon: Plus },
                 { id: 'preview', label: 'Preview', icon: Eye },
-                { id: 'settings', label: 'Settings', icon: Settings }
-              ].map(tab => (
+                { id: 'settings', label: 'Settings', icon: Settings },
+              ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
@@ -361,7 +365,7 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                 <div className="max-w-4xl mx-auto space-y-6">
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">Template Settings</h2>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -370,15 +374,15 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                         <input
                           type="text"
                           value={template.name}
-                          onChange={(e) => setTemplate(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) =>
+                            setTemplate((prev) => ({ ...prev, name: e.target.value }))
+                          }
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                             errors.name ? 'border-red-500' : 'border-gray-300'
                           }`}
                           placeholder="Enter template name"
                         />
-                        {errors.name && (
-                          <p className="mt-2 text-sm text-red-600">{errors.name}</p>
-                        )}
+                        {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name}</p>}
                       </div>
 
                       <div>
@@ -387,7 +391,9 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                         </label>
                         <select
                           value={template.category}
-                          onChange={(e) => setTemplate(prev => ({ ...prev, category: e.target.value }))}
+                          onChange={(e) =>
+                            setTemplate((prev) => ({ ...prev, category: e.target.value }))
+                          }
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="identity">Identity Verification</option>
@@ -409,7 +415,9 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                       </label>
                       <textarea
                         value={template.description}
-                        onChange={(e) => setTemplate(prev => ({ ...prev, description: e.target.value }))}
+                        onChange={(e) =>
+                          setTemplate((prev) => ({ ...prev, description: e.target.value }))
+                        }
                         rows={4}
                         className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                           errors.description ? 'border-red-500' : 'border-gray-300'
@@ -426,7 +434,9 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                         <input
                           type="checkbox"
                           checked={template.isPublic}
-                          onChange={(e) => setTemplate(prev => ({ ...prev, isPublic: e.target.checked }))}
+                          onChange={(e) =>
+                            setTemplate((prev) => ({ ...prev, isPublic: e.target.checked }))
+                          }
                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span className="ml-2 text-sm text-gray-700">Make template public</span>
@@ -436,7 +446,12 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                         <input
                           type="checkbox"
                           checked={template.requiresEncryption}
-                          onChange={(e) => setTemplate(prev => ({ ...prev, requiresEncryption: e.target.checked }))}
+                          onChange={(e) =>
+                            setTemplate((prev) => ({
+                              ...prev,
+                              requiresEncryption: e.target.checked,
+                            }))
+                          }
                           className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span className="ml-2 text-sm text-gray-700">Require encryption</span>
@@ -461,7 +476,7 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
             <div className="p-4 border-b border-gray-200">
               <h3 className="font-semibold text-gray-900">Template Components</h3>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto">
               <div className="p-4">
                 <FieldDefinitions
@@ -473,7 +488,7 @@ const VisualBuilder: React.FC<VisualBuilderProps> = ({
                   onFieldSelect={setSelectedField}
                 />
               </div>
-              
+
               <div className="p-4 border-t border-gray-200">
                 <ValidationRules
                   rules={template.validationRules}

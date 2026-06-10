@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { User, Settings, Copy, ExternalLink, RefreshCw, Shield, Globe, LogOut, ChevronDown } from 'lucide-react';
+import {
+  User,
+  Settings,
+  Copy,
+  ExternalLink,
+  RefreshCw,
+  Shield,
+  Globe,
+  LogOut,
+  ChevronDown,
+} from 'lucide-react';
 import { useFreighter } from '../../hooks/useFreighter';
 import toast from 'react-hot-toast';
 
@@ -23,7 +33,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
   onNetworkChange,
   className = '',
   showNetworkSelector = true,
-  compact = false
+  compact = false,
 }) => {
   const {
     isConnected,
@@ -34,7 +44,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
     isLoadingNetwork,
     disconnect,
     refreshBalance,
-    switchNetwork
+    switchNetwork,
   } = useFreighter();
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -45,20 +55,20 @@ const AccountManager: React.FC<AccountManagerProps> = ({
       name: 'Public',
       value: 'PUBLIC',
       passphrase: 'Public Global Stellar Network ; September 2015',
-      color: 'green'
+      color: 'green',
     },
     {
       name: 'Testnet',
       value: 'TESTNET',
       passphrase: 'Test SDF Network ; September 2015',
-      color: 'blue'
+      color: 'blue',
     },
     {
       name: 'Futurenet',
       value: 'FUTURENET',
       passphrase: 'Test SDF Future Network ; October 2022',
-      color: 'purple'
-    }
+      color: 'purple',
+    },
   ];
 
   const handleRefresh = async () => {
@@ -111,7 +121,10 @@ const AccountManager: React.FC<AccountManagerProps> = ({
   const viewOnExplorer = () => {
     if (account?.publicKey) {
       const networkType = network?.network === 'PUBLIC' ? 'public' : 'testnet';
-      window.open(`https://stellar.expert/explorer/${networkType}/account/${account.publicKey}`, '_blank');
+      window.open(
+        `https://stellar.expert/explorer/${networkType}/account/${account.publicKey}`,
+        '_blank',
+      );
     }
   };
 
@@ -120,7 +133,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
       const num = parseFloat(balance);
       return num.toLocaleString(undefined, {
         minimumFractionDigits: 2,
-        maximumFractionDigits: 7
+        maximumFractionDigits: 7,
       });
     } catch {
       return '0.00';
@@ -128,7 +141,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
   };
 
   const getCurrentNetwork = () => {
-    return networks.find(n => n.value === network?.network) || networks[0];
+    return networks.find((n) => n.value === network?.network) || networks[0];
   };
 
   if (!isConnected || !account) {
@@ -159,7 +172,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={handleRefresh}
@@ -168,7 +181,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
             >
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
-            
+
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="p-1 text-gray-500 hover:text-gray-700"
@@ -215,12 +228,10 @@ const AccountManager: React.FC<AccountManagerProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-medium text-gray-900">Account Manager</h3>
-              <p className="text-sm text-gray-600">
-                {account.network || 'Unknown Network'}
-              </p>
+              <p className="text-sm text-gray-600">{account.network || 'Unknown Network'}</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={handleRefresh}
@@ -229,7 +240,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
             >
               <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
-            
+
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
@@ -244,9 +255,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
       <div className="p-6 space-y-4">
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Public Key
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Public Key</label>
           <div className="flex items-center space-x-2">
             <div className="flex-1 p-3 bg-gray-50 rounded-lg font-mono text-sm text-gray-900">
               {account.publicKey}
@@ -268,9 +277,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
 
         {/* Balance */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Balance
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Balance</label>
           {isLoadingBalance ? (
             <div className="p-3 bg-gray-50 rounded-lg">
               <div className="animate-pulse flex space-x-4">
@@ -302,9 +309,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
         {/* Network Selector */}
         {showNetworkSelector && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Network
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Network</label>
             {isLoadingNetwork ? (
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="animate-pulse flex space-x-4">
@@ -319,9 +324,7 @@ const AccountManager: React.FC<AccountManagerProps> = ({
                 >
                   <div className="flex items-center space-x-3">
                     <Globe className={`w-5 h-5 text-${getCurrentNetwork().color}-600`} />
-                    <span className="font-medium text-gray-900">
-                      {getCurrentNetwork().name}
-                    </span>
+                    <span className="font-medium text-gray-900">{getCurrentNetwork().name}</span>
                   </div>
                   <ChevronDown className="w-4 h-4 text-gray-500" />
                 </button>
@@ -362,7 +365,8 @@ const AccountManager: React.FC<AccountManagerProps> = ({
             <div>
               <h4 className="text-sm font-medium text-blue-900">Security Notice</h4>
               <p className="text-xs text-blue-700 mt-1">
-                Your private keys are securely stored in Freighter wallet. Never share your private key or recovery phrase.
+                Your private keys are securely stored in Freighter wallet. Never share your private
+                key or recovery phrase.
               </p>
             </div>
           </div>

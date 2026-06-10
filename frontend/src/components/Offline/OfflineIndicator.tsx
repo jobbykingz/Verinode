@@ -7,7 +7,7 @@ export const OfflineIndicator: React.FC = () => {
   if (isOnline) return null;
 
   return (
-    <div 
+    <div
       className="fixed bottom-4 left-4 z-50 flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg"
       role="alert"
     >

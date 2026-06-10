@@ -61,14 +61,19 @@ class FormBuilderService {
     return response.data;
   }
 
-  async getSubmissions(templateId: string, filters?: {
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ submissions: FormSubmission[]; total: number }> {
-    const response = await this.api.get(`/form-templates/${templateId}/submissions`, { params: filters });
+  async getSubmissions(
+    templateId: string,
+    filters?: {
+      status?: string;
+      dateFrom?: string;
+      dateTo?: string;
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<{ submissions: FormSubmission[]; total: number }> {
+    const response = await this.api.get(`/form-templates/${templateId}/submissions`, {
+      params: filters,
+    });
     return response.data;
   }
 
@@ -77,7 +82,10 @@ class FormBuilderService {
     return response.data;
   }
 
-  async updateSubmissionStatus(id: string, status: FormSubmission['status']): Promise<FormSubmission> {
+  async updateSubmissionStatus(
+    id: string,
+    status: FormSubmission['status'],
+  ): Promise<FormSubmission> {
     const response = await this.api.patch(`/form-submissions/${id}/status`, { status });
     return response.data;
   }
@@ -89,7 +97,9 @@ class FormBuilderService {
   }
 
   async getUsageStats(templateId: string, period: 'day' | 'week' | 'month'): Promise<any> {
-    const response = await this.api.get(`/form-templates/${templateId}/usage`, { params: { period } });
+    const response = await this.api.get(`/form-templates/${templateId}/usage`, {
+      params: { period },
+    });
     return response.data;
   }
 
@@ -105,7 +115,7 @@ class FormBuilderService {
   async importTemplate(file: File): Promise<FormTemplate> {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     const response = await this.api.post('/form-templates/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -115,12 +125,18 @@ class FormBuilderService {
   }
 
   // Validation Operations
-  async validateField(field: FormField, value: any): Promise<{ isValid: boolean; errors: string[] }> {
+  async validateField(
+    field: FormField,
+    value: any,
+  ): Promise<{ isValid: boolean; errors: string[] }> {
     const response = await this.api.post('/validation/field', { field, value });
     return response.data;
   }
 
-  async validateForm(fields: FormField[], data: Record<string, any>): Promise<{
+  async validateForm(
+    fields: FormField[],
+    data: Record<string, any>,
+  ): Promise<{
     isValid: boolean;
     errors: Record<string, string[]>;
   }> {
@@ -133,7 +149,7 @@ class FormBuilderService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('fieldId', fieldId);
-    
+
     const response = await this.api.post('/files/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -147,11 +163,14 @@ class FormBuilderService {
   }
 
   // Template Sharing Operations
-  async shareTemplate(id: string, options: {
-    isPublic: boolean;
-    allowCopy: boolean;
-    expiresAt?: string;
-  }): Promise<{ shareUrl: string; shareId: string }> {
+  async shareTemplate(
+    id: string,
+    options: {
+      isPublic: boolean;
+      allowCopy: boolean;
+      expiresAt?: string;
+    },
+  ): Promise<{ shareUrl: string; shareId: string }> {
     const response = await this.api.post(`/form-templates/${id}/share`, options);
     return response.data;
   }
@@ -188,11 +207,14 @@ class FormBuilderService {
   }
 
   // Search and Discovery
-  async searchTemplates(query: string, filters?: {
-    category?: string;
-    tags?: string[];
-    fieldType?: string;
-  }): Promise<FormTemplate[]> {
+  async searchTemplates(
+    query: string,
+    filters?: {
+      category?: string;
+      tags?: string[];
+      fieldType?: string;
+    },
+  ): Promise<FormTemplate[]> {
     const response = await this.api.get('/form-templates/search', {
       params: { query, ...filters },
     });

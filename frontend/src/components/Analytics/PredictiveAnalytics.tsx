@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Brain, TrendingUp, AlertTriangle, Lightbulb, Target, Activity, Calendar, Settings } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
+import {
+  Brain,
+  TrendingUp,
+  AlertTriangle,
+  Lightbulb,
+  Target,
+  Activity,
+  Calendar,
+  Settings,
+} from 'lucide-react';
 
 interface Prediction {
   date: string;
@@ -47,7 +67,7 @@ interface PredictiveAnalyticsProps {
 
 export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
   metric = 'user_growth',
-  horizon = '30d'
+  horizon = '30d',
 }) => {
   const [predictions, setPredictions] = useState<PredictiveModel | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
@@ -55,7 +75,9 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
   const [loading, setLoading] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState(metric);
   const [selectedHorizon, setSelectedHorizon] = useState(horizon);
-  const [activeTab, setActiveTab] = useState<'predictions' | 'anomalies' | 'insights'>('predictions');
+  const [activeTab, setActiveTab] = useState<'predictions' | 'anomalies' | 'insights'>(
+    'predictions',
+  );
 
   useEffect(() => {
     fetchPredictiveData();
@@ -65,9 +87,11 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
     setLoading(true);
     try {
       const [predictionsRes, anomaliesRes, insightsRes] = await Promise.all([
-        fetch(`/api/analytics/predictive-analytics?metric=${selectedMetric}&horizon=${selectedHorizon}`),
+        fetch(
+          `/api/analytics/predictive-analytics?metric=${selectedMetric}&horizon=${selectedHorizon}`,
+        ),
         fetch('/api/analytics/anomaly-detection'),
-        fetch('/api/analytics/predictive-insights')
+        fetch('/api/analytics/predictive-insights'),
       ]);
 
       const predictionsData = await predictionsRes.json();
@@ -86,20 +110,29 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-50';
-      case 'high': return 'text-orange-600 bg-orange-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'low': return 'text-blue-600 bg-blue-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'critical':
+        return 'text-red-600 bg-red-50';
+      case 'high':
+        return 'text-orange-600 bg-orange-50';
+      case 'medium':
+        return 'text-yellow-600 bg-yellow-50';
+      case 'low':
+        return 'text-blue-600 bg-blue-50';
+      default:
+        return 'text-gray-600 bg-gray-50';
     }
   };
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'high': return 'text-red-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
+      case 'high':
+        return 'text-red-600';
+      case 'medium':
+        return 'text-yellow-600';
+      case 'low':
+        return 'text-green-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
@@ -125,9 +158,11 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">Predictive Analytics</h2>
-          <p className="text-sm text-gray-600 mt-1">AI-powered predictions and insights for business planning</p>
+          <p className="text-sm text-gray-600 mt-1">
+            AI-powered predictions and insights for business planning
+          </p>
         </div>
-        
+
         <div className="flex gap-2">
           <select
             value={selectedMetric}
@@ -140,7 +175,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
             <option value="response_time">Response Time</option>
             <option value="error_rate">Error Rate</option>
           </select>
-          
+
           <select
             value={selectedHorizon}
             onChange={(e) => setSelectedHorizon(e.target.value)}
@@ -167,7 +202,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
               <Brain className="w-8 h-8 text-blue-500" />
             </div>
           </div>
-          
+
           <div className="bg-green-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -179,7 +214,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
               <Target className="w-8 h-8 text-green-500" />
             </div>
           </div>
-          
+
           <div className="bg-purple-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -191,7 +226,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
               <Activity className="w-8 h-8 text-purple-500" />
             </div>
           </div>
-          
+
           <div className="bg-orange-50 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -218,7 +253,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
           <TrendingUp className="w-4 h-4" />
           Predictions
         </button>
-        
+
         <button
           onClick={() => setActiveTab('anomalies')}
           className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -230,7 +265,7 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
           <AlertTriangle className="w-4 h-4" />
           Anomalies
         </button>
-        
+
         <button
           onClick={() => setActiveTab('insights')}
           className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -247,47 +282,53 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
       {activeTab === 'predictions' && predictions && (
         <div className="space-y-6">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Predicted Values with Confidence Intervals</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Predicted Values with Confidence Intervals
+            </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={predictions.predictions}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: 12 }}
                     tickFormatter={(value) => new Date(value).toLocaleDateString()}
                   />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
+                  <Tooltip
                     labelFormatter={(value) => new Date(value).toLocaleDateString()}
                     formatter={(value: any, name: string) => [
                       typeof value === 'number' ? value.toLocaleString() : value,
-                      name === 'value' ? 'Predicted' : name === 'lower' ? 'Lower Bound' : 'Upper Bound'
+                      name === 'value'
+                        ? 'Predicted'
+                        : name === 'lower'
+                          ? 'Lower Bound'
+                          : 'Upper Bound',
                     ]}
                   />
                   <Legend />
-                  <Area 
-                    type="monotone" 
-                    dataKey="upper" 
+                  <Area
+                    type="monotone"
+                    dataKey="upper"
                     stackId="1"
-                    stroke="#3b82f6" 
+                    stroke="#3b82f6"
                     fill="#3b82f6"
                     fillOpacity={0.2}
                     name="Upper Bound"
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="lower" 
+                  <Area
+                    type="monotone"
+                    dataKey="lower"
                     stackId="2"
-                    stroke="#3b82f6" 
+                    stroke="#3b82f6"
                     fill="#3b82f6"
                     fillOpacity={0.2}
                     name="Lower Bound"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="#3b82f6" 
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#3b82f6"
                     strokeWidth={2}
                     name="Predicted Value"
                     dot={{ r: 3 }}
@@ -307,25 +348,26 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
                 Confidence: {((predictions.predictions[0]?.confidence || 0) * 100).toFixed(1)}%
               </p>
             </div>
-            
+
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-medium text-gray-900 mb-2">30 Day Average</h4>
               <p className="text-2xl font-bold text-green-600">
-                {Math.round(predictions.predictions.reduce((sum, p) => sum + p.value, 0) / predictions.predictions.length).toLocaleString()}
+                {Math.round(
+                  predictions.predictions.reduce((sum, p) => sum + p.value, 0) /
+                    predictions.predictions.length,
+                ).toLocaleString()}
               </p>
-              <p className="text-sm text-gray-600">
-                Based on current trends
-              </p>
+              <p className="text-sm text-gray-600">Based on current trends</p>
             </div>
-            
+
             <div className="border border-gray-200 rounded-lg p-4">
               <h4 className="font-medium text-gray-900 mb-2">End of Period</h4>
               <p className="text-2xl font-bold text-purple-600">
-                {predictions.predictions[predictions.predictions.length - 1]?.value.toLocaleString() || 'N/A'}
+                {predictions.predictions[
+                  predictions.predictions.length - 1
+                ]?.value.toLocaleString() || 'N/A'}
               </p>
-              <p className="text-sm text-gray-600">
-                {selectedHorizon} projection
-              </p>
+              <p className="text-sm text-gray-600">{selectedHorizon} projection</p>
             </div>
           </div>
         </div>
@@ -349,19 +391,25 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
                       <p className="text-sm text-gray-600">{anomaly.description}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(anomaly.severity)}`}>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityColor(anomaly.severity)}`}
+                      >
                         {anomaly.severity.toUpperCase()}
                       </span>
-                      <span className={`text-sm font-medium ${getConfidenceColor(anomaly.confidence)}`}>
+                      <span
+                        className={`text-sm font-medium ${getConfidenceColor(anomaly.confidence)}`}
+                      >
                         {(anomaly.confidence * 100).toFixed(1)}%
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">Expected:</span>
-                      <span className="ml-2 font-medium">{anomaly.expectedValue.toLocaleString()}</span>
+                      <span className="ml-2 font-medium">
+                        {anomaly.expectedValue.toLocaleString()}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-600">Actual:</span>
@@ -370,11 +418,16 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
                     <div>
                       <span className="text-gray-600">Deviation:</span>
                       <span className="ml-2 font-medium">
-                        {((Math.abs(anomaly.value - anomaly.expectedValue) / anomaly.expectedValue) * 100).toFixed(1)}%
+                        {(
+                          (Math.abs(anomaly.value - anomaly.expectedValue) /
+                            anomaly.expectedValue) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="mt-2 text-xs text-gray-500">
                     {new Date(anomaly.timestamp).toLocaleString()}
                   </div>
@@ -403,18 +456,20 @@ export const PredictiveAnalytics: React.FC<PredictiveAnalyticsProps> = ({
                       <span className={`text-sm font-medium ${getImpactColor(insight.impact)}`}>
                         {insight.impact.toUpperCase()}
                       </span>
-                      <span className={`text-sm font-medium ${getConfidenceColor(insight.confidence)}`}>
+                      <span
+                        className={`text-sm font-medium ${getConfidenceColor(insight.confidence)}`}
+                      >
                         {(insight.confidence * 100).toFixed(1)}%
                       </span>
                     </div>
                   </div>
-                  
+
                   <p className="text-sm text-gray-600 mb-3">{insight.description}</p>
-                  
+
                   <div className="mb-3">
                     <span className="text-xs text-gray-500">Timeframe: {insight.timeframe}</span>
                   </div>
-                  
+
                   {insight.recommendations.length > 0 && (
                     <div>
                       <h5 className="text-sm font-medium text-gray-900 mb-1">Recommendations:</h5>

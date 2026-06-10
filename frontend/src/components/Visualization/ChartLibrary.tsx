@@ -13,16 +13,7 @@ import {
   RadialLinearScale,
   Filler,
 } from 'chart.js';
-import {
-  Line,
-  Bar,
-  Pie,
-  Doughnut,
-  Radar,
-  PolarArea,
-  Scatter,
-  Bubble,
-} from 'react-chartjs-2';
+import { Line, Bar, Pie, Doughnut, Radar, PolarArea, Scatter, Bubble } from 'react-chartjs-2';
 import * as d3 from 'd3';
 import { motion } from 'framer-motion';
 
@@ -37,7 +28,7 @@ ChartJS.register(
   Legend,
   ArcElement,
   RadialLinearScale,
-  Filler
+  Filler,
 );
 
 export interface ChartData {
@@ -131,7 +122,7 @@ const ChartLibrary: React.FC<ChartProps> = ({
         padding: 12,
         displayColors: true,
         callbacks: {
-          label: function(context: any) {
+          label: function (context: any) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -144,26 +135,29 @@ const ChartLibrary: React.FC<ChartProps> = ({
         },
       },
     },
-    scales: type !== 'pie' && type !== 'doughnut' && type !== 'radar' && type !== 'polarArea' ? {
-      x: {
-        grid: {
-          color: currentTheme.gridColor,
-          drawBorder: false,
-        },
-        ticks: {
-          color: currentTheme.textColor,
-        },
-      },
-      y: {
-        grid: {
-          color: currentTheme.gridColor,
-          drawBorder: false,
-        },
-        ticks: {
-          color: currentTheme.textColor,
-        },
-      },
-    } : undefined,
+    scales:
+      type !== 'pie' && type !== 'doughnut' && type !== 'radar' && type !== 'polarArea'
+        ? {
+            x: {
+              grid: {
+                color: currentTheme.gridColor,
+                drawBorder: false,
+              },
+              ticks: {
+                color: currentTheme.textColor,
+              },
+            },
+            y: {
+              grid: {
+                color: currentTheme.gridColor,
+                drawBorder: false,
+              },
+              ticks: {
+                color: currentTheme.textColor,
+              },
+            },
+          }
+        : undefined,
     onClick: (event: any, elements: any[]) => {
       if (onDataPointClick && elements.length > 0) {
         const element = elements[0];
@@ -310,9 +304,7 @@ const ChartLibrary: React.FC<ChartProps> = ({
         </motion.div>
       )}
 
-      <div className="w-full h-full">
-        {renderChart()}
-      </div>
+      <div className="w-full h-full">{renderChart()}</div>
     </motion.div>
   );
 };

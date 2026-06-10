@@ -1,23 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
 import {
   FileText,
@@ -78,7 +66,7 @@ interface GeneratedReport {
 
 /**
  * Compliance Report Component
- * 
+ *
  * Provides comprehensive compliance reporting capabilities:
  * - Multiple compliance frameworks (SOX, GDPR, HIPAA, PCI-DSS)
  * - Flexible time periods and scheduling
@@ -86,12 +74,14 @@ interface GeneratedReport {
  * - Report templates and customization
  * - Report history and management
  */
-export const AuditReportComponent: React.FC<AuditReportProps> = ({ 
-  className, 
-  onReportGenerated 
+export const AuditReportComponent: React.FC<AuditReportProps> = ({
+  className,
+  onReportGenerated,
 }) => {
   const [framework, setFramework] = useState<ComplianceFramework>(ComplianceFramework.SOX);
-  const [periodType, setPeriodType] = useState<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom'>('monthly');
+  const [periodType, setPeriodType] = useState<
+    'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly' | 'custom'
+  >('monthly');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [format, setFormat] = useState<'pdf' | 'json' | 'csv' | 'html'>('pdf');
@@ -156,7 +146,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         periodType: 'monthly',
         format: 'pdf',
         includeRawData: false,
-        includeCharts: true
+        includeCharts: true,
       },
       {
         id: 'gdpr-quarterly',
@@ -166,7 +156,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         periodType: 'quarterly',
         format: 'pdf',
         includeRawData: false,
-        includeCharts: true
+        includeCharts: true,
       },
       {
         id: 'hipaa-annual',
@@ -176,7 +166,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         periodType: 'yearly',
         format: 'pdf',
         includeRawData: true,
-        includeCharts: true
+        includeCharts: true,
       },
       {
         id: 'pci-dss-monthly',
@@ -186,8 +176,8 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         periodType: 'monthly',
         format: 'pdf',
         includeRawData: false,
-        includeCharts: true
-      }
+        includeCharts: true,
+      },
     ];
 
     const saved = localStorage.getItem('audit-report-templates');
@@ -211,12 +201,12 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         period: {
           type: periodType,
           startDate,
-          endDate
+          endDate,
         },
         format,
         generatedAt: new Date().toISOString(),
         size: 0,
-        status: 'generating'
+        status: 'generating',
       };
 
       // Add to reports list
@@ -229,37 +219,37 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
         {
           type: periodType,
           startDate,
-          endDate
+          endDate,
         },
         framework,
         {
           format,
-          includeRawData
-        }
+          includeRawData,
+        },
       );
 
       // Create download URL
       const url = URL.createObjectURL(blob);
-      
+
       // Update report status
       const completedReport = {
         ...newReport,
         status: 'completed' as const,
         size: blob.size,
-        downloadUrl: url
+        downloadUrl: url,
       };
 
-      const finalReports = updated.map(r => r.id === reportId ? completedReport : r);
+      const finalReports = updated.map((r) => (r.id === reportId ? completedReport : r));
       setGeneratedReports(finalReports);
       localStorage.setItem('audit-generated-reports', JSON.stringify(finalReports));
 
       onReportGenerated?.(reportId);
     } catch (error) {
       console.error('Failed to generate report:', error);
-      
+
       // Update report status to failed
-      const failedReports = generatedReports.map(r => 
-        r.id === `report_${Date.now()}` ? { ...r, status: 'failed' as const } : r
+      const failedReports = generatedReports.map((r) =>
+        r.id === `report_${Date.now()}` ? { ...r, status: 'failed' as const } : r,
       );
       setGeneratedReports(failedReports);
       localStorage.setItem('audit-generated-reports', JSON.stringify(failedReports));
@@ -280,7 +270,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
   };
 
   const deleteReport = (reportId: string) => {
-    const updated = generatedReports.filter(r => r.id !== reportId);
+    const updated = generatedReports.filter((r) => r.id !== reportId);
     setGeneratedReports(updated);
     localStorage.setItem('audit-generated-reports', JSON.stringify(updated));
   };
@@ -294,7 +284,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
       periodType: periodType as any,
       format,
       includeRawData,
-      includeCharts
+      includeCharts,
     };
 
     const updated = [...templates, newTemplate];
@@ -312,7 +302,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
   };
 
   const deleteTemplate = (templateId: string) => {
-    const updated = templates.filter(t => t.id !== templateId);
+    const updated = templates.filter((t) => t.id !== templateId);
     setTemplates(updated);
     localStorage.setItem('audit-report-templates', JSON.stringify(updated));
   };
@@ -324,7 +314,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
       [ComplianceFramework.HIPAA]: '#f59e0b',
       [ComplianceFramework.PCI_DSS]: '#ef4444',
       [ComplianceFramework.ISO_27001]: '#8b5cf6',
-      [ComplianceFramework.NIST]: '#64748b'
+      [ComplianceFramework.NIST]: '#64748b',
     };
     return colors[framework] || '#64748b';
   };
@@ -371,16 +361,17 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
             <FileText className="h-5 w-5 mr-2" />
             Report Configuration
           </CardTitle>
-          <CardDescription>
-            Configure your compliance report parameters
-          </CardDescription>
+          <CardDescription>Configure your compliance report parameters</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Framework Selection */}
             <div>
               <Label htmlFor="framework">Compliance Framework</Label>
-              <Select value={framework} onValueChange={(value) => setFramework(value as ComplianceFramework)}>
+              <Select
+                value={framework}
+                onValueChange={(value) => setFramework(value as ComplianceFramework)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -509,17 +500,13 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
                 <div key={template.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{template.name}</h4>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteTemplate(template.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => deleteTemplate(template.id)}>
                       ×
                     </Button>
                   </div>
                   <p className="text-sm text-gray-600 mb-3">{template.description}</p>
                   <div className="flex items-center space-x-2 mb-3">
-                    <Badge 
+                    <Badge
                       style={{ backgroundColor: getFrameworkColor(template.framework) }}
                       className="text-white"
                     >
@@ -529,11 +516,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
                     <Badge variant="outline">{template.format.toUpperCase()}</Badge>
                   </div>
                   <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => loadTemplate(template)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => loadTemplate(template)}>
                       Load
                     </Button>
                     <Button
@@ -568,7 +551,10 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
           ) : (
             <div className="space-y-3">
               {generatedReports.map((report) => (
-                <div key={report.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div
+                  key={report.id}
+                  className="flex items-center justify-between p-4 border rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     {getStatusIcon(report.status)}
                     <div>
@@ -583,7 +569,7 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge 
+                    <Badge
                       style={{ backgroundColor: getFrameworkColor(report.framework) }}
                       className="text-white"
                     >
@@ -591,20 +577,12 @@ export const AuditReportComponent: React.FC<AuditReportProps> = ({
                     </Badge>
                     <Badge variant="outline">{report.format.toUpperCase()}</Badge>
                     {report.status === 'completed' && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => downloadReport(report)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => downloadReport(report)}>
                         <Download className="h-4 w-4 mr-2" />
                         Download
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteReport(report.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => deleteReport(report.id)}>
                       ×
                     </Button>
                   </div>

@@ -70,11 +70,11 @@ export class FocusManager {
 
   static trapFocus(element: HTMLElement): () => void {
     this.trapStack.push(element);
-    
+
     const focusableElements = element.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]',
     ) as NodeListOf<HTMLElement>;
-    
+
     const firstFocusable = focusableElements[0];
     const lastFocusable = focusableElements[focusableElements.length - 1];
 
@@ -95,13 +95,13 @@ export class FocusManager {
     };
 
     element.addEventListener('keydown', handleKeyDown);
-    
+
     // Focus first element
     firstFocusable?.focus();
 
     return () => {
       element.removeEventListener('keydown', handleKeyDown);
-      this.trapStack = this.trapStack.filter(el => el !== element);
+      this.trapStack = this.trapStack.filter((el) => el !== element);
     };
   }
 
@@ -122,7 +122,10 @@ export class AriaUtils {
     });
   }
 
-  static announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite'): void {
+  static announceToScreenReader(
+    message: string,
+    priority: 'polite' | 'assertive' = 'polite',
+  ): void {
     accessibilityService.announce(message, priority);
   }
 
@@ -133,8 +136,8 @@ export class AriaUtils {
   static setupLabelRelationships(): void {
     // Auto-associate labels with form inputs
     const inputs = document.querySelectorAll('input:not([aria-label]):not([aria-labelledby])');
-    
-    inputs.forEach(input => {
+
+    inputs.forEach((input) => {
       const id = input.id || this.generateUniqueId('input');
       input.id = id;
 
@@ -155,15 +158,17 @@ export class AriaUtils {
 export class ColorContrast {
   static hexToRgb(hex: string): { r: number; g: number; b: number } | null {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   }
 
   static getLuminance(r: number, g: number, b: number): number {
-    const [rs, gs, bs] = [r, g, b].map(c => {
+    const [rs, gs, bs] = [r, g, b].map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
@@ -173,24 +178,33 @@ export class ColorContrast {
   static getContrastRatio(color1: string, color2: string): number {
     const rgb1 = this.hexToRgb(color1);
     const rgb2 = this.hexToRgb(color2);
-    
+
     if (!rgb1 || !rgb2) return 0;
 
     const lum1 = this.getLuminance(rgb1.r, rgb1.g, rgb1.b);
     const lum2 = this.getLuminance(rgb2.r, rgb2.g, rgb2.b);
-    
+
     const brightest = Math.max(lum1, lum2);
     const darkest = Math.min(lum1, lum2);
-    
+
     return (brightest + 0.05) / (darkest + 0.05);
   }
 
-  static meetsWCAG(foreground: string, background: string, level: 'AA' | 'AAA' = 'AA', large = false): boolean {
+  static meetsWCAG(
+    foreground: string,
+    background: string,
+    level: 'AA' | 'AAA' = 'AA',
+    large = false,
+  ): boolean {
     const ratio = this.getContrastRatio(foreground, background);
-    const requiredRatio = large ? 
-      (level === 'AA' ? CONTRAST_RATIOS.AA_LARGE : CONTRAST_RATIOS.AAA_LARGE) :
-      (level === 'AA' ? CONTRAST_RATIOS.AA_NORMAL : CONTRAST_RATIOS.AAA_NORMAL);
-    
+    const requiredRatio = large
+      ? level === 'AA'
+        ? CONTRAST_RATIOS.AA_LARGE
+        : CONTRAST_RATIOS.AAA_LARGE
+      : level === 'AA'
+        ? CONTRAST_RATIOS.AA_NORMAL
+        : CONTRAST_RATIOS.AAA_NORMAL;
+
     return ratio >= requiredRatio;
   }
 }
@@ -198,18 +212,18 @@ export class ColorContrast {
 // Keyboard navigation utilities
 export class KeyboardNavigation {
   private static keyMap: Record<string, string> = {
-    'Enter': 'activate',
+    Enter: 'activate',
     ' ': 'activate',
-    'Escape': 'cancel',
-    'ArrowUp': 'previous',
-    'ArrowDown': 'next',
-    'ArrowLeft': 'previous',
-    'ArrowRight': 'next',
-    'Home': 'first',
-    'End': 'last',
-    'PageUp': 'previousPage',
-    'PageDown': 'nextPage',
-    'Tab': 'nextFocus',
+    Escape: 'cancel',
+    ArrowUp: 'previous',
+    ArrowDown: 'next',
+    ArrowLeft: 'previous',
+    ArrowRight: 'next',
+    Home: 'first',
+    End: 'last',
+    PageUp: 'previousPage',
+    PageDown: 'nextPage',
+    Tab: 'nextFocus',
   };
 
   static getKeyAction(key: string): string {
@@ -217,42 +231,44 @@ export class KeyboardNavigation {
   }
 
   static setupMenuNavigation(menuElement: HTMLElement): void {
-    const menuItems = menuElement.querySelectorAll('[role="menuitem"], [role="option"]') as NodeListOf<HTMLElement>;
+    const menuItems = menuElement.querySelectorAll(
+      '[role="menuitem"], [role="option"]',
+    ) as NodeListOf<HTMLElement>;
     let currentIndex = -1;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const action = this.getKeyAction(e.key);
-      
+
       switch (action) {
         case 'next':
           e.preventDefault();
           currentIndex = (currentIndex + 1) % menuItems.length;
           menuItems[currentIndex]?.focus();
           break;
-          
+
         case 'previous':
           e.preventDefault();
           currentIndex = currentIndex <= 0 ? menuItems.length - 1 : currentIndex - 1;
           menuItems[currentIndex]?.focus();
           break;
-          
+
         case 'first':
           e.preventDefault();
           currentIndex = 0;
           menuItems[currentIndex]?.focus();
           break;
-          
+
         case 'last':
           e.preventDefault();
           currentIndex = menuItems.length - 1;
           menuItems[currentIndex]?.focus();
           break;
-          
+
         case 'activate':
           e.preventDefault();
           menuItems[currentIndex]?.click();
           break;
-          
+
         case 'cancel':
           e.preventDefault();
           menuElement.setAttribute('aria-hidden', 'true');
@@ -273,7 +289,7 @@ export class KeyboardNavigation {
     };
 
     document.addEventListener('keydown', handleKey);
-    
+
     // Store for cleanup
     if (!(window as any).keyboardShortcuts) {
       (window as any).keyboardShortcuts = [];
@@ -288,23 +304,24 @@ export class ScreenReaderUtils {
     // Multiple detection methods for better accuracy
     const hasSpeechSynthesis = 'speechSynthesis' in window;
     const hasAriaLive = document.querySelector('[aria-live]') !== null;
-    
+
     // Check for common screen reader browser extensions
     const userAgent = navigator.userAgent.toLowerCase();
-    const hasScreenReaderExtension = 
-      userAgent.includes('nvda') || 
-      userAgent.includes('jaws') || 
-      userAgent.includes('voiceover');
-    
+    const hasScreenReaderExtension =
+      userAgent.includes('nvda') || userAgent.includes('jaws') || userAgent.includes('voiceover');
+
     return hasSpeechSynthesis || hasAriaLive || hasScreenReaderExtension;
   }
 
-  static speakText(text: string, options: {
-    rate?: number;
-    pitch?: number;
-    volume?: number;
-    lang?: string;
-  } = {}): void {
+  static speakText(
+    text: string,
+    options: {
+      rate?: number;
+      pitch?: number;
+      volume?: number;
+      lang?: string;
+    } = {},
+  ): void {
     if (!('speechSynthesis' in window)) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -326,7 +343,7 @@ export class ScreenReaderUtils {
     region.style.width = '1px';
     region.style.height = '1px';
     region.style.overflow = 'hidden';
-    
+
     document.body.appendChild(region);
     return region;
   }
@@ -337,15 +354,19 @@ export class AccessibilityValidator {
   static validateImageAltText(): string[] {
     const issues: string[] = [];
     const images = document.querySelectorAll('img');
-    
+
     images.forEach((img, index) => {
       if (!img.hasAttribute('alt')) {
         issues.push(`Image ${index + 1}: Missing alt attribute`);
-      } else if (img.alt === '' && !img.hasAttribute('role') && img.getAttribute('role') !== 'presentation') {
+      } else if (
+        img.alt === '' &&
+        !img.hasAttribute('role') &&
+        img.getAttribute('role') !== 'presentation'
+      ) {
         issues.push(`Image ${index + 1}: Empty alt text but not marked as presentation`);
       }
     });
-    
+
     return issues;
   }
 
@@ -353,66 +374,71 @@ export class AccessibilityValidator {
     const issues: string[] = [];
     const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
     let lastLevel = 0;
-    
+
     headings.forEach((heading, index) => {
       const currentLevel = parseInt(heading.tagName.charAt(1));
-      
+
       if (index === 0 && currentLevel !== 1) {
         issues.push('Page should start with h1 heading');
       }
-      
+
       if (currentLevel > lastLevel + 1) {
         issues.push(`Heading level skipped: h${lastLevel} to h${currentLevel}`);
       }
-      
+
       if (heading.textContent?.trim() === '') {
         issues.push(`Empty ${heading.tagName.toLowerCase()} heading found`);
       }
-      
+
       lastLevel = currentLevel;
     });
-    
+
     return issues;
   }
 
   static validateFormLabels(): string[] {
     const issues: string[] = [];
     const inputs = document.querySelectorAll('input, select, textarea');
-    
+
     inputs.forEach((input, index) => {
-      const hasLabel = input.hasAttribute('aria-label') || 
-                      input.hasAttribute('aria-labelledby') ||
-                      document.querySelector(`label[for="${input.id}"]`) ||
-                      input.closest('label');
-      
+      const hasLabel =
+        input.hasAttribute('aria-label') ||
+        input.hasAttribute('aria-labelledby') ||
+        document.querySelector(`label[for="${input.id}"]`) ||
+        input.closest('label');
+
       if (!hasLabel) {
         issues.push(`Form input ${index + 1}: Missing label or aria-label`);
       }
     });
-    
+
     return issues;
   }
 
   static validateFocusManagement(): string[] {
     const issues: string[] = [];
-    
+
     // Check for tabindex abuse
     const elementsWithTabindex = document.querySelectorAll('[tabindex]');
-    elementsWithTabindex.forEach(element => {
+    elementsWithTabindex.forEach((element) => {
       const tabindex = element.getAttribute('tabindex');
       if (tabindex && parseInt(tabindex) > 0) {
         issues.push(`Element with positive tabindex: ${element.tagName.toLowerCase()}`);
       }
     });
-    
+
     // Check for focusable elements with disabled state
-    const disabledFocusable = document.querySelectorAll('button:disabled, input:disabled, select:disabled');
-    disabledFocusable.forEach(element => {
+    const disabledFocusable = document.querySelectorAll(
+      'button:disabled, input:disabled, select:disabled',
+    );
+    disabledFocusable.forEach((element) => {
       if (element.getAttribute('tabindex') !== '-1') {
-        issues.push(`Disabled focusable element should have tabindex="-1": ${element.tagName.toLowerCase()}`);
+        issues.push(
+          `Disabled focusable element should have tabindex="-1": ${element.tagName.toLowerCase()}`,
+        );
       }
     });
-    
+
     return issues;
   }
 
@@ -428,7 +454,7 @@ export class AccessibilityValidator {
       headings: this.validateHeadingStructure(),
       forms: this.validateFormLabels(),
       focus: this.validateFocusManagement(),
-      total: 0 // Will be calculated
+      total: 0, // Will be calculated
     };
   }
 }
@@ -446,19 +472,19 @@ export class VoiceCommandUtils {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     this.recognition = new SpeechRecognition();
-    
+
     this.recognition.continuous = true;
     this.recognition.interimResults = false;
     this.recognition.lang = 'en-US';
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-      
+
       // Find matching command
-      const matchedCommand = Object.keys(commands).find(cmd => 
-        command.includes(cmd.toLowerCase())
+      const matchedCommand = Object.keys(commands).find((cmd) =>
+        command.includes(cmd.toLowerCase()),
       );
-      
+
       if (matchedCommand) {
         commands[matchedCommand]();
         AriaUtils.announceToScreenReader(`Command executed: ${matchedCommand}`);
@@ -503,4 +529,3 @@ export class VoiceCommandUtils {
     return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
   }
 }
-

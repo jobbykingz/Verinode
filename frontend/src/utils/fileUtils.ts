@@ -17,17 +17,17 @@ import {
  */
 export const validateFiles = async (
   files: File[],
-  options: FileValidationOptions = {}
+  options: FileValidationOptions = {},
 ): Promise<FileValidationResult[]> => {
   const results: FileValidationResult[] = [];
-  
+
   for (const file of files) {
     const result: FileValidationResult = {
       isValid: true,
       errors: [],
       warnings: [],
     };
-    
+
     // File size validation
     if (options.maxSize && file.size > options.maxSize) {
       result.isValid = false;
@@ -38,17 +38,17 @@ export const validateFiles = async (
         value: file.size,
       });
     }
-    
+
     // File type validation
     if (options.allowedTypes && options.allowedTypes.length > 0) {
-      const isAllowed = options.allowedTypes.some(type => {
+      const isAllowed = options.allowedTypes.some((type) => {
         if (type.includes('*')) {
           const wildcard = type.replace('*', '');
           return file.type.startsWith(wildcard);
         }
         return file.type === type;
       });
-      
+
       if (!isAllowed) {
         result.isValid = false;
         result.errors.push({
@@ -59,7 +59,7 @@ export const validateFiles = async (
         });
       }
     }
-    
+
     // Blocked file types
     if (options.blockedTypes && options.blockedTypes.includes(file.type)) {
       result.isValid = false;
@@ -70,7 +70,7 @@ export const validateFiles = async (
         value: file.type,
       });
     }
-    
+
     // File name validation
     const invalidChars = /[<>:"/\\|?*]/;
     if (invalidChars.test(file.name)) {
@@ -81,7 +81,7 @@ export const validateFiles = async (
         value: file.name,
       });
     }
-    
+
     // File name length
     if (file.name.length > 255) {
       result.warnings.push({
@@ -91,7 +91,7 @@ export const validateFiles = async (
         value: file.name,
       });
     }
-    
+
     // Virus scanning
     if (options.enableVirusScanning) {
       try {
@@ -114,7 +114,7 @@ export const validateFiles = async (
         });
       }
     }
-    
+
     // Content validation
     if (options.enableContentValidation) {
       try {
@@ -133,7 +133,7 @@ export const validateFiles = async (
         });
       }
     }
-    
+
     // Custom validation
     if (options.customValidation) {
       try {
@@ -152,24 +152,21 @@ export const validateFiles = async (
         });
       }
     }
-    
+
     results.push(result);
   }
-  
+
   return results;
 };
 
 /**
  * Generate thumbnails for image files
  */
-export const generateThumbnails = async (
-  file: File,
-  config: ThumbnailConfig
-): Promise<string> => {
+export const generateThumbnails = async (file: File, config: ThumbnailConfig): Promise<string> => {
   if (!config.enabled || !file.type.startsWith('image/')) {
     return '';
   }
-  
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -177,21 +174,21 @@ export const generateThumbnails = async (
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
+
         // Calculate dimensions
         let { width, height } = calculateDimensions(
           img.width,
           img.height,
           config.maxWidth,
-          config.maxHeight
+          config.maxHeight,
         );
-        
+
         canvas.width = width;
         canvas.height = height;
-        
+
         // Draw and compress image
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convert to blob
         canvas.toBlob(
           (blob) => {
@@ -203,21 +200,21 @@ export const generateThumbnails = async (
             }
           },
           `image/${config.format}`,
-          config.quality / 100
+          config.quality / 100,
         );
       };
-      
+
       img.onerror = () => {
         reject(new Error('Failed to load image'));
       };
-      
+
       img.src = e.target?.result as string;
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file'));
     };
-    
+
     reader.readAsDataURL(file);
   });
 };
@@ -232,7 +229,7 @@ export const extractMetadata = async (file: File): Promise<FileMetadata> => {
     mimeType: file.type,
     encoding: (file as any).encoding || 'utf-8',
   };
-  
+
   // Extract image metadata
   if (file.type.startsWith('image/')) {
     try {
@@ -242,7 +239,7 @@ export const extractMetadata = async (file: File): Promise<FileMetadata> => {
       console.warn('Failed to extract image metadata:', error);
     }
   }
-  
+
   // Extract video metadata
   if (file.type.startsWith('video/')) {
     try {
@@ -252,7 +249,7 @@ export const extractMetadata = async (file: File): Promise<FileMetadata> => {
       console.warn('Failed to extract video metadata:', error);
     }
   }
-  
+
   // Extract audio metadata
   if (file.type.startsWith('audio/')) {
     try {
@@ -262,7 +259,7 @@ export const extractMetadata = async (file: File): Promise<FileMetadata> => {
       console.warn('Failed to extract audio metadata:', error);
     }
   }
-  
+
   // Extract document metadata
   if (file.type.includes('pdf') || file.type.includes('document')) {
     try {
@@ -272,17 +269,17 @@ export const extractMetadata = async (file: File): Promise<FileMetadata> => {
       console.warn('Failed to extract document metadata:', error);
     }
   }
-  
+
   // Generate checksum
   try {
     metadata.checksum = await generateChecksum(file);
   } catch (error) {
     console.warn('Failed to generate checksum:', error);
   }
-  
+
   // Extract device info
   metadata.deviceInfo = getDeviceInfo();
-  
+
   return metadata;
 };
 
@@ -296,15 +293,10 @@ export const compressImage = async (
     maxWidth?: number;
     maxHeight?: number;
     format?: string;
-  } = {}
+  } = {},
 ): Promise<File> => {
-  const {
-    quality = 0.8,
-    maxWidth = 1920,
-    maxHeight = 1080,
-    format = 'image/jpeg',
-  } = options;
-  
+  const { quality = 0.8, maxWidth = 1920, maxHeight = 1080, format = 'image/jpeg' } = options;
+
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -312,21 +304,16 @@ export const compressImage = async (
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        
+
         // Calculate dimensions
-        let { width, height } = calculateDimensions(
-          img.width,
-          img.height,
-          maxWidth,
-          maxHeight
-        );
-        
+        let { width, height } = calculateDimensions(img.width, img.height, maxWidth, maxHeight);
+
         canvas.width = width;
         canvas.height = height;
-        
+
         // Draw compressed image
         ctx.drawImage(img, 0, 0, width, height);
-        
+
         // Convert to blob
         canvas.toBlob(
           (blob) => {
@@ -341,21 +328,21 @@ export const compressImage = async (
             }
           },
           format,
-          quality
+          quality,
         );
       };
-      
+
       img.onerror = () => {
         reject(new Error('Failed to load image for compression'));
       };
-      
+
       img.src = e.target?.result as string;
     };
-    
+
     reader.onerror = () => {
       reject(new Error('Failed to read file for compression'));
     };
-    
+
     reader.readAsDataURL(file);
   });
 };
@@ -375,19 +362,15 @@ export const fileToBase64 = (file: File): Promise<string> => {
 /**
  * Convert base64 to file
  */
-export const base64ToFile = (
-  base64: string,
-  filename: string,
-  mimeType?: string
-): File => {
+export const base64ToFile = (base64: string, filename: string, mimeType?: string): File => {
   const byteString = atob(base64.split(',')[1]);
   const arrayBuffer = new ArrayBuffer(byteString.length);
   const uint8Array = new Uint8Array(arrayBuffer);
-  
+
   for (let i = 0; i < byteString.length; i++) {
     uint8Array[i] = byteString.charCodeAt(i);
   }
-  
+
   const blob = new Blob([uint8Array], { type: mimeType || 'application/octet-stream' });
   return new File([blob], filename);
 };
@@ -411,11 +394,11 @@ export const downloadFile = (file: File, filename?: string): void => {
  */
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
@@ -509,19 +492,16 @@ export const revokePreviewUrl = (url: string): void => {
 /**
  * Split file into chunks
  */
-export const splitFileIntoChunks = (
-  file: File,
-  chunkSize: number
-): ArrayBuffer[] => {
+export const splitFileIntoChunks = (file: File, chunkSize: number): ArrayBuffer[] => {
   const chunks: ArrayBuffer[] = [];
   const fileSize = file.size;
-  
+
   for (let start = 0; start < fileSize; start += chunkSize) {
     const end = Math.min(start + chunkSize, fileSize);
     const chunk = file.slice(start, end);
     chunks.push(chunk);
   }
-  
+
   return chunks;
 };
 
@@ -532,23 +512,23 @@ const calculateDimensions = (
   originalWidth: number,
   originalHeight: number,
   maxWidth: number,
-  maxHeight: number
+  maxHeight: number,
 ): { width: number; height: number } => {
   const aspectRatio = originalWidth / originalHeight;
-  
+
   let width = originalWidth;
   let height = originalHeight;
-  
+
   if (width > maxWidth) {
     width = maxWidth;
     height = width / aspectRatio;
   }
-  
+
   if (height > maxHeight) {
     height = maxHeight;
     width = height * aspectRatio;
   }
-  
+
   return { width, height };
 };
 
@@ -567,7 +547,7 @@ const extractImageMetadata = async (file: File): Promise<Partial<FileMetadata>> 
         },
       });
     };
-    
+
     // Try to extract EXIF data (would need a library like exif-js)
     img.src = URL.createObjectURL(file);
   });
@@ -589,7 +569,7 @@ const extractVideoMetadata = async (file: File): Promise<Partial<FileMetadata>> 
         },
       });
     };
-    
+
     video.src = URL.createObjectURL(file);
   });
 };
@@ -606,7 +586,7 @@ const extractAudioMetadata = async (file: File): Promise<Partial<FileMetadata>> 
         bitrate: 128, // Default bitrate
       });
     };
-    
+
     audio.src = URL.createObjectURL(file);
   });
 };
@@ -627,7 +607,7 @@ const generateChecksum = async (file: File): Promise<string> => {
   const buffer = await file.arrayBuffer();
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   return hashHex;
 };
 
@@ -637,14 +617,16 @@ const generateChecksum = async (file: File): Promise<string> => {
 const scanForVirus = async (file: File): Promise<{ clean: boolean; threat?: string }> => {
   // This would integrate with an actual virus scanning service
   // For now, simulate the scan
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise((resolve) => setTimeout(resolve, 100));
   return { clean: true };
 };
 
 /**
  * Validate file content (mock implementation)
  */
-const validateContent = async (file: File): Promise<{ valid: boolean; errors: ValidationError[]; warnings: ValidationWarning[] }> => {
+const validateContent = async (
+  file: File,
+): Promise<{ valid: boolean; errors: ValidationError[]; warnings: ValidationWarning[] }> => {
   // This would implement actual content validation
   // For now, return valid result
   return { valid: true, errors: [], warnings: [] };

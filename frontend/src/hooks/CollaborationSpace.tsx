@@ -6,12 +6,14 @@ import { UserPresence } from './UserPresence';
 import { ChangeHistory } from './ChangeHistory';
 import { useCollaboration } from '../../hooks/useCollaboration';
 
-export const CollaborationSpace: React.FC<{ proofId: string, currentUser: any }> = ({ proofId, currentUser }) => {
-  
+export const CollaborationSpace: React.FC<{ proofId: string; currentUser: any }> = ({
+  proofId,
+  currentUser,
+}) => {
   useEffect(() => {
     // Connect to WebSocket on mount
     collabService.connect(proofId, currentUser.id, currentUser.name);
-    
+
     return () => {
       collabService.disconnect();
     };
@@ -32,8 +34,12 @@ export const CollaborationSpace: React.FC<{ proofId: string, currentUser: any }>
 
       {/* Right Sidebar (Comments & History) */}
       <div className="w-full md:w-80 flex flex-col bg-white border-l border-gray-200">
-        <div className="flex-1 overflow-hidden"><CommentSystem proofId={proofId} currentUser={currentUser} /></div>
-        <div className="p-4 border-t border-gray-200 bg-gray-50"><ChangeHistory version={version} /></div>
+        <div className="flex-1 overflow-hidden">
+          <CommentSystem proofId={proofId} currentUser={currentUser} />
+        </div>
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          <ChangeHistory version={version} />
+        </div>
       </div>
     </div>
   );

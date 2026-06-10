@@ -78,7 +78,7 @@ class EncryptionService {
           window.location.href = '/login';
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -90,7 +90,7 @@ class EncryptionService {
     authorizedAddresses: string[],
     permissions: string[],
     maxAccessCount: number,
-    expirationTime?: number
+    expirationTime?: number,
   ): Promise<EncryptedProofData> {
     const response = await this.api.post('/api/encryption/proofs', {
       encryptedData,
@@ -124,7 +124,7 @@ class EncryptionService {
     authorizedAddresses: string[],
     permissions: string[],
     maxAccessCount: number,
-    expirationTime?: number
+    expirationTime?: number,
   ): Promise<void> {
     await this.api.put(`/api/encryption/proofs/${proofId}/access`, {
       authorizedAddresses,
@@ -134,11 +134,7 @@ class EncryptionService {
     });
   }
 
-  async grantAccess(
-    proofId: string,
-    address: string,
-    permissions: string[]
-  ): Promise<void> {
+  async grantAccess(proofId: string, address: string, permissions: string[]): Promise<void> {
     await this.api.post(`/api/encryption/proofs/${proofId}/access/grant`, {
       address,
       permissions,
@@ -212,7 +208,10 @@ class EncryptionService {
   }
 
   // Batch Operations
-  async batchVerifyProofs(proofIds: string[], verificationData: string): Promise<VerificationResult[]> {
+  async batchVerifyProofs(
+    proofIds: string[],
+    verificationData: string,
+  ): Promise<VerificationResult[]> {
     const response = await this.api.post('/api/encryption/batch/verify', {
       proofIds,
       verificationData,
@@ -282,7 +281,10 @@ class EncryptionService {
     return response.data;
   }
 
-  async benchmarkOperation(operation: string, iterations: number = 100): Promise<{
+  async benchmarkOperation(
+    operation: string,
+    iterations: number = 100,
+  ): Promise<{
     operation: string;
     averageTime: number;
     minTime: number;
@@ -326,7 +328,11 @@ class EncryptionService {
     return await signer.signMessage(message);
   }
 
-  async verifySignature(proofId: string, signature: string, expectedSigner: string): Promise<boolean> {
+  async verifySignature(
+    proofId: string,
+    signature: string,
+    expectedSigner: string,
+  ): Promise<boolean> {
     const proof = await this.getEncryptedProof(proofId);
     const message = `Verify proof ${proofId} with checksum ${proof.metadata.checksum}`;
 

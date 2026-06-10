@@ -176,8 +176,8 @@ impl ChainVerifier {
             
             let verified = Self::verify_proof_on_chain(
                 env.clone(),
-                *proof_id,
-                *chain_id,
+                proof_id,
+                chain_id,
                 proof_data.clone(),
                 verifier.clone(),
                 verification_hash,
@@ -193,7 +193,7 @@ impl ChainVerifier {
     pub fn is_fully_verified(env: Env, proof_id: u64, required_chains: Vec<u32>) -> bool {
         for i in 0..required_chains.len() {
             let chain_id = required_chains.get(i).unwrap();
-            if let Some(result) = Self::get_verification_result(env.clone(), proof_id, *chain_id) {
+            if let Some(result) = Self::get_verification_result(env.clone(), proof_id, chain_id) {
                 if !result.verified {
                     return false;
                 }

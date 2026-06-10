@@ -15,7 +15,7 @@ export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
         {children}
       </label>
     );
-  }
+  },
 );
 
 Label.displayName = 'Label';

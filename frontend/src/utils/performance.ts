@@ -3,12 +3,20 @@ export const performanceMetrics = {
   // Measure page load time
   measurePageLoad: () => {
     if (typeof window !== 'undefined' && window.performance) {
-      const navigation = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      const navigation = window.performance.getEntriesByType(
+        'navigation',
+      )[0] as PerformanceNavigationTiming;
       return {
-        domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
+        domContentLoaded:
+          navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart,
         loadComplete: navigation.loadEventEnd - navigation.loadEventStart,
-        firstPaint: window.performance.getEntriesByType('paint').find(entry => entry.name === 'first-paint')?.startTime || 0,
-        firstContentfulPaint: window.performance.getEntriesByType('paint').find(entry => entry.name === 'first-contentful-paint')?.startTime || 0,
+        firstPaint:
+          window.performance.getEntriesByType('paint').find((entry) => entry.name === 'first-paint')
+            ?.startTime || 0,
+        firstContentfulPaint:
+          window.performance
+            .getEntriesByType('paint')
+            .find((entry) => entry.name === 'first-contentful-paint')?.startTime || 0,
       };
     }
     return null;
@@ -26,7 +34,7 @@ export const performanceMetrics = {
   // Debounce function for performance optimization
   debounce: <T extends (...args: any[]) => any>(
     func: T,
-    wait: number
+    wait: number,
   ): ((...args: Parameters<T>) => void) => {
     let timeout: NodeJS.Timeout;
     return (...args: Parameters<T>) => {
@@ -38,14 +46,14 @@ export const performanceMetrics = {
   // Throttle function for performance optimization
   throttle: <T extends (...args: any[]) => any>(
     func: T,
-    limit: number
+    limit: number,
   ): ((...args: Parameters<T>) => void) => {
     let inThrottle: boolean;
     return (...args: Parameters<T>) => {
       if (!inThrottle) {
         func(...args);
         inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
+        setTimeout(() => (inThrottle = false), limit);
       }
     };
   },
@@ -54,7 +62,7 @@ export const performanceMetrics = {
   lazyLoadImages: () => {
     if ('IntersectionObserver' in window) {
       const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const img = entry.target as HTMLImageElement;
             if (img.dataset.src) {
@@ -66,7 +74,7 @@ export const performanceMetrics = {
         });
       });
 
-      document.querySelectorAll('img[data-src]').forEach(img => {
+      document.querySelectorAll('img[data-src]').forEach((img) => {
         imageObserver.observe(img);
       });
     }
@@ -114,7 +122,7 @@ export const preloadCriticalResources = () => {
     { url: '/static/js/main.js', as: 'script' },
   ];
 
-  criticalResources.forEach(resource => {
+  criticalResources.forEach((resource) => {
     performanceMetrics.preloadResource(resource.url, resource.as);
   });
 };

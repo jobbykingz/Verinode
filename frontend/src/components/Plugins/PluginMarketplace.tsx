@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download, Star, Users, Package, ExternalLink, Shield, Clock, TrendingUp } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  Download,
+  Star,
+  Users,
+  Package,
+  ExternalLink,
+  Shield,
+  Clock,
+  TrendingUp,
+} from 'lucide-react';
 import { PluginStore, PluginListing, SearchFilters } from '../../marketplace/pluginStore';
 import { PluginInstaller } from '../../marketplace/pluginInstaller';
 import { PluginManager } from '../../plugins/pluginManager';
@@ -34,7 +45,7 @@ const PluginMarketplace: React.FC = () => {
     try {
       const [categoriesData, tagsData] = await Promise.all([
         pluginStore.getCategories(),
-        pluginStore.getTags()
+        pluginStore.getTags(),
       ]);
       setCategories(categoriesData);
       setTags(tagsData);
@@ -49,9 +60,9 @@ const PluginMarketplace: React.FC = () => {
       const filters: SearchFilters = {
         query: searchQuery || undefined,
         category: selectedCategory || undefined,
-        pricing: selectedPricing as any || undefined,
+        pricing: (selectedPricing as any) || undefined,
         sortBy: sortBy as any,
-        page
+        page,
       };
 
       const result = await pluginStore.searchPlugins(filters);
@@ -94,7 +105,7 @@ const PluginMarketplace: React.FC = () => {
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
@@ -103,10 +114,14 @@ const PluginMarketplace: React.FC = () => {
 
   const getPricingIcon = (pricing: string) => {
     switch (pricing) {
-      case 'free': return <span className="text-green-600">Free</span>;
-      case 'paid': return <span className="text-blue-600">Paid</span>;
-      case 'freemium': return <span className="text-purple-600">Freemium</span>;
-      default: return <span className="text-gray-600">Unknown</span>;
+      case 'free':
+        return <span className="text-green-600">Free</span>;
+      case 'paid':
+        return <span className="text-blue-600">Paid</span>;
+      case 'freemium':
+        return <span className="text-purple-600">Freemium</span>;
+      default:
+        return <span className="text-gray-600">Unknown</span>;
     }
   };
 
@@ -115,7 +130,9 @@ const PluginMarketplace: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Plugin Marketplace</h1>
-          <p className="text-gray-600 mt-1">Discover and install plugins to extend Verinode functionality</p>
+          <p className="text-gray-600 mt-1">
+            Discover and install plugins to extend Verinode functionality
+          </p>
         </div>
       </div>
 
@@ -157,8 +174,10 @@ const PluginMarketplace: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">All Categories</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </select>
             </div>
@@ -205,7 +224,10 @@ const PluginMarketplace: React.FC = () => {
       ) : (
         <div className="grid gap-6">
           {plugins.map((plugin) => (
-            <div key={plugin.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div
+              key={plugin.id}
+              className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
@@ -217,9 +239,9 @@ const PluginMarketplace: React.FC = () => {
                       <Shield className="w-4 h-4 text-blue-600" title="Verified Author" />
                     )}
                   </div>
-                  
+
                   <p className="text-gray-600 mb-3">{plugin.metadata.description}</p>
-                  
+
                   <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
                     <div className="flex items-center space-x-1">
                       <Users className="w-4 h-4" />
@@ -231,7 +253,9 @@ const PluginMarketplace: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 text-yellow-500" />
-                      <span>{plugin.stats.rating.toFixed(1)} ({plugin.stats.reviews} reviews)</span>
+                      <span>
+                        {plugin.stats.rating.toFixed(1)} ({plugin.stats.reviews} reviews)
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock className="w-4 h-4" />
@@ -241,10 +265,15 @@ const PluginMarketplace: React.FC = () => {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <span className="text-sm font-medium">{getPricingIcon(plugin.pricing.type)}</span>
+                      <span className="text-sm font-medium">
+                        {getPricingIcon(plugin.pricing.type)}
+                      </span>
                       <div className="flex flex-wrap gap-1">
                         {plugin.tags.slice(0, 3).map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                          >
                             {tag}
                           </span>
                         ))}
@@ -255,7 +284,7 @@ const PluginMarketplace: React.FC = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={() => window.open(`/plugins/${plugin.id}`, '_blank')}

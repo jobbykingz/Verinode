@@ -11,8 +11,8 @@ export const UserPresence: React.FC = () => {
       <span className="text-sm text-gray-500 font-medium">Viewing:</span>
       <div className="flex -space-x-2 overflow-hidden">
         {activeUsers.map((user) => (
-          <div 
-            key={user.socketId} 
+          <div
+            key={user.socketId}
             className="inline-block h-8 w-8 rounded-full ring-2 ring-white bg-blue-500 text-white flex items-center justify-center text-xs font-bold"
             title={`${user.username} (${user.status})`}
           >
@@ -23,9 +23,7 @@ export const UserPresence: React.FC = () => {
           </div>
         ))}
       </div>
-      <span className="text-xs text-gray-400 ml-2">
-        {activeUsers.length} online
-      </span>
+      <span className="text-xs text-gray-400 ml-2">{activeUsers.length} online</span>
     </div>
   );
 };

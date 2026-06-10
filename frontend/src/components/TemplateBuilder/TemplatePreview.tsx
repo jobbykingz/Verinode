@@ -65,13 +65,14 @@ interface TemplatePreviewProps {
 
 const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
   const getFieldById = (fieldId: string) => {
-    return template.fields.find(field => field.id === fieldId);
+    return template.fields.find((field) => field.id === fieldId);
   };
 
   const renderField = (field: TemplateField) => {
-    const baseClasses = "w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent";
-    const disabledClasses = "bg-gray-100 text-gray-500 cursor-not-allowed";
-    
+    const baseClasses =
+      'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    const disabledClasses = 'bg-gray-100 text-gray-500 cursor-not-allowed';
+
     const className = `${baseClasses} ${field.editable ? '' : disabledClasses}`;
 
     switch (field.type) {
@@ -88,7 +89,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             defaultValue={field.defaultValue}
           />
         );
-      
+
       case 'number':
         return (
           <input
@@ -101,7 +102,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             defaultValue={field.defaultValue}
           />
         );
-      
+
       case 'date':
         return (
           <input
@@ -111,7 +112,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             defaultValue={field.defaultValue}
           />
         );
-      
+
       case 'boolean':
         return (
           <div className="flex items-center">
@@ -121,12 +122,10 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
               disabled={!field.editable}
               defaultChecked={field.defaultValue}
             />
-            <label className="ml-2 text-sm text-gray-700">
-              {field.label}
-            </label>
+            <label className="ml-2 text-sm text-gray-700">{field.label}</label>
           </div>
         );
-      
+
       case 'select':
         return (
           <select
@@ -135,14 +134,14 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             defaultValue={field.defaultValue}
           >
             <option value="">{field.placeholder || 'Select an option'}</option>
-            {field.options?.map(option => (
+            {field.options?.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
         );
-      
+
       case 'multiselect':
         return (
           <select
@@ -151,23 +150,17 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             disabled={!field.editable}
             defaultValue={field.defaultValue}
           >
-            {field.options?.map(option => (
+            {field.options?.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
             ))}
           </select>
         );
-      
+
       case 'file':
-        return (
-          <input
-            type="file"
-            className={className}
-            disabled={!field.editable}
-          />
-        );
-      
+        return <input type="file" className={className} disabled={!field.editable} />;
+
       default:
         return (
           <input
@@ -183,10 +176,14 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
 
   const getFieldWidthClass = (width: string) => {
     switch (width) {
-      case 'half': return 'md:col-span-6';
-      case 'third': return 'md:col-span-4';
-      case 'quarter': return 'md:col-span-3';
-      default: return 'md:col-span-12';
+      case 'half':
+        return 'md:col-span-6';
+      case 'third':
+        return 'md:col-span-4';
+      case 'quarter':
+        return 'md:col-span-3';
+      default:
+        return 'md:col-span-12';
     }
   };
 
@@ -194,19 +191,16 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
         {/* Template Header */}
-        <div 
+        <div
           className="p-6 border-b border-gray-200"
           style={{ backgroundColor: template.layout.theme.backgroundColor }}
         >
           <div className="flex items-start justify-between">
             <div>
-              <h1 
-                className="text-2xl font-bold"
-                style={{ color: template.layout.theme.textColor }}
-              >
+              <h1 className="text-2xl font-bold" style={{ color: template.layout.theme.textColor }}>
                 {template.name}
               </h1>
-              <p 
+              <p
                 className="mt-2 text-gray-600"
                 style={{ color: template.layout.theme.secondaryColor }}
               >
@@ -233,13 +227,9 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             </div>
             <div className="text-right">
               {template.price > 0 && (
-                <div className="text-3xl font-bold text-green-600">
-                  {template.price} XLM
-                </div>
+                <div className="text-3xl font-bold text-green-600">{template.price} XLM</div>
               )}
-              <div className="mt-2 text-sm text-gray-500">
-                {template.fields.length} fields
-              </div>
+              <div className="mt-2 text-sm text-gray-500">{template.fields.length} fields</div>
             </div>
           </div>
         </div>
@@ -249,18 +239,18 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
           <form className="space-y-6">
             {template.layout.sections
               .sort((a, b) => a.order - b.order)
-              .map(section => {
+              .map((section) => {
                 const visibleFields = section.fields
-                  .map(f => getFieldById(f.fieldId))
-                  .filter(field => field && field.visible) as TemplateField[];
-                
+                  .map((f) => getFieldById(f.fieldId))
+                  .filter((field) => field && field.visible) as TemplateField[];
+
                 if (visibleFields.length === 0) return null;
-                
+
                 return (
                   <div key={section.id}>
                     {section.title && (
                       <div className="mb-4">
-                        <h2 
+                        <h2
                           className="text-xl font-semibold"
                           style={{ color: template.layout.theme.primaryColor }}
                         >
@@ -271,65 +261,55 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
                         )}
                       </div>
                     )}
-                    
+
                     <div className="grid grid-cols-12 gap-4">
                       {section.fields
-                        .map(f => {
+                        .map((f) => {
                           const field = getFieldById(f.fieldId);
                           return field && field.visible ? { ...field, width: f.width } : null;
                         })
                         .filter(Boolean)
                         .map((field: any) => (
-                          <div 
-                            key={field.id} 
+                          <div
+                            key={field.id}
                             className={`col-span-12 ${getFieldWidthClass(field.width)}`}
                           >
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               {field.label}
-                              {field.required && (
-                                <span className="text-red-500 ml-1">*</span>
-                              )}
+                              {field.required && <span className="text-red-500 ml-1">*</span>}
                             </label>
-                            
+
                             {renderField(field)}
-                            
+
                             {field.description && (
-                              <p className="mt-1 text-sm text-gray-500">
-                                {field.description}
-                              </p>
+                              <p className="mt-1 text-sm text-gray-500">{field.description}</p>
                             )}
-                            
+
                             {field.helpText && (
-                              <p className="mt-1 text-xs text-blue-600">
-                                {field.helpText}
-                              </p>
+                              <p className="mt-1 text-xs text-blue-600">{field.helpText}</p>
                             )}
-                            
+
                             {field.type === 'email' && (
                               <p className="mt-1 text-xs text-gray-500">
                                 Example: user@example.com
                               </p>
                             )}
-                            
+
                             {field.type === 'url' && (
                               <p className="mt-1 text-xs text-gray-500">
                                 Include http:// or https://
                               </p>
                             )}
                           </div>
-                        ))
-                      }
+                        ))}
                     </div>
                   </div>
                 );
-              })
-            }
-            
+              })}
+
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-6 border-t border-gray-200">
-              <div className="text-sm text-gray-500">
-                This is a preview of your template
-              </div>
+              <div className="text-sm text-gray-500">This is a preview of your template</div>
               <div className="flex space-x-3">
                 <button
                   type="button"
@@ -353,35 +333,36 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
       {/* Template Information */}
       <div className="mt-8 bg-white rounded-xl shadow-lg border border-gray-200 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Information</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Fields</h3>
             <div className="space-y-2">
               {template.fields
-                .filter(field => field.visible)
-                .map(field => (
+                .filter((field) => field.visible)
+                .map((field) => (
                   <div key={field.id} className="flex items-center justify-between text-sm">
                     <span className="text-gray-700">{field.label}</span>
                     <span className="text-gray-500">
                       {field.type} {field.required && <span className="text-red-500">*</span>}
                     </span>
                   </div>
-                ))
-              }
+                ))}
             </div>
           </div>
-          
+
           <div>
             <h3 className="font-medium text-gray-900 mb-2">Validation Rules</h3>
             <div className="space-y-2">
               {template.validationRules.length > 0 ? (
-                template.validationRules.map(rule => {
-                  const field = template.fields.find(f => f.id === rule.fieldId);
+                template.validationRules.map((rule) => {
+                  const field = template.fields.find((f) => f.id === rule.fieldId);
                   return (
                     <div key={rule.id} className="text-sm">
                       <div className="font-medium text-gray-700">{rule.name}</div>
-                      <div className="text-gray-500">{field?.label} • {rule.ruleType}</div>
+                      <div className="text-gray-500">
+                        {field?.label} • {rule.ruleType}
+                      </div>
                     </div>
                   );
                 })
@@ -391,7 +372,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({ template }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 pt-6 border-t border-gray-200">
           <h3 className="font-medium text-gray-900 mb-2">Metadata</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

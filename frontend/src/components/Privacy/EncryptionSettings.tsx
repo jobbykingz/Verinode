@@ -15,16 +15,13 @@ interface EncryptionConfig {
   rotationInterval: number; // days
 }
 
-const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({ 
-  proofId, 
-  onEncryptionChange 
-}) => {
+const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({ proofId, onEncryptionChange }) => {
   const [config, setConfig] = useState<EncryptionConfig>({
     enabled: true,
     algorithm: 'AES-256-GCM',
     keyDerivation: 'scrypt',
     autoRotate: true,
-    rotationInterval: 90
+    rotationInterval: 90,
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -39,7 +36,7 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
   }, [config, onEncryptionChange]);
 
   const handleConfigChange = (key: keyof EncryptionConfig, value: any) => {
-    setConfig(prev => ({ ...prev, [key]: value }));
+    setConfig((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleGenerateKeys = async () => {
@@ -56,8 +53,8 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
     setIsGeneratingKeys(true);
     try {
       // Simulate key generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       toast.success('Encryption keys generated successfully!');
       setMasterPassword('');
       setConfirmPassword('');
@@ -181,7 +178,7 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
                 <Key className="h-5 w-5 mr-2" />
                 Master Password Setup
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -189,7 +186,7 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={masterPassword}
                       onChange={(e) => setMasterPassword(e.target.value)}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
@@ -203,14 +200,17 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  
+
                   {masterPassword && (
                     <div className="mt-2">
                       <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
+                        <div
                           className={`h-2 rounded-full ${
-                            strengthColor === 'red' ? 'bg-red-500' : 
-                            strengthColor === 'yellow' ? 'bg-yellow-500' : 'bg-green-500'
+                            strengthColor === 'red'
+                              ? 'bg-red-500'
+                              : strengthColor === 'yellow'
+                                ? 'bg-yellow-500'
+                                : 'bg-green-500'
                           }`}
                           style={{ width: `${passwordStrength}%` }}
                         ></div>
@@ -228,12 +228,13 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
                   </label>
                   <div className="relative">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       className={`w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10 ${
-                        confirmPassword && masterPassword !== confirmPassword 
-                          ? 'border-red-300' : 'border-gray-300'
+                        confirmPassword && masterPassword !== confirmPassword
+                          ? 'border-red-300'
+                          : 'border-gray-300'
                       }`}
                       placeholder="Confirm master password"
                     />
@@ -245,7 +246,9 @@ const EncryptionSettings: React.FC<EncryptionSettingsProps> = ({
 
                 <button
                   onClick={handleGenerateKeys}
-                  disabled={isGeneratingKeys || !masterPassword || masterPassword !== confirmPassword}
+                  disabled={
+                    isGeneratingKeys || !masterPassword || masterPassword !== confirmPassword
+                  }
                   className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                 >
                   {isGeneratingKeys ? (

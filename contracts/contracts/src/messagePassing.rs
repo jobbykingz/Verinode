@@ -97,7 +97,7 @@ impl MessagePassing {
         env.storage().instance().set(&MessageDataKey::MessageCount, &0u64);
         env.storage().instance().set(&MessageDataKey::RelayerCount, &0u64);
         env.storage().instance().set(&MessageDataKey::QueueCount, &0u64);
-        env.storage().instance().set(&MessageDataKey::PendingMessages, &Vec::new(&env));
+        env.storage().instance().set(&MessageDataKey::PendingMessages, &Vec::<u64>::new(&env));
     }
 
     /// Send cross-chain message
@@ -350,7 +350,7 @@ impl MessagePassing {
             
             let message_id = Self::send_message(
                 env.clone(),
-                *target_chain,
+                target_chain,
                 recipient.clone(),
                 message_type.clone(),
                 payload.clone(),
@@ -373,21 +373,21 @@ impl MessagePassing {
         for i in 0..pending.len() {
             let message_id = pending.get(i).unwrap();
             let message: CrossChainMessage = env.storage().instance()
-                .get(&MessageDataKey::CrossChainMessage(*message_id))
+                .get(&MessageDataKey::CrossChainMessage(message_id))
                 .unwrap();
             
             if current_time > message.created_at + timeout_seconds {
                 let mut updated_message = message;
                 updated_message.status = MessageStatus::Expired;
                 
-                env.storage().instance().set(&MessageDataKey::CrossChainMessage(*message_id), &updated_message);
-                expired.push_back(*message_id);
+                env.storage().instance().set(&MessageDataKey::CrossChainMessage(message_id), &updated_message);
+                expired.push_back(message_id);
             }
         }
         
         // Remove expired from pending
         for i in 0..expired.len() {
-            Self::remove_from_pending(env.clone(), *expired.get(i).unwrap());
+            Self::remove_from_pending(env.clone(), expired.get(i).unwrap());
         }
         
         expired
@@ -447,9 +447,9 @@ impl MessagePassing {
         
         let mut new_pending = Vec::new(&env);
         for i in 0..pending.len() {
-            let id = pending.get(i).unwrap();
-            if *id != message_id {
-                new_pending.push_back(*id);
+            let id: u64 = pending.get(i).unwrap();
+            if id != message_id {
+                new_pending.push_back(id);
             }
         }
         

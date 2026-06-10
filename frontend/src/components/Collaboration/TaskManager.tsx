@@ -1,5 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Filter, Calendar, User, Tag, AlertCircle, Clock, MessageSquare, Paperclip, Edit3, Trash2, CheckCircle, XCircle, Play, Pause, BarChart2, Download, Upload } from 'lucide-react';
+import {
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  User,
+  Tag,
+  AlertCircle,
+  Clock,
+  MessageSquare,
+  Paperclip,
+  Edit3,
+  Trash2,
+  CheckCircle,
+  XCircle,
+  Play,
+  Pause,
+  BarChart2,
+  Download,
+  Upload,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Task {
@@ -59,7 +79,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   projectId,
   onTaskSelect,
   onTaskUpdate,
-  className = ''
+  className = '',
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
@@ -67,7 +87,9 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'timeline'>('list');
-  const [sortBy, setSortBy] = useState<'title' | 'priority' | 'dueDate' | 'createdAt' | 'status'>('createdAt');
+  const [sortBy, setSortBy] = useState<'title' | 'priority' | 'dueDate' | 'createdAt' | 'status'>(
+    'createdAt',
+  );
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filters, setFilters] = useState<TaskFilters>({
     status: [],
@@ -76,7 +98,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     assignee: 'all',
     labels: [],
     dueDate: {},
-    search: ''
+    search: '',
   });
   const [isCreatingTask, setIsCreatingTask] = useState(false);
   const [isBulkEditing, setIsBulkEditing] = useState(false);
@@ -104,7 +126,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         completedSubtasks: 2,
         dependencies: ['2'],
         createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-20')
+        updatedAt: new Date('2024-01-20'),
       },
       {
         id: '2',
@@ -126,7 +148,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         completedSubtasks: 0,
         dependencies: [],
         createdAt: new Date('2024-01-16'),
-        updatedAt: new Date('2024-01-16')
+        updatedAt: new Date('2024-01-16'),
       },
       {
         id: '3',
@@ -148,7 +170,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         completedSubtasks: 3,
         dependencies: [],
         createdAt: new Date('2024-01-10'),
-        updatedAt: new Date('2024-01-22')
+        updatedAt: new Date('2024-01-22'),
       },
       {
         id: '4',
@@ -169,8 +191,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         completedSubtasks: 5,
         dependencies: [],
         createdAt: new Date('2024-01-05'),
-        updatedAt: new Date('2024-01-18')
-      }
+        updatedAt: new Date('2024-01-18'),
+      },
     ];
 
     setTasks(mockTasks);
@@ -183,43 +205,44 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
     // Apply search filter
     if (filters.search) {
-      filtered = filtered.filter(task =>
-        task.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        task.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-        task.labels.some(label => label.toLowerCase().includes(filters.search.toLowerCase()))
+      filtered = filtered.filter(
+        (task) =>
+          task.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          task.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+          task.labels.some((label) => label.toLowerCase().includes(filters.search.toLowerCase())),
       );
     }
 
     // Apply status filter
     if (filters.status.length > 0) {
-      filtered = filtered.filter(task => filters.status.includes(task.status));
+      filtered = filtered.filter((task) => filters.status.includes(task.status));
     }
 
     // Apply priority filter
     if (filters.priority.length > 0) {
-      filtered = filtered.filter(task => filters.priority.includes(task.priority));
+      filtered = filtered.filter((task) => filters.priority.includes(task.priority));
     }
 
     // Apply type filter
     if (filters.type.length > 0) {
-      filtered = filtered.filter(task => filters.type.includes(task.type));
+      filtered = filtered.filter((task) => filters.type.includes(task.type));
     }
 
     // Apply assignee filter
     if (filters.assignee !== 'all') {
-      filtered = filtered.filter(task => task.assignee?.id === filters.assignee);
+      filtered = filtered.filter((task) => task.assignee?.id === filters.assignee);
     }
 
     // Apply labels filter
     if (filters.labels.length > 0) {
-      filtered = filtered.filter(task =>
-        filters.labels.some(label => task.labels.includes(label))
+      filtered = filtered.filter((task) =>
+        filters.labels.some((label) => task.labels.includes(label)),
       );
     }
 
     // Apply due date filter
     if (filters.dueDate.from || filters.dueDate.to) {
-      filtered = filtered.filter(task => {
+      filtered = filtered.filter((task) => {
         if (!task.dueDate) return false;
         if (filters.dueDate.from && task.dueDate < filters.dueDate.from) return false;
         if (filters.dueDate.to && task.dueDate > filters.dueDate.to) return false;
@@ -233,7 +256,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       let bValue: any = b[sortBy];
 
       if (sortBy === 'priority') {
-        const priorityOrder = { 'URGENT': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+        const priorityOrder = { URGENT: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
         aValue = priorityOrder[a.priority];
         bValue = priorityOrder[b.priority];
       }
@@ -247,11 +270,11 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   }, [tasks, filters, sortBy, sortOrder]);
 
   const handleTaskStatusChange = (taskId: string, newStatus: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
 
     const updatedTask = { ...task, status: newStatus as Task['status'] };
-    
+
     // Auto-update progress based on status
     if (newStatus === 'COMPLETED') {
       updatedTask.progress = 100;
@@ -261,45 +284,45 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       updatedTask.progress = 25;
     }
 
-    setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     onTaskUpdate?.(taskId, { status: newStatus, progress: updatedTask.progress });
     toast(`Task status updated to ${newStatus}`);
   };
 
   const handleTaskPriorityChange = (taskId: string, newPriority: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
 
     const updatedTask = { ...task, priority: newPriority as Task['priority'] };
-    setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     onTaskUpdate?.(taskId, { priority: newPriority });
     toast(`Task priority updated to ${newPriority}`);
   };
 
   const handleTaskAssigneeChange = (taskId: string, newAssignee?: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find((t) => t.id === taskId);
     if (!task) return;
 
-    const updatedTask = { 
-      ...task, 
-      assignee: newAssignee ? { id: newAssignee, name: 'New User', avatar: 'NU' } : undefined 
+    const updatedTask = {
+      ...task,
+      assignee: newAssignee ? { id: newAssignee, name: 'New User', avatar: 'NU' } : undefined,
     };
-    setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t));
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? updatedTask : t)));
     onTaskUpdate?.(taskId, { assignee: updatedTask.assignee });
     toast('Task assignee updated');
   };
 
   const handleTaskSelection = (taskId: string, selected: boolean) => {
     if (selected) {
-      setSelectedTasks(prev => [...prev, taskId]);
+      setSelectedTasks((prev) => [...prev, taskId]);
     } else {
-      setSelectedTasks(prev => prev.filter(id => id !== taskId));
+      setSelectedTasks((prev) => prev.filter((id) => id !== taskId));
     }
   };
 
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      setSelectedTasks(filteredTasks.map(task => task.id));
+      setSelectedTasks(filteredTasks.map((task) => task.id));
     } else {
       setSelectedTasks([]);
     }
@@ -314,13 +337,13 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
     switch (action) {
       case 'delete':
         if (window.confirm(`Are you sure you want to delete ${selectedTasks.length} tasks?`)) {
-          setTasks(prev => prev.filter(task => !selectedTasks.includes(task.id)));
+          setTasks((prev) => prev.filter((task) => !selectedTasks.includes(task.id)));
           setSelectedTasks([]);
           toast('Tasks deleted successfully');
         }
         break;
       case 'complete':
-        selectedTasks.forEach(taskId => {
+        selectedTasks.forEach((taskId) => {
           handleTaskStatusChange(taskId, 'COMPLETED');
         });
         setSelectedTasks([]);
@@ -333,7 +356,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
   };
 
   const exportTasks = (format: 'csv' | 'json' | 'excel') => {
-    const data = filteredTasks.map(task => ({
+    const data = filteredTasks.map((task) => ({
       ID: task.id,
       Title: task.title,
       Status: task.status,
@@ -344,7 +367,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
       'Estimated Hours': task.estimatedHours || 0,
       'Actual Hours': task.actualHours || 0,
       Progress: `${task.progress}%`,
-      Labels: task.labels.join(', ')
+      Labels: task.labels.join(', '),
     }));
 
     let content: string;
@@ -383,49 +406,65 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
   const convertToCSV = (data: any[]) => {
     if (data.length === 0) return '';
-    
+
     const headers = Object.keys(data[0]);
     const csvHeaders = headers.join(',');
-    const csvRows = data.map(row => 
-      headers.map(header => {
-        const value = row[header];
-        return typeof value === 'string' && value.includes(',') 
-          ? `"${value}"` 
-          : value;
-      }).join(',')
+    const csvRows = data.map((row) =>
+      headers
+        .map((header) => {
+          const value = row[header];
+          return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+        })
+        .join(','),
     );
-    
+
     return [csvHeaders, ...csvRows].join('\n');
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'TODO': return 'bg-gray-100 text-gray-700';
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-700';
-      case 'IN_REVIEW': return 'bg-yellow-100 text-yellow-700';
-      case 'COMPLETED': return 'bg-green-100 text-green-700';
-      case 'CANCELLED': return 'bg-red-100 text-red-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'TODO':
+        return 'bg-gray-100 text-gray-700';
+      case 'IN_PROGRESS':
+        return 'bg-blue-100 text-blue-700';
+      case 'IN_REVIEW':
+        return 'bg-yellow-100 text-yellow-700';
+      case 'COMPLETED':
+        return 'bg-green-100 text-green-700';
+      case 'CANCELLED':
+        return 'bg-red-100 text-red-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-500';
-      case 'HIGH': return 'bg-orange-500';
-      case 'MEDIUM': return 'bg-yellow-500';
-      case 'LOW': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'URGENT':
+        return 'bg-red-500';
+      case 'HIGH':
+        return 'bg-orange-500';
+      case 'MEDIUM':
+        return 'bg-yellow-500';
+      case 'LOW':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'BUG': return '🐛';
-      case 'FEATURE': return '✨';
-      case 'EPIC': return '📋';
-      case 'STORY': return '📖';
-      default: return '📝';
+      case 'BUG':
+        return '🐛';
+      case 'FEATURE':
+        return '✨';
+      case 'EPIC':
+        return '📋';
+      case 'STORY':
+        return '📖';
+      default:
+        return '📝';
     }
   };
 
@@ -436,7 +475,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
   const getUniqueAssignees = () => {
     const assignees = new Map();
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (task.assignee) {
         assignees.set(task.assignee.id, task.assignee);
       }
@@ -446,8 +485,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
   const getUniqueLabels = () => {
     const labels = new Set<string>();
-    tasks.forEach(task => {
-      task.labels.forEach(label => labels.add(label));
+    tasks.forEach((task) => {
+      task.labels.forEach((label) => labels.add(label));
     });
     return Array.from(labels);
   };
@@ -473,12 +512,10 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               {filteredTasks.length} of {tasks.length} tasks
             </span>
             {selectedTasks.length > 0 && (
-              <span className="text-sm text-blue-600">
-                {selectedTasks.length} selected
-              </span>
+              <span className="text-sm text-blue-600">{selectedTasks.length} selected</span>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -486,7 +523,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
             >
               <Filter className="w-5 h-5" />
             </button>
-            
+
             <div className="relative group">
               <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
                 <Download className="w-5 h-5" />
@@ -512,7 +549,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 </button>
               </div>
             </div>
-            
+
             <button
               onClick={() => setIsCreatingTask(true)}
               className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -530,7 +567,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               type="text"
               placeholder="Search tasks..."
               value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -548,7 +585,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           </select>
 
           <button
-            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+            onClick={() => setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
@@ -583,16 +620,19 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <div className="space-y-1">
-                  {['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED', 'CANCELLED'].map(status => (
+                  {['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED', 'CANCELLED'].map((status) => (
                     <label key={status} className="flex items-center">
                       <input
                         type="checkbox"
                         checked={filters.status.includes(status)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setFilters(prev => ({ ...prev, status: [...prev.status, status] }));
+                            setFilters((prev) => ({ ...prev, status: [...prev.status, status] }));
                           } else {
-                            setFilters(prev => ({ ...prev, status: prev.status.filter(s => s !== status) }));
+                            setFilters((prev) => ({
+                              ...prev,
+                              status: prev.status.filter((s) => s !== status),
+                            }));
                           }
                         }}
                         className="mr-2"
@@ -606,16 +646,22 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                 <div className="space-y-1">
-                  {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map(priority => (
+                  {['URGENT', 'HIGH', 'MEDIUM', 'LOW'].map((priority) => (
                     <label key={priority} className="flex items-center">
                       <input
                         type="checkbox"
                         checked={filters.priority.includes(priority)}
                         onChange={(e) => {
                           if (e.target.checked) {
-                            setFilters(prev => ({ ...prev, priority: [...prev.priority, priority] }));
+                            setFilters((prev) => ({
+                              ...prev,
+                              priority: [...prev.priority, priority],
+                            }));
                           } else {
-                            setFilters(prev => ({ ...prev, priority: prev.priority.filter(p => p !== priority) }));
+                            setFilters((prev) => ({
+                              ...prev,
+                              priority: prev.priority.filter((p) => p !== priority),
+                            }));
                           }
                         }}
                         className="mr-2"
@@ -630,11 +676,11 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
                 <select
                   value={filters.assignee}
-                  onChange={(e) => setFilters(prev => ({ ...prev, assignee: e.target.value }))}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, assignee: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Assignees</option>
-                  {getUniqueAssignees().map(assignee => (
+                  {getUniqueAssignees().map((assignee) => (
                     <option key={assignee.id} value={assignee.id}>
                       {assignee.name}
                     </option>
@@ -648,19 +694,29 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                   <input
                     type="date"
                     value={filters.dueDate.from?.toISOString().split('T')[0] || ''}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      dueDate: { ...prev.dueDate, from: e.target.value ? new Date(e.target.value) : undefined }
-                    }))}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dueDate: {
+                          ...prev.dueDate,
+                          from: e.target.value ? new Date(e.target.value) : undefined,
+                        },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <input
                     type="date"
                     value={filters.dueDate.to?.toISOString().split('T')[0] || ''}
-                    onChange={(e) => setFilters(prev => ({ 
-                      ...prev, 
-                      dueDate: { ...prev.dueDate, to: e.target.value ? new Date(e.target.value) : undefined }
-                    }))}
+                    onChange={(e) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        dueDate: {
+                          ...prev.dueDate,
+                          to: e.target.value ? new Date(e.target.value) : undefined,
+                        },
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -683,7 +739,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 Clear selection
               </button>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => handleBulkAction('complete')}
@@ -717,7 +773,9 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               <div className="col-span-1">
                 <input
                   type="checkbox"
-                  checked={selectedTasks.length === filteredTasks.length && filteredTasks.length > 0}
+                  checked={
+                    selectedTasks.length === filteredTasks.length && filteredTasks.length > 0
+                  }
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="rounded"
                 />
@@ -745,19 +803,24 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                     className="rounded"
                   />
                 </div>
-                
+
                 <div className="col-span-4">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">{getTypeIcon(task.type)}</span>
                     <div>
-                      <h4 className="font-medium text-sm cursor-pointer hover:text-blue-600"
-                          onClick={() => onTaskSelect?.(task)}>
+                      <h4
+                        className="font-medium text-sm cursor-pointer hover:text-blue-600"
+                        onClick={() => onTaskSelect?.(task)}
+                      >
                         {task.title}
                       </h4>
                       <p className="text-xs text-gray-500 line-clamp-1">{task.description}</p>
                       <div className="flex items-center space-x-2 mt-1">
                         {task.labels.slice(0, 2).map((label, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+                          >
                             {label}
                           </span>
                         ))}
@@ -811,9 +874,11 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
                 <div className="col-span-1">
                   {task.dueDate && (
-                    <div className={`flex items-center space-x-1 text-xs ${
-                      isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`flex items-center space-x-1 text-xs ${
+                        isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'
+                      }`}
+                    >
                       <Calendar className="w-3 h-3" />
                       <span>{task.dueDate.toLocaleDateString()}</span>
                     </div>
@@ -876,9 +941,11 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                     {task.status}
                   </span>
                   {task.dueDate && (
-                    <div className={`flex items-center space-x-1 text-xs ${
-                      isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`flex items-center space-x-1 text-xs ${
+                        isOverdue(task.dueDate) ? 'text-red-600' : 'text-gray-600'
+                      }`}
+                    >
                       <Calendar className="w-3 h-3" />
                       <span>{task.dueDate.toLocaleDateString()}</span>
                     </div>
@@ -907,7 +974,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="text-xs text-gray-600">{task.progress}%</div>
                 </div>
 
@@ -929,7 +996,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         {viewMode === 'timeline' && (
           <div className="space-y-4">
             {filteredTasks
-              .filter(task => task.dueDate)
+              .filter((task) => task.dueDate)
               .sort((a, b) => (a.dueDate?.getTime() || 0) - (b.dueDate?.getTime() || 0))
               .map((task) => (
                 <div key={task.id} className="flex items-center space-x-4">
@@ -937,7 +1004,9 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                     {task.dueDate?.toLocaleDateString()}
                   </div>
                   <div className="flex-shrink-0">
-                    <div className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}></div>
+                    <div
+                      className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`}
+                    ></div>
                   </div>
                   <div className="flex-1 bg-white border border-gray-200 rounded-lg p-3">
                     <div className="flex items-center justify-between">
@@ -960,15 +1029,17 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
           <div className="text-center py-8">
             <div className="text-gray-500">No tasks found</div>
             <button
-              onClick={() => setFilters({
-                status: [],
-                priority: [],
-                type: [],
-                assignee: 'all',
-                labels: [],
-                dueDate: {},
-                search: ''
-              })}
+              onClick={() =>
+                setFilters({
+                  status: [],
+                  priority: [],
+                  type: [],
+                  assignee: 'all',
+                  labels: [],
+                  dueDate: {},
+                  search: '',
+                })
+              }
               className="mt-2 text-blue-600 hover:text-blue-800 text-sm"
             >
               Clear filters
@@ -982,12 +1053,10 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
             <h3 className="text-lg font-semibold mb-4">Create New Task</h3>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Task Title
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
                 <input
                   type="text"
                   placeholder="Enter task title..."
@@ -996,9 +1065,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   placeholder="Enter task description..."
                   rows={4}
@@ -1008,9 +1075,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Priority
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
@@ -1020,9 +1085,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="TASK">Task</option>
                     <option value="BUG">Bug</option>
@@ -1033,12 +1096,10 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assignee
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Assignee</label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="">Unassigned</option>
-                    {getUniqueAssignees().map(assignee => (
+                    {getUniqueAssignees().map((assignee) => (
                       <option key={assignee.id} value={assignee.id}>
                         {assignee.name}
                       </option>
@@ -1049,9 +1110,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Due Date
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
                   <input
                     type="date"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

@@ -13,7 +13,7 @@ export const ThreatDashboard: React.FC = () => {
     totalThreats: 0,
     criticalThreats: 0,
     highThreats: 0,
-    lastUpdated: new Date().toISOString()
+    lastUpdated: new Date().toISOString(),
   });
 
   // Simulated polling for real-time updates
@@ -32,18 +32,20 @@ export const ThreatDashboard: React.FC = () => {
   return (
     <div className="p-6 bg-gray-900 text-white rounded-lg shadow-xl">
       <h2 className="text-2xl font-bold mb-6 text-red-500">Advanced Threat Detection Dashboard</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
           <h3 className="text-gray-400 text-sm font-semibold uppercase">Total Threats Monitored</h3>
           <p className="text-4xl font-mono mt-2 text-blue-400">{stats.totalThreats}</p>
         </div>
-        
+
         <div className="bg-gray-800 p-4 rounded-lg border border-red-900">
           <h3 className="text-gray-400 text-sm font-semibold uppercase">Critical Threats</h3>
-          <p className="text-4xl font-mono mt-2 text-red-500 animate-pulse">{stats.criticalThreats}</p>
+          <p className="text-4xl font-mono mt-2 text-red-500 animate-pulse">
+            {stats.criticalThreats}
+          </p>
         </div>
-        
+
         <div className="bg-gray-800 p-4 rounded-lg border border-orange-900">
           <h3 className="text-gray-400 text-sm font-semibold uppercase">High/Medium Alerts</h3>
           <p className="text-4xl font-mono mt-2 text-orange-400">{stats.highThreats}</p>
@@ -51,7 +53,9 @@ export const ThreatDashboard: React.FC = () => {
       </div>
 
       <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">Recent Security Events</h3>
+        <h3 className="text-xl font-semibold mb-4 border-b border-gray-700 pb-2">
+          Recent Security Events
+        </h3>
         <SecurityAlerts />
       </div>
 

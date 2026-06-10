@@ -18,9 +18,10 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
   children,
   className = '',
   customCommands = {},
-  showIndicator = true
+  showIndicator = true,
 }) => {
-  const { isVoiceSupported, isVoiceListening, startVoiceCommands, toggleVoiceListening, announce } = useAccessibility();
+  const { isVoiceSupported, isVoiceListening, startVoiceCommands, toggleVoiceListening, announce } =
+    useAccessibility();
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastCommand, setLastCommand] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -48,9 +49,11 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
     'toggle voice commands': () => {
       toggleVoiceListening();
     },
-    'help': () => {
-      announce('Voice commands available: navigate home, navigate dashboard, navigate search, toggle high contrast, toggle voice commands, help');
-    }
+    help: () => {
+      announce(
+        'Voice commands available: navigate home, navigate dashboard, navigate search, toggle high contrast, toggle voice commands, help',
+      );
+    },
   };
 
   // Initialize voice commands
@@ -59,7 +62,7 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
 
     const allCommands = { ...defaultCommands, ...customCommands };
     const success = startVoiceCommands(allCommands);
-    
+
     if (success) {
       setIsInitialized(true);
       announce('Voice commands initialized');
@@ -78,11 +81,7 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
   }, [isVoiceListening]);
 
   if (!isVoiceSupported) {
-    return (
-      <div className={`voice-commands ${className}`}>
-        {children}
-      </div>
-    );
+    return <div className={`voice-commands ${className}`}>{children}</div>;
   }
 
   return (
@@ -92,34 +91,34 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
         <div
           ref={indicatorRef}
           className={`fixed bottom-4 right-4 z-50 p-3 rounded-lg transition-all duration-300 ${
-            isVoiceListening 
-              ? 'bg-green-500 text-white shadow-lg animate-pulse' 
+            isVoiceListening
+              ? 'bg-green-500 text-white shadow-lg animate-pulse'
               : 'bg-gray-200 text-gray-600'
           }`}
           role="status"
           aria-live="polite"
         >
           <div className="flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${isVoiceListening ? 'bg-white animate-ping' : 'bg-gray-400'}`} />
+            <div
+              className={`w-3 h-3 rounded-full ${isVoiceListening ? 'bg-white animate-ping' : 'bg-gray-400'}`}
+            />
             <span className="text-sm font-medium">
               {isVoiceListening ? 'Listening...' : 'Voice Commands'}
             </span>
           </div>
-          
-          {lastCommand && (
-            <div className="mt-2 text-xs opacity-75">
-              Last: {lastCommand}
-            </div>
-          )}
+
+          {lastCommand && <div className="mt-2 text-xs opacity-75">Last: {lastCommand}</div>}
         </div>
       )}
 
       {/* Voice command controls */}
-      <div className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 
+      <div
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 
                       focus:bg-white focus:border-2 focus:border-blue-600 focus:rounded-lg 
                       focus:p-4 focus:shadow-lg"
-           role="group"
-           aria-label="Voice command controls">
+        role="group"
+        aria-label="Voice command controls"
+      >
         <h3 className="font-bold mb-2">Voice Commands</h3>
         <button
           onClick={toggleVoiceListening}
@@ -128,7 +127,7 @@ export const VoiceCommands: React.FC<VoiceCommandsProps> = ({
         >
           {isVoiceListening ? 'Stop Listening' : 'Start Listening'}
         </button>
-        
+
         <div className="text-sm text-gray-600 mt-2">
           <p>Available commands:</p>
           <ul className="list-disc list-inside mt-1">

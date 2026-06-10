@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Monitor, MonitorOff, Users, Download, Settings, Maximize2, Minimize2, Mic, MicOff, Video, VideoOff, MessageSquare, PhoneOff } from 'lucide-react';
+import {
+  Monitor,
+  MonitorOff,
+  Users,
+  Download,
+  Settings,
+  Maximize2,
+  Minimize2,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  MessageSquare,
+  PhoneOff,
+} from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
@@ -40,7 +54,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
   isHost: initialIsHost = false,
   onSessionStart,
   onSessionEnd,
-  className = ''
+  className = '',
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -55,13 +69,15 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
   const [showParticipants, setShowParticipants] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [chatMessages, setChatMessages] = useState<Array<{
-    id: string;
-    userId: string;
-    displayName: string;
-    message: string;
-    timestamp: Date;
-  }>>([]);
+  const [chatMessages, setChatMessages] = useState<
+    Array<{
+      id: string;
+      userId: string;
+      displayName: string;
+      message: string;
+      timestamp: Date;
+    }>
+  >([]);
   const [newMessage, setNewMessage] = useState('');
   const [settings, setSettings] = useState<ScreenShareSettings>({
     quality: 'high',
@@ -71,7 +87,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
     allowRemoteControl: false,
     enableRecording: false,
     enableChat: true,
-    maxViewers: 50
+    maxViewers: 50,
   });
 
   const screenVideoRef = useRef<HTMLVideoElement>(null);
@@ -88,9 +104,12 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       return;
     }
 
-    const newSocket = io(process.env.REACT_APP_SCREEN_SHARE_SERVICE_URL || 'http://localhost:3002', {
-      auth: { token }
-    });
+    const newSocket = io(
+      process.env.REACT_APP_SCREEN_SHARE_SERVICE_URL || 'http://localhost:3002',
+      {
+        auth: { token },
+      },
+    );
 
     newSocket.on('connect', () => {
       setIsConnected(true);
@@ -102,30 +121,36 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       console.log('Disconnected from screen share service');
     });
 
-    newSocket.on('session-started', (data: { sessionId: string, settings: ScreenShareSettings }) => {
-      setCurrentSession(data.sessionId);
-      setIsSharing(true);
-      toast.success('Screen sharing session started');
-      onSessionStart?.(data.sessionId);
-    });
+    newSocket.on(
+      'session-started',
+      (data: { sessionId: string; settings: ScreenShareSettings }) => {
+        setCurrentSession(data.sessionId);
+        setIsSharing(true);
+        toast.success('Screen sharing session started');
+        onSessionStart?.(data.sessionId);
+      },
+    );
 
-    newSocket.on('session-joined', (data: { sessionId: string, hostId: string, streamUrl: string }) => {
-      setCurrentSession(data.sessionId);
-      setIsViewing(true);
-      toast.success('Joined screen sharing session');
-    });
+    newSocket.on(
+      'session-joined',
+      (data: { sessionId: string; hostId: string; streamUrl: string }) => {
+        setCurrentSession(data.sessionId);
+        setIsViewing(true);
+        toast.success('Joined screen sharing session');
+      },
+    );
 
     newSocket.on('viewer-joined', (data: { participant: ScreenShareParticipant }) => {
-      setParticipants(prev => [...prev, data.participant]);
+      setParticipants((prev) => [...prev, data.participant]);
       toast(`${data.participant.displayName} joined the session`);
     });
 
     newSocket.on('viewer-left', (data: { userId: string }) => {
-      setParticipants(prev => prev.filter(p => p.userId !== data.userId));
+      setParticipants((prev) => prev.filter((p) => p.userId !== data.userId));
       toast('A viewer left the session');
     });
 
-    newSocket.on('screen-data', (data: { frame: ArrayBuffer, timestamp: number }) => {
+    newSocket.on('screen-data', (data: { frame: ArrayBuffer; timestamp: number }) => {
       // Handle screen frame data
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext('2d');
@@ -137,14 +162,21 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       }
     });
 
-    newSocket.on('cursor-update', (data: { userId: string, x: number, y: number, visible: boolean }) => {
-      setParticipants(prev => prev.map(p => 
-        p.userId === data.userId ? { ...p, cursor: { x: data.x, y: data.y, visible: data.visible } } : p
-      ));
-    });
+    newSocket.on(
+      'cursor-update',
+      (data: { userId: string; x: number; y: number; visible: boolean }) => {
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.userId === data.userId
+              ? { ...p, cursor: { x: data.x, y: data.y, visible: data.visible } }
+              : p,
+          ),
+        );
+      },
+    );
 
     newSocket.on('chat-message', (message: any) => {
-      setChatMessages(prev => [...prev, message]);
+      setChatMessages((prev) => [...prev, message]);
     });
 
     newSocket.on('recording-started', () => {
@@ -157,13 +189,13 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       toast('Recording stopped');
     });
 
-    newSocket.on('remote-control-request', (data: { userId: string, displayName: string }) => {
+    newSocket.on('remote-control-request', (data: { userId: string; displayName: string }) => {
       if (settings.allowRemoteControl) {
         const response = window.confirm(`${data.displayName} wants to control your screen. Allow?`);
-        socket.emit('remote-control-response', { 
-          sessionId: currentSession, 
-          userId: data.userId, 
-          allowed: response 
+        socket.emit('remote-control-response', {
+          sessionId: currentSession,
+          userId: data.userId,
+          allowed: response,
         });
       }
     });
@@ -211,11 +243,15 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
     try {
       const displayMediaOptions: DisplayMediaStreamOptions = {
         video: {
-          width: { ideal: settings.quality === 'high' ? 1920 : settings.quality === 'medium' ? 1280 : 854 },
-          height: { ideal: settings.quality === 'high' ? 1080 : settings.quality === 'medium' ? 720 : 480 },
-          frameRate: { ideal: settings.frameRate }
+          width: {
+            ideal: settings.quality === 'high' ? 1920 : settings.quality === 'medium' ? 1280 : 854,
+          },
+          height: {
+            ideal: settings.quality === 'high' ? 1080 : settings.quality === 'medium' ? 720 : 480,
+          },
+          frameRate: { ideal: settings.frameRate },
         },
-        audio: settings.includeAudio
+        audio: settings.includeAudio,
       };
 
       const stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
@@ -234,10 +270,14 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       socket.emit('start-screen-share', {
         settings: {
           ...settings,
-          resolution: settings.quality === 'high' ? '1920x1080' : settings.quality === 'medium' ? '1280x720' : '854x480'
-        }
+          resolution:
+            settings.quality === 'high'
+              ? '1920x1080'
+              : settings.quality === 'medium'
+                ? '1280x720'
+                : '854x480',
+        },
       });
-
     } catch (error) {
       console.error('Error starting screen share:', error);
       toast.error('Failed to start screen sharing');
@@ -246,7 +286,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
 
   const stopScreenShare = () => {
     if (screenStream) {
-      screenStream.getTracks().forEach(track => track.stop());
+      screenStream.getTracks().forEach((track) => track.stop());
       setScreenStream(null);
     }
 
@@ -332,7 +372,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
 
     socket.emit('chat-message', {
       sessionId: currentSession,
-      message: newMessage.trim()
+      message: newMessage.trim(),
     });
 
     setNewMessage('');
@@ -358,14 +398,14 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
       socket.emit('remote-click', {
         sessionId: currentSession,
         x: (x / rect.width) * 100, // Percentage
-        y: (y / rect.height) * 100
+        y: (y / rect.height) * 100,
       });
     }
   };
 
   const cleanup = () => {
     if (screenStream) {
-      screenStream.getTracks().forEach(track => track.stop());
+      screenStream.getTracks().forEach((track) => track.stop());
     }
   };
 
@@ -373,21 +413,21 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
     return (
       <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
         <h2 className="text-2xl font-bold mb-6">Screen Sharing</h2>
-        
+
         <div className="space-y-6">
           {initialIsHost ? (
             <div>
               <h3 className="text-lg font-semibold mb-3">Start Screen Sharing</h3>
-              
+
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Quality
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Quality</label>
                     <select
                       value={settings.quality}
-                      onChange={(e) => setSettings(prev => ({ ...prev, quality: e.target.value as any }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, quality: e.target.value as any }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="low">Low (480p)</option>
@@ -395,14 +435,19 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                       <option value="high">High (1080p)</option>
                     </select>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Frame Rate
                     </label>
                     <select
                       value={settings.frameRate}
-                      onChange={(e) => setSettings(prev => ({ ...prev, frameRate: parseInt(e.target.value) as any }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          frameRate: parseInt(e.target.value) as any,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="15">15 FPS</option>
@@ -411,59 +456,69 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                     </select>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-4">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.includeAudio}
-                      onChange={(e) => setSettings(prev => ({ ...prev, includeAudio: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, includeAudio: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Include Audio</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.showCursor}
-                      onChange={(e) => setSettings(prev => ({ ...prev, showCursor: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, showCursor: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Show Cursor</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.allowRemoteControl}
-                      onChange={(e) => setSettings(prev => ({ ...prev, allowRemoteControl: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, allowRemoteControl: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Allow Remote Control</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.enableRecording}
-                      onChange={(e) => setSettings(prev => ({ ...prev, enableRecording: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, enableRecording: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Enable Recording</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={settings.enableChat}
-                      onChange={(e) => setSettings(prev => ({ ...prev, enableChat: e.target.checked }))}
+                      onChange={(e) =>
+                        setSettings((prev) => ({ ...prev, enableChat: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Enable Chat</span>
                   </label>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Max Viewers
@@ -473,11 +528,13 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                     min="1"
                     max="100"
                     value={settings.maxViewers}
-                    onChange={(e) => setSettings(prev => ({ ...prev, maxViewers: parseInt(e.target.value) }))}
+                    onChange={(e) =>
+                      setSettings((prev) => ({ ...prev, maxViewers: parseInt(e.target.value) }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <button
                   onClick={startScreenShare}
                   disabled={!isConnected}
@@ -491,7 +548,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
           ) : (
             <div>
               <h3 className="text-lg font-semibold mb-3">Join Screen Sharing Session</h3>
-              
+
               <div className="space-y-4">
                 <input
                   type="text"
@@ -504,10 +561,12 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                     }
                   }}
                 />
-                
+
                 <button
                   onClick={() => {
-                    const input = document.querySelector('input[placeholder="Enter Session ID"]') as HTMLInputElement;
+                    const input = document.querySelector(
+                      'input[placeholder="Enter Session ID"]',
+                    ) as HTMLInputElement;
                     const sessionId = input?.value.trim();
                     if (sessionId) joinSession(sessionId);
                   }}
@@ -520,12 +579,16 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="mt-6 text-center">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-            isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            <span className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+              isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            ></span>
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
         </div>
@@ -547,7 +610,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
               {participants.length} viewer{participants.length !== 1 ? 's' : ''}
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {isRecording && (
               <span className="flex items-center text-red-600">
@@ -555,14 +618,14 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                 Recording
               </span>
             )}
-            
+
             <button
               onClick={() => setShowParticipants(!showParticipants)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
             >
               <Users className="w-5 h-5" />
             </button>
-            
+
             {settings.enableChat && (
               <button
                 onClick={() => setShowChat(!showChat)}
@@ -574,14 +637,14 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                 )}
               </button>
             )}
-            
+
             <button
               onClick={toggleFullscreen}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
             >
               {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </button>
-            
+
             <button
               onClick={isSharing ? stopScreenShare : leaveSession}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
@@ -622,23 +685,25 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
           )}
 
           {/* Remote cursors */}
-          {participants.map((participant) => (
-            participant.cursor && participant.cursor.visible && (
-              <div
-                key={participant.userId}
-                className="absolute w-4 h-4 border-2 border-blue-500 rounded-full pointer-events-none"
-                style={{
-                  left: `${participant.cursor.x}%`,
-                  top: `${participant.cursor.y}%`,
-                  transform: 'translate(-50%, -50%)'
-                }}
-              >
-                <div className="absolute -top-6 left-4 bg-black bg-opacity-75 text-white text-xs px-1 rounded">
-                  {participant.displayName}
+          {participants.map(
+            (participant) =>
+              participant.cursor &&
+              participant.cursor.visible && (
+                <div
+                  key={participant.userId}
+                  className="absolute w-4 h-4 border-2 border-blue-500 rounded-full pointer-events-none"
+                  style={{
+                    left: `${participant.cursor.x}%`,
+                    top: `${participant.cursor.y}%`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                >
+                  <div className="absolute -top-6 left-4 bg-black bg-opacity-75 text-white text-xs px-1 rounded">
+                    {participant.displayName}
+                  </div>
                 </div>
-              </div>
-            )
-          ))}
+              ),
+          )}
 
           {/* Quality indicator */}
           <div className="absolute top-4 left-4 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-sm">
@@ -654,7 +719,10 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
               <h3 className="font-semibold mb-3">Viewers</h3>
               <div className="space-y-2">
                 {participants.map((participant) => (
-                  <div key={participant.userId} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                  <div
+                    key={participant.userId}
+                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
+                  >
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2">
                         <span className="text-xs font-semibold">
@@ -683,11 +751,8 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
               <div className="p-4 border-b border-gray-200">
                 <h3 className="font-semibold">Chat</h3>
               </div>
-              
-              <div
-                ref={chatContainerRef}
-                className="flex-1 p-4 overflow-y-auto space-y-2"
-              >
+
+              <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2">
                 {chatMessages.map((message) => (
                   <div key={message.id} className="bg-gray-50 rounded-lg p-2">
                     <div className="flex items-center justify-between mb-1">
@@ -700,7 +765,7 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                   </div>
                 ))}
               </div>
-              
+
               <div className="p-4 border-t border-gray-200">
                 <div className="flex space-x-2">
                   <input
@@ -773,7 +838,9 @@ export const ScreenShare: React.FC<ScreenShareProps> = ({
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              <div className={`w-5 h-5 rounded-full ${isRecording ? 'bg-red-600' : 'bg-gray-600'}`}></div>
+              <div
+                className={`w-5 h-5 rounded-full ${isRecording ? 'bg-red-600' : 'bg-gray-600'}`}
+              ></div>
             </button>
           )}
 

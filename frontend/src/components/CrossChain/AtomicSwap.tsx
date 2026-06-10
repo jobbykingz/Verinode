@@ -47,7 +47,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
   const supportedChains = [
     { id: 1, name: 'Ethereum', icon: '🔷' },
     { id: 137, name: 'Polygon', icon: '🟣' },
-    { id: 56, name: 'BSC', icon: '🟡' }
+    { id: 56, name: 'BSC', icon: '🟡' },
   ];
 
   const supportedAssets = ['ETH', 'MATIC', 'BNB', 'USDC', 'USDT', 'WBTC'];
@@ -93,7 +93,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
           secretHash: '0xabc123...',
           status: 'Initiated',
           timeout: Date.now() + 86400000, // 24 hours from now
-          createdAt: Date.now() - 300000
+          createdAt: Date.now() - 300000,
         },
         {
           swapId: 'swap_002',
@@ -108,8 +108,8 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
           secretHash: '0xdef456...',
           status: 'Funded',
           timeout: Date.now() + 43200000, // 12 hours from now
-          createdAt: Date.now() - 600000
-        }
+          createdAt: Date.now() - 600000,
+        },
       ];
       setSwaps(mockSwaps);
     } catch (error) {
@@ -148,13 +148,13 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
         targetAmount,
         secretHash,
         status: 'Initiated',
-        timeout: Date.now() + (timeoutHours * 3600000),
-        createdAt: Date.now()
+        timeout: Date.now() + timeoutHours * 3600000,
+        createdAt: Date.now(),
       };
 
-      setSwaps(prev => [newSwap, ...prev]);
+      setSwaps((prev) => [newSwap, ...prev]);
       setShowCreateModal(false);
-      
+
       // Reset form
       setParticipant('');
       setSourceAmount('');
@@ -179,11 +179,11 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
     setIsLoading(true);
     try {
       // Simulate funding swap
-      setSwaps(prev => prev.map(swap => 
-        swap.swapId === swapId 
-          ? { ...swap, status: 'Funded' as const }
-          : swap
-      ));
+      setSwaps((prev) =>
+        prev.map((swap) =>
+          swap.swapId === swapId ? { ...swap, status: 'Funded' as const } : swap,
+        ),
+      );
       alert('Swap funded successfully!');
     } catch (error) {
       console.error('Failed to fund swap:', error);
@@ -202,12 +202,14 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
     setIsLoading(true);
     try {
       // Simulate redeeming swap
-      setSwaps(prev => prev.map(swap => 
-        swap.swapId === selectedSwap.swapId 
-          ? { ...swap, status: 'Redeemed' as const, completedAt: Date.now() }
-          : swap
-      ));
-      
+      setSwaps((prev) =>
+        prev.map((swap) =>
+          swap.swapId === selectedSwap.swapId
+            ? { ...swap, status: 'Redeemed' as const, completedAt: Date.now() }
+            : swap,
+        ),
+      );
+
       setShowRedeemModal(false);
       setSelectedSwap(null);
       setRedeemSecret('');
@@ -229,11 +231,13 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
     setIsLoading(true);
     try {
       // Simulate refunding swap
-      setSwaps(prev => prev.map(swap => 
-        swap.swapId === swapId 
-          ? { ...swap, status: 'Refunded' as const, completedAt: Date.now() }
-          : swap
-      ));
+      setSwaps((prev) =>
+        prev.map((swap) =>
+          swap.swapId === swapId
+            ? { ...swap, status: 'Refunded' as const, completedAt: Date.now() }
+            : swap,
+        ),
+      );
       alert('Swap refunded successfully!');
     } catch (error) {
       console.error('Failed to refund swap:', error);
@@ -278,12 +282,12 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
   };
 
   const getChainName = (chainId: number) => {
-    const chain = supportedChains.find(c => c.id === chainId);
+    const chain = supportedChains.find((c) => c.id === chainId);
     return chain ? chain.name : `Chain ${chainId}`;
   };
 
   const getChainIcon = (chainId: number) => {
-    const chain = supportedChains.find(c => c.id === chainId);
+    const chain = supportedChains.find((c) => c.id === chainId);
     return chain ? chain.icon : '⛓️';
   };
 
@@ -294,15 +298,15 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
   const getTimeRemaining = (timeout: number) => {
     const remaining = timeout - Date.now();
     if (remaining <= 0) return 'Expired';
-    
+
     const hours = Math.floor(remaining / 3600000);
     const minutes = Math.floor((remaining % 3600000) / 60000);
-    
+
     if (hours > 24) {
       const days = Math.floor(hours / 24);
       return `${days}d ${hours % 24}h`;
     }
-    
+
     return `${hours}h ${minutes}m`;
   };
 
@@ -316,9 +320,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Atomic Swaps</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Trustless cross-chain token exchanges
-            </p>
+            <p className="text-sm text-gray-600 mt-1">Trustless cross-chain token exchanges</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
@@ -326,7 +328,12 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
             </svg>
             <span>Create Swap</span>
           </button>
@@ -342,23 +349,28 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
           <div className="text-center py-8">
             <div className="text-gray-400 text-lg mb-2">No atomic swaps found</div>
             <p className="text-gray-500 text-sm">
-              {walletConnected ? 'Create your first atomic swap' : 'Connect your wallet to get started'}
+              {walletConnected
+                ? 'Create your first atomic swap'
+                : 'Connect your wallet to get started'}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             {swaps.map((swap) => (
-              <div key={swap.swapId} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div
+                key={swap.swapId}
+                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(swap.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(swap.status)}`}
+                    >
                       {getStatusIcon(swap.status)} {swap.status}
                     </span>
                     <span className="text-sm text-gray-500">ID: {swap.swapId}</span>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {formatTimestamp(swap.createdAt)}
-                  </div>
+                  <div className="text-sm text-gray-500">{formatTimestamp(swap.createdAt)}</div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
@@ -369,11 +381,14 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                         <div className="text-sm font-medium text-gray-900">
                           {swap.sourceAmount} {swap.sourceAsset}
                         </div>
-                        <div className="text-xs text-gray-500">{getChainName(swap.sourceChain)}</div>
+                        <div className="text-xs text-gray-500">
+                          {getChainName(swap.sourceChain)}
+                        </div>
                       </div>
                     </div>
                     <div className="text-xs text-gray-600">
-                      From: {swap.initiator === userAddress ? 'You' : swap.initiator.slice(0, 10) + '...'}
+                      From:{' '}
+                      {swap.initiator === userAddress ? 'You' : swap.initiator.slice(0, 10) + '...'}
                     </div>
                   </div>
 
@@ -384,22 +399,28 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                         <div className="text-sm font-medium text-gray-900">
                           {swap.targetAmount} {swap.targetAsset}
                         </div>
-                        <div className="text-xs text-gray-500">{getChainName(swap.targetChain)}</div>
+                        <div className="text-xs text-gray-500">
+                          {getChainName(swap.targetChain)}
+                        </div>
                       </div>
                     </div>
                     <div className="text-xs text-gray-600">
-                      To: {swap.participant === userAddress ? 'You' : swap.participant.slice(0, 10) + '...'}
+                      To:{' '}
+                      {swap.participant === userAddress
+                        ? 'You'
+                        : swap.participant.slice(0, 10) + '...'}
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                   <div className="text-sm text-gray-500">
-                    Time remaining: <span className={isExpired(swap.timeout) ? 'text-red-600' : 'text-gray-700'}>
+                    Time remaining:{' '}
+                    <span className={isExpired(swap.timeout) ? 'text-red-600' : 'text-gray-700'}>
                       {getTimeRemaining(swap.timeout)}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {swap.initiator === userAddress && swap.status === 'Initiated' && (
                       <button
@@ -410,29 +431,33 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                         Fund
                       </button>
                     )}
-                    
-                    {swap.participant === userAddress && swap.status === 'Funded' && !isExpired(swap.timeout) && (
-                      <button
-                        onClick={() => {
-                          setSelectedSwap(swap);
-                          setShowRedeemModal(true);
-                        }}
-                        disabled={isLoading}
-                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
-                      >
-                        Redeem
-                      </button>
-                    )}
-                    
-                    {swap.initiator === userAddress && swap.status === 'Funded' && isExpired(swap.timeout) && (
-                      <button
-                        onClick={() => refundSwap(swap.swapId)}
-                        disabled={isLoading}
-                        className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
-                      >
-                        Refund
-                      </button>
-                    )}
+
+                    {swap.participant === userAddress &&
+                      swap.status === 'Funded' &&
+                      !isExpired(swap.timeout) && (
+                        <button
+                          onClick={() => {
+                            setSelectedSwap(swap);
+                            setShowRedeemModal(true);
+                          }}
+                          disabled={isLoading}
+                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                        >
+                          Redeem
+                        </button>
+                      )}
+
+                    {swap.initiator === userAddress &&
+                      swap.status === 'Funded' &&
+                      isExpired(swap.timeout) && (
+                        <button
+                          onClick={() => refundSwap(swap.swapId)}
+                          disabled={isLoading}
+                          className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+                        >
+                          Refund
+                        </button>
+                      )}
                   </div>
                 </div>
               </div>
@@ -448,7 +473,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-lg font-bold text-gray-900">Create Atomic Swap</h3>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -462,26 +487,24 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Target Chain
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Target Chain</label>
                 <select
                   value={targetChain}
                   onChange={(e) => setTargetChain(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {supportedChains
-                    .filter(chain => chain.id !== currentChain)
-                    .map(chain => (
+                    .filter((chain) => chain.id !== currentChain)
+                    .map((chain) => (
                       <option key={chain.id} value={chain.id}>
                         {chain.icon} {chain.name}
                       </option>
                     ))}
                 </select>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -492,12 +515,14 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                     onChange={(e) => setSourceAsset(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {supportedAssets.map(asset => (
-                      <option key={asset} value={asset}>{asset}</option>
+                    {supportedAssets.map((asset) => (
+                      <option key={asset} value={asset}>
+                        {asset}
+                      </option>
                     ))}
                   </select>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Target Asset
@@ -507,13 +532,15 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                     onChange={(e) => setTargetAsset(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    {supportedAssets.map(asset => (
-                      <option key={asset} value={asset}>{asset}</option>
+                    {supportedAssets.map((asset) => (
+                      <option key={asset} value={asset}>
+                        {asset}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -527,7 +554,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Target Amount
@@ -541,7 +568,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Timeout (hours)
@@ -556,7 +583,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                 />
               </div>
             </div>
-            
+
             <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => setShowCreateModal(false)}
@@ -583,20 +610,20 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-lg font-bold text-gray-900">Redeem Atomic Swap</h3>
             </div>
-            
+
             <div className="p-6 space-y-4">
               <div className="bg-gray-50 p-3 rounded-lg">
                 <div className="text-sm text-gray-600 mb-2">Swap Details:</div>
                 <div className="text-sm">
-                  <div>Receive: {selectedSwap.targetAmount} {selectedSwap.targetAsset}</div>
+                  <div>
+                    Receive: {selectedSwap.targetAmount} {selectedSwap.targetAsset}
+                  </div>
                   <div>From: {selectedSwap.sourceChain}</div>
                 </div>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Secret
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Secret</label>
                 <input
                   type="password"
                   value={redeemSecret}
@@ -606,7 +633,7 @@ const AtomicSwap: React.FC<AtomicSwapProps> = ({ currentChain, className = '' })
                 />
               </div>
             </div>
-            
+
             <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => {

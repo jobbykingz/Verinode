@@ -64,9 +64,9 @@ const HeatMap: React.FC<HeatMapProps> = ({
     const mockData: HeatMapData[] = [];
     const hours = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    
-    days.forEach(day => {
-      hours.forEach(hour => {
+
+    days.forEach((day) => {
+      hours.forEach((hour) => {
         mockData.push({
           x: hour,
           y: day,
@@ -79,17 +79,17 @@ const HeatMap: React.FC<HeatMapProps> = ({
         });
       });
     });
-    
+
     return mockData;
   }, []);
 
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const finalData = data || generateMockData;
       setHeatMapData(finalData);
       setIsLoading(false);
@@ -132,39 +132,30 @@ const HeatMap: React.FC<HeatMapProps> = ({
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
     // Get unique x and y values
-    const xValues = Array.from(new Set(heatMapData.map(d => d.x))).sort();
-    const yValues = Array.from(new Set(heatMapData.map(d => d.y))).sort();
+    const xValues = Array.from(new Set(heatMapData.map((d) => d.x))).sort();
+    const yValues = Array.from(new Set(heatMapData.map((d) => d.y))).sort();
 
     // Create scales
-    const xScale = d3.scaleBand()
-      .domain(xValues)
-      .range([0, innerWidth])
-      .padding(0.1);
+    const xScale = d3.scaleBand().domain(xValues).range([0, innerWidth]).padding(0.1);
 
-    const yScale = d3.scaleBand()
-      .domain(yValues)
-      .range([0, innerHeight])
-      .padding(0.1);
+    const yScale = d3.scaleBand().domain(yValues).range([0, innerHeight]).padding(0.1);
 
     // Create color scale
     const colorScale = colorSchemes[colorScheme];
-    const maxValue = d3.max(heatMapData, d => d.value) || 100;
-    const minValue = d3.min(heatMapData, d => d.value) || 0;
+    const maxValue = d3.max(heatMapData, (d) => d.value) || 100;
+    const minValue = d3.min(heatMapData, (d) => d.value) || 0;
     colorScale.domain([minValue, maxValue]);
 
     // Create cells
-    const cells = g.selectAll('.cell')
-      .data(heatMapData)
-      .enter()
-      .append('g')
-      .attr('class', 'cell');
+    const cells = g.selectAll('.cell').data(heatMapData).enter().append('g').attr('class', 'cell');
 
-    cells.append('rect')
-      .attr('x', d => xScale(d.x) || 0)
-      .attr('y', d => yScale(d.y) || 0)
+    cells
+      .append('rect')
+      .attr('x', (d) => xScale(d.x) || 0)
+      .attr('y', (d) => yScale(d.y) || 0)
       .attr('width', xScale.bandwidth())
       .attr('height', yScale.bandwidth())
-      .attr('fill', d => colorScale(d.value))
+      .attr('fill', (d) => colorScale(d.value))
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .style('cursor', interactive ? 'pointer' : 'default')
@@ -175,18 +166,14 @@ const HeatMap: React.FC<HeatMapProps> = ({
       })
       .on('mouseover', (event, d) => {
         if (interactive) {
-          d3.select(event.target)
-            .attr('stroke', '#333')
-            .attr('stroke-width', 3);
+          d3.select(event.target).attr('stroke', '#333').attr('stroke-width', 3);
           setHoveredCell(d);
           onCellHover?.(d);
         }
       })
       .on('mouseout', (event, d) => {
         if (interactive) {
-          d3.select(event.target)
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 2);
+          d3.select(event.target).attr('stroke', '#fff').attr('stroke-width', 2);
           setHoveredCell(null);
           onCellHover?.(null);
         }
@@ -194,15 +181,16 @@ const HeatMap: React.FC<HeatMapProps> = ({
 
     // Add value labels on cells (if space permits)
     if (xScale.bandwidth() > 30 && yScale.bandwidth() > 30) {
-      cells.append('text')
-        .attr('x', d => (xScale(d.x) || 0) + xScale.bandwidth() / 2)
-        .attr('y', d => (yScale(d.y) || 0) + yScale.bandwidth() / 2)
+      cells
+        .append('text')
+        .attr('x', (d) => (xScale(d.x) || 0) + xScale.bandwidth() / 2)
+        .attr('y', (d) => (yScale(d.y) || 0) + yScale.bandwidth() / 2)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'middle')
-        .attr('fill', d => d.value > maxValue * 0.6 ? '#fff' : '#333')
+        .attr('fill', (d) => (d.value > maxValue * 0.6 ? '#fff' : '#333'))
         .attr('font-size', '12px')
         .attr('font-weight', 'bold')
-        .text(d => d.value.toString());
+        .text((d) => d.value.toString());
     }
 
     // Add axes
@@ -215,14 +203,13 @@ const HeatMap: React.FC<HeatMapProps> = ({
       .attr('dy', '.15em')
       .attr('transform', 'rotate(-45)');
 
-    g.append('g')
-      .call(d3.axisLeft(yScale));
+    g.append('g').call(d3.axisLeft(yScale));
 
     // Add axis labels
     g.append('text')
       .attr('transform', 'rotate(-90)')
       .attr('y', 0 - margin.left)
-      .attr('x', 0 - (innerHeight / 2))
+      .attr('x', 0 - innerHeight / 2)
       .attr('dy', '1em')
       .style('text-anchor', 'middle')
       .style('font-size', '14px')
@@ -237,7 +224,8 @@ const HeatMap: React.FC<HeatMapProps> = ({
       .text(xAxisLabel);
 
     // Add title
-    svg.append('text')
+    svg
+      .append('text')
       .attr('x', dimensions.width / 2)
       .attr('y', 30)
       .attr('text-anchor', 'middle')
@@ -252,16 +240,13 @@ const HeatMap: React.FC<HeatMapProps> = ({
       const legendX = dimensions.width - margin.right + 20;
       const legendY = margin.top;
 
-      const legendScale = d3.scaleLinear()
-        .domain([minValue, maxValue])
-        .range([legendHeight, 0]);
+      const legendScale = d3.scaleLinear().domain([minValue, maxValue]).range([legendHeight, 0]);
 
-      const legendAxis = d3.axisRight(legendScale)
-        .ticks(10)
-        .tickFormat(d3.format('.0f'));
+      const legendAxis = d3.axisRight(legendScale).ticks(10).tickFormat(d3.format('.0f'));
 
       // Legend gradient
-      const gradient = svg.append('defs')
+      const gradient = svg
+        .append('defs')
         .append('linearGradient')
         .attr('id', 'legend-gradient')
         .attr('x1', '0%')
@@ -269,15 +254,12 @@ const HeatMap: React.FC<HeatMapProps> = ({
         .attr('x2', '0%')
         .attr('y2', '0%');
 
-      gradient.append('stop')
-        .attr('offset', '0%')
-        .attr('stop-color', colorScale(minValue));
+      gradient.append('stop').attr('offset', '0%').attr('stop-color', colorScale(minValue));
 
-      gradient.append('stop')
-        .attr('offset', '100%')
-        .attr('stop-color', colorScale(maxValue));
+      gradient.append('stop').attr('offset', '100%').attr('stop-color', colorScale(maxValue));
 
-      svg.append('rect')
+      svg
+        .append('rect')
         .attr('x', legendX)
         .attr('y', legendY)
         .attr('width', legendWidth)
@@ -286,11 +268,13 @@ const HeatMap: React.FC<HeatMapProps> = ({
         .style('stroke', '#000')
         .style('stroke-width', 1);
 
-      svg.append('g')
+      svg
+        .append('g')
         .attr('transform', `translate(${legendX + legendWidth}, ${legendY})`)
         .call(legendAxis);
 
-      svg.append('text')
+      svg
+        .append('text')
         .attr('x', legendX + legendWidth / 2)
         .attr('y', legendY - 10)
         .attr('text-anchor', 'middle')
@@ -298,8 +282,19 @@ const HeatMap: React.FC<HeatMapProps> = ({
         .style('font-weight', 'bold')
         .text(valueLabel);
     }
-
-  }, [heatMapData, dimensions, colorScheme, title, xAxisLabel, yAxisLabel, valueLabel, showLegend, interactive, onCellClick, onCellHover]);
+  }, [
+    heatMapData,
+    dimensions,
+    colorScheme,
+    title,
+    xAxisLabel,
+    yAxisLabel,
+    valueLabel,
+    showLegend,
+    interactive,
+    onCellClick,
+    onCellHover,
+  ]);
 
   if (isLoading) {
     return (
@@ -317,7 +312,9 @@ const HeatMap: React.FC<HeatMapProps> = ({
         <div className="flex flex-wrap gap-2">
           <select
             value={colorScheme}
-            onChange={(e) => {/* Handle color scheme change */}}
+            onChange={(e) => {
+              /* Handle color scheme change */
+            }}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="blues">Blues</option>
@@ -346,7 +343,7 @@ const HeatMap: React.FC<HeatMapProps> = ({
       >
         <div className="relative">
           <svg ref={svgRef} className="w-full"></svg>
-          
+
           {/* Tooltip */}
           {showTooltip && hoveredCell && (
             <motion.div
@@ -377,13 +374,13 @@ const HeatMap: React.FC<HeatMapProps> = ({
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Min Value</div>
           <div className="text-xl font-bold text-gray-900 dark:text-white">
-            {Math.min(...heatMapData.map(d => d.value)).toLocaleString()}
+            {Math.min(...heatMapData.map((d) => d.value)).toLocaleString()}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
           <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Max Value</div>
           <div className="text-xl font-bold text-gray-900 dark:text-white">
-            {Math.max(...heatMapData.map(d => d.value)).toLocaleString()}
+            {Math.max(...heatMapData.map((d) => d.value)).toLocaleString()}
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">

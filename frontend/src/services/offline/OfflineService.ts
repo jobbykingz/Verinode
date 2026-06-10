@@ -9,7 +9,7 @@ export class OfflineService {
     const proofData = {
       ...proof,
       id: isNew ? generateTempId() : proof.id,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     // Always save locally first for fast UI updates
@@ -19,7 +19,7 @@ export class OfflineService {
     await QueueManager.enqueue({
       action: isNew ? 'CREATE' : 'UPDATE',
       entity: 'proof',
-      data: proofData
+      data: proofData,
     });
 
     // Attempt background sync if online
@@ -31,7 +31,7 @@ export class OfflineService {
   }
 
   static async getProofs(): Promise<any[]> {
-    // Could be modified to fetch from API and cache if online, 
+    // Could be modified to fetch from API and cache if online,
     // or resolve conflicts based on `resolveConflict` helper.
     return await getAll('proofs');
   }

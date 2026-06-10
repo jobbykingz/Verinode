@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-const RatingSystem = ({ 
-  initialRating = 0, 
-  initialReview = '', 
-  onSubmit, 
-  onCancel, 
+const RatingSystem = ({
+  initialRating = 0,
+  initialReview = '',
+  onSubmit,
+  onCancel,
   isLoading = false,
-  isEditing = false
+  isEditing = false,
 }) => {
   const [rating, setRating] = useState(initialRating);
   const [review, setReview] = useState(initialReview);
@@ -14,22 +14,22 @@ const RatingSystem = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (rating < 1) {
       alert('Please select a rating');
       return;
     }
-    
+
     onSubmit({ rating, review });
   };
 
   const renderStars = () => {
     const stars = [];
-    
+
     for (let i = 1; i <= 5; i++) {
       const isFilled = i <= (hoverRating || rating);
       const isHovered = i <= hoverRating;
-      
+
       stars.push(
         <button
           key={i}
@@ -38,18 +38,14 @@ const RatingSystem = ({
           onMouseEnter={() => setHoverRating(i)}
           onMouseLeave={() => setHoverRating(0)}
           className={`text-3xl focus:outline-none transition-colors ${
-            isFilled 
-              ? isHovered 
-                ? 'text-yellow-500' 
-                : 'text-yellow-400'
-              : 'text-gray-300'
+            isFilled ? (isHovered ? 'text-yellow-500' : 'text-yellow-400') : 'text-gray-300'
           }`}
         >
           ★
-        </button>
+        </button>,
       );
     }
-    
+
     return stars;
   };
 
@@ -59,17 +55,13 @@ const RatingSystem = ({
         <h3 className="text-xl font-bold text-gray-900 mb-2">
           {isEditing ? 'Update Your Rating' : 'Rate This Template'}
         </h3>
-        <p className="text-gray-600">
-          Share your experience with this template to help others
-        </p>
+        <p className="text-gray-600">Share your experience with this template to help others</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         {/* Rating Stars */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Your Rating *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-3">Your Rating *</label>
           <div className="flex items-center space-x-1">
             {renderStars()}
             <span className="ml-3 text-sm text-gray-600">
@@ -93,9 +85,7 @@ const RatingSystem = ({
             maxLength={500}
           />
           <div className="flex justify-between items-center mt-2">
-            <p className="text-sm text-gray-500">
-              {review.length}/500 characters
-            </p>
+            <p className="text-sm text-gray-500">{review.length}/500 characters</p>
             {review.length > 450 && (
               <p className={`text-sm ${review.length > 500 ? 'text-red-600' : 'text-yellow-600'}`}>
                 {500 - review.length} characters remaining
@@ -124,8 +114,10 @@ const RatingSystem = ({
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
                 Submitting...
               </>
+            ) : isEditing ? (
+              'Update Rating'
             ) : (
-              isEditing ? 'Update Rating' : 'Submit Rating'
+              'Submit Rating'
             )}
           </button>
         </div>
@@ -135,19 +127,12 @@ const RatingSystem = ({
 };
 
 // Display component for showing existing ratings
-export const RatingDisplay = ({ 
-  rating, 
-  review, 
-  user, 
-  createdAt,
-  onEdit,
-  showEdit = false
-}) => {
+export const RatingDisplay = ({ rating, review, user, createdAt, onEdit, showEdit = false }) => {
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -155,26 +140,32 @@ export const RatingDisplay = ({
     const stars = [];
     const fullStars = Math.floor(ratingValue);
     const hasHalfStar = ratingValue % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className="text-yellow-400 text-lg">★</span>
+        <span key={i} className="text-yellow-400 text-lg">
+          ★
+        </span>,
       );
     }
-    
+
     if (hasHalfStar) {
       stars.push(
-        <span key="half" className="text-yellow-400 text-lg">☆</span>
+        <span key="half" className="text-yellow-400 text-lg">
+          ☆
+        </span>,
       );
     }
-    
+
     const emptyStars = 5 - Math.ceil(ratingValue);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <span key={`empty-${i}`} className="text-gray-300 text-lg">☆</span>
+        <span key={`empty-${i}`} className="text-gray-300 text-lg">
+          ☆
+        </span>,
       );
     }
-    
+
     return stars;
   };
 
@@ -182,12 +173,8 @@ export const RatingDisplay = ({
     <div className="bg-gray-50 rounded-lg p-4">
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <div className="flex items-center">
-            {renderStars(rating)}
-          </div>
-          <span className="text-sm font-medium text-gray-900">
-            {rating.toFixed(1)} stars
-          </span>
+          <div className="flex items-center">{renderStars(rating)}</div>
+          <span className="text-sm font-medium text-gray-900">{rating.toFixed(1)} stars</span>
         </div>
         {showEdit && onEdit && (
           <button
@@ -198,11 +185,9 @@ export const RatingDisplay = ({
           </button>
         )}
       </div>
-      
-      {review && (
-        <p className="text-gray-700 mb-3">{review}</p>
-      )}
-      
+
+      {review && <p className="text-gray-700 mb-3">{review}</p>}
+
       <div className="flex items-center text-xs text-gray-500">
         <span>{user || 'Anonymous'}</span>
         <span className="mx-2">•</span>

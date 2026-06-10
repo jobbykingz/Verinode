@@ -65,7 +65,7 @@ impl AtomicSwapContract {
         env.storage().instance().set(&SwapDataKey::Admin, &admin);
         env.storage().instance().set(&SwapDataKey::SwapCount, &0u64);
         env.storage().instance().set(&SwapDataKey::ProposalCount, &0u64);
-        env.storage().instance().set(&SwapDataKey::ActiveSwaps, &Vec::new(&env));
+        env.storage().instance().set(&SwapDataKey::ActiveSwaps, &Vec::<u64>::new(&env));
     }
 
     /// Initiate atomic swap
@@ -323,7 +323,7 @@ impl AtomicSwapContract {
         for i in 0..active_swaps.len() {
             let swap_id = active_swaps.get(i).unwrap();
             let swap: AtomicSwap = env.storage().instance()
-                .get(&SwapDataKey::AtomicSwap(*swap_id))
+                .get(&SwapDataKey::AtomicSwap(swap_id))
                 .unwrap();
             
             if current_time > swap.timeout && swap.status == SwapStatus::Funded {
@@ -331,14 +331,14 @@ impl AtomicSwapContract {
                 updated_swap.status = SwapStatus::Expired;
                 updated_swap.completed_at = Some(current_time);
                 
-                env.storage().instance().set(&SwapDataKey::AtomicSwap(*swap_id), &updated_swap);
-                expired_swaps.push_back(*swap_id);
+                env.storage().instance().set(&SwapDataKey::AtomicSwap(swap_id), &updated_swap);
+                expired_swaps.push_back(swap_id);
             }
         }
         
         // Remove expired swaps from active list
         for i in 0..expired_swaps.len() {
-            Self::remove_from_active_swaps(env.clone(), *expired_swaps.get(i).unwrap());
+            Self::remove_from_active_swaps(env.clone(), expired_swaps.get(i).unwrap());
         }
         
         expired_swaps
@@ -363,9 +363,9 @@ impl AtomicSwapContract {
         
         let mut new_active = Vec::new(&env);
         for i in 0..active_swaps.len() {
-            let id = active_swaps.get(i).unwrap();
-            if *id != swap_id {
-                new_active.push_back(*id);
+            let id: u64 = active_swaps.get(i).unwrap();
+            if id != swap_id {
+                new_active.push_back(id);
             }
         }
         

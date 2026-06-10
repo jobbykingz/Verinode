@@ -27,9 +27,5 @@ export const Alert: React.FC<AlertProps> = ({ children, variant = 'default', cla
 };
 
 export const AlertDescription: React.FC<AlertDescriptionProps> = ({ children, className = '' }) => {
-  return (
-    <p className={`text-sm mt-1 ${className}`}>
-      {children}
-    </p>
-  );
+  return <p className={`text-sm mt-1 ${className}`}>{children}</p>;
 };

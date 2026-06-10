@@ -60,7 +60,7 @@ const onPageHide = (callback: () => void): void => {
         runOnce();
       }
     },
-    { once: true }
+    { once: true },
   );
 
   window.addEventListener('pagehide', runOnce, { once: true });
@@ -87,7 +87,10 @@ const trackLCP = (): void => {
       }
     });
 
-    observer.observe({ type: 'largest-contentful-paint', buffered: true } as PerformanceObserverInit);
+    observer.observe({
+      type: 'largest-contentful-paint',
+      buffered: true,
+    } as PerformanceObserverInit);
 
     onPageHide(() => {
       if (lcpValue > 0) {

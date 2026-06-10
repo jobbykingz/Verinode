@@ -23,9 +23,12 @@ jest.mock('ethers', () => ({
     })),
     BigNumber: {
       from: jest.fn().mockImplementation((value) => ({
-        toString: jest.fn().mockReturnValue(value.toString()),
+        toString: jest.fn().mockReturnValue(String(value)),
         toNumber: jest.fn().mockReturnValue(Number(value)),
-        mul: jest.fn().mockReturnValue(ethers.BigNumber.from('210000000000000')),
+        mul: jest.fn().mockReturnValue({
+          toString: jest.fn().mockReturnValue('210000000000000'),
+          toNumber: jest.fn().mockReturnValue(210000000000000),
+        }),
       })),
     },
     utils: {

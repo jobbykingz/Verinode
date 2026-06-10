@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,12 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LineChart,
   Line,
@@ -53,7 +42,7 @@ import {
   BarChart3,
   PieChart as PieChartIcon,
   Download,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface ModelInsightsProps {
@@ -97,7 +86,7 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
   onRetrainModel,
   onExportReport,
   timeRange = '24h',
-  onTimeRangeChange
+  onTimeRangeChange,
 }) => {
   const [selectedTab, setSelectedTab] = useState('overview');
   const [refreshing, setRefreshing] = useState(false);
@@ -105,7 +94,7 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
   const handleRefresh = async () => {
     setRefreshing(true);
     // Simulate data refresh
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     setRefreshing(false);
   };
 
@@ -137,18 +126,19 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
   ];
 
   const featureImportanceData = Object.entries(modelData.featureImportance)
-    .sort(([,a], [,b]) => b - a)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 8)
     .map(([feature, importance]) => ({
       name: feature.replace(/([A-Z])/g, ' $1').trim(),
       value: importance * 100,
     }));
 
-  const predictionDistributionData = Object.entries(modelData.predictionDistribution)
-    .map(([range, count]) => ({
+  const predictionDistributionData = Object.entries(modelData.predictionDistribution).map(
+    ([range, count]) => ({
       range,
       count,
-    }));
+    }),
+  );
 
   const COLORS = ['#10b981', '#f59e0b', '#f97316', '#ef4444'];
 
@@ -217,11 +207,11 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             {performanceData.map((metric) => (
               <div key={metric.name} className="text-center">
-                <div className={`flex items-center justify-center space-x-1 ${getPerformanceColor(metric.value / 100)}`}>
+                <div
+                  className={`flex items-center justify-center space-x-1 ${getPerformanceColor(metric.value / 100)}`}
+                >
                   {getPerformanceIcon(metric.value / 100)}
-                  <span className="text-2xl font-bold">
-                    {metric.value.toFixed(1)}%
-                  </span>
+                  <span className="text-2xl font-bold">{metric.value.toFixed(1)}%</span>
                 </div>
                 <div className="text-sm text-gray-600">{metric.name}</div>
                 <Progress value={metric.value} className="mt-2 h-2" />
@@ -285,19 +275,27 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Total Validations</span>
-                  <span className="font-bold">{modelData.performanceMetrics.totalValidations.toLocaleString()}</span>
+                  <span className="font-bold">
+                    {modelData.performanceMetrics.totalValidations.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Avg Processing Time</span>
-                  <span className="font-bold">{modelData.performanceMetrics.averageProcessingTime.toFixed(0)}ms</span>
+                  <span className="font-bold">
+                    {modelData.performanceMetrics.averageProcessingTime.toFixed(0)}ms
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">System Uptime</span>
-                  <span className="font-bold text-green-600">{modelData.performanceMetrics.uptime.toFixed(1)}%</span>
+                  <span className="font-bold text-green-600">
+                    {modelData.performanceMetrics.uptime.toFixed(1)}%
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Error Rate</span>
-                  <span className={`font-bold ${modelData.performanceMetrics.errorRate < 1 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span
+                    className={`font-bold ${modelData.performanceMetrics.errorRate < 1 ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {modelData.performanceMetrics.errorRate.toFixed(2)}%
                   </span>
                 </div>
@@ -377,9 +375,7 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
                 <Zap className="h-5 w-5" />
                 <span>Feature Importance</span>
               </CardTitle>
-              <CardDescription>
-                Most influential features in model predictions
-              </CardDescription>
+              <CardDescription>Most influential features in model predictions</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={400}>
@@ -402,9 +398,7 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
                 <BarChart3 className="h-5 w-5" />
                 <span>Prediction Distribution</span>
               </CardTitle>
-              <CardDescription>
-                Distribution of prediction confidence scores
-              </CardDescription>
+              <CardDescription>Distribution of prediction confidence scores</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
@@ -427,9 +421,7 @@ const ModelInsights: React.FC<ModelInsightsProps> = ({
                 <Clock className="h-5 w-5" />
                 <span>Training History</span>
               </CardTitle>
-              <CardDescription>
-                Model performance over time
-              </CardDescription>
+              <CardDescription>Model performance over time</CardDescription>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>

@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Shield, Key, Globe, Database, Bell, RefreshCw, Save, Trash2, Download, Upload } from 'lucide-react';
+import {
+  Settings,
+  Shield,
+  Key,
+  Globe,
+  Database,
+  Bell,
+  RefreshCw,
+  Save,
+  Trash2,
+  Download,
+  Upload,
+} from 'lucide-react';
 import { PluginManager } from '../../plugins/pluginManager';
 import { PermissionsModel } from '../../plugins/permissionsModel';
 import { PluginMetadata, PluginPermission } from '../../plugins/pluginAPI';
@@ -14,7 +26,7 @@ const PluginSettings: React.FC = () => {
     allowBeta: false,
     requireApproval: true,
     enableSandbox: true,
-    logLevel: 'info' as 'debug' | 'info' | 'warn' | 'error'
+    logLevel: 'info' as 'debug' | 'info' | 'warn' | 'error',
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +42,7 @@ const PluginSettings: React.FC = () => {
       setLoading(true);
       const installedPlugins = pluginManager.getInstalledPlugins();
       setPlugins(installedPlugins);
-      
+
       const pluginPermissions: Record<string, PluginPermission[]> = {};
       for (const plugin of installedPlugins) {
         pluginPermissions[plugin.id] = permissionsModel.getPluginPermissions(plugin.id);
@@ -43,28 +55,33 @@ const PluginSettings: React.FC = () => {
     }
   };
 
-  const handlePermissionChange = (pluginId: string, permissionType: string, scope: string[], granted: boolean) => {
+  const handlePermissionChange = (
+    pluginId: string,
+    permissionType: string,
+    scope: string[],
+    granted: boolean,
+  ) => {
     if (granted) {
       const permission: PluginPermission = {
         type: permissionType as any,
         scope,
-        description: `Access to ${permissionType} for ${scope.join(', ')}`
+        description: `Access to ${permissionType} for ${scope.join(', ')}`,
       };
       permissionsModel.grantPermission(pluginId, permission);
     } else {
       permissionsModel.revokePermission(pluginId, permissionType, scope);
     }
-    
+
     setPermissions({
       ...permissions,
-      [pluginId]: permissionsModel.getPluginPermissions(pluginId)
+      [pluginId]: permissionsModel.getPluginPermissions(pluginId),
     });
   };
 
   const handleGlobalSettingChange = (key: string, value: any) => {
     setGlobalSettings({
       ...globalSettings,
-      [key]: value
+      [key]: value,
     });
   };
 
@@ -78,21 +95,21 @@ const PluginSettings: React.FC = () => {
     permissionsModel.revokePermission(pluginId, 'network', ['*']);
     permissionsModel.revokePermission(pluginId, 'ui', ['*']);
     permissionsModel.revokePermission(pluginId, 'storage', ['*']);
-    
+
     setPermissions({
       ...permissions,
-      [pluginId]: permissionsModel.getPluginPermissions(pluginId)
+      [pluginId]: permissionsModel.getPluginPermissions(pluginId),
     });
-    
+
     toast.success('Permissions reset for plugin');
   };
 
   const handleExportSettings = () => {
     const settings = {
       global: globalSettings,
-      permissions: permissionsModel.exportPermissions()
+      permissions: permissionsModel.exportPermissions(),
     };
-    
+
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -100,7 +117,7 @@ const PluginSettings: React.FC = () => {
     a.download = 'plugin-settings.json';
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast.success('Settings exported');
   };
 
@@ -112,16 +129,16 @@ const PluginSettings: React.FC = () => {
     reader.onload = (e) => {
       try {
         const settings = JSON.parse(e.target?.result as string);
-        
+
         if (settings.global) {
           setGlobalSettings(settings.global);
         }
-        
+
         if (settings.permissions) {
           permissionsModel.importPermissions(settings.permissions);
           loadSettings();
         }
-        
+
         toast.success('Settings imported successfully');
       } catch (error) {
         toast.error('Failed to import settings');
@@ -132,11 +149,16 @@ const PluginSettings: React.FC = () => {
 
   const getPermissionIcon = (type: string) => {
     switch (type) {
-      case 'stellar': return <Key className="w-4 h-4" />;
-      case 'network': return <Globe className="w-4 h-4" />;
-      case 'ui': return <Bell className="w-4 h-4" />;
-      case 'storage': return <Database className="w-4 h-4" />;
-      default: return <Shield className="w-4 h-4" />;
+      case 'stellar':
+        return <Key className="w-4 h-4" />;
+      case 'network':
+        return <Globe className="w-4 h-4" />;
+      case 'ui':
+        return <Bell className="w-4 h-4" />;
+      case 'storage':
+        return <Database className="w-4 h-4" />;
+      default:
+        return <Shield className="w-4 h-4" />;
     }
   };
 
@@ -166,12 +188,7 @@ const PluginSettings: React.FC = () => {
           <label className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer">
             <Upload className="w-4 h-4" />
             <span>Import</span>
-            <input
-              type="file"
-              accept=".json"
-              onChange={handleImportSettings}
-              className="hidden"
-            />
+            <input type="file" accept=".json" onChange={handleImportSettings} className="hidden" />
           </label>
           <button
             onClick={handleSaveSettings}
@@ -185,12 +202,14 @@ const PluginSettings: React.FC = () => {
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Global Settings</h2>
-        
+
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <label className="font-medium text-gray-900">Auto-update plugins</label>
-              <p className="text-sm text-gray-600">Automatically update plugins when new versions are available</p>
+              <p className="text-sm text-gray-600">
+                Automatically update plugins when new versions are available
+              </p>
             </div>
             <input
               type="checkbox"
@@ -216,7 +235,9 @@ const PluginSettings: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <label className="font-medium text-gray-900">Require approval</label>
-              <p className="text-sm text-gray-600">Ask for user approval before installing plugins</p>
+              <p className="text-sm text-gray-600">
+                Ask for user approval before installing plugins
+              </p>
             </div>
             <input
               type="checkbox"
@@ -229,7 +250,9 @@ const PluginSettings: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <label className="font-medium text-gray-900">Enable sandbox</label>
-              <p className="text-sm text-gray-600">Run plugins in isolated environment for security</p>
+              <p className="text-sm text-gray-600">
+                Run plugins in isolated environment for security
+              </p>
             </div>
             <input
               type="checkbox"
@@ -258,7 +281,7 @@ const PluginSettings: React.FC = () => {
 
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Plugin Permissions</h2>
-        
+
         {plugins.length === 0 ? (
           <p className="text-gray-600">No plugins installed</p>
         ) : (
@@ -271,7 +294,9 @@ const PluginSettings: React.FC = () => {
                     <p className="text-sm text-gray-600">{plugin.description}</p>
                   </div>
                   <button
-                    onClick={() => setSelectedPlugin(selectedPlugin === plugin.id ? null : plugin.id)}
+                    onClick={() =>
+                      setSelectedPlugin(selectedPlugin === plugin.id ? null : plugin.id)
+                    }
                     className="text-blue-600 hover:text-blue-700 text-sm"
                   >
                     {selectedPlugin === plugin.id ? 'Hide' : 'Show'} Permissions
@@ -297,20 +322,27 @@ const PluginSettings: React.FC = () => {
                           {getPermissionIcon(permissionType)}
                           <span className="font-medium capitalize">{permissionType}</span>
                         </div>
-                        
+
                         <div className="space-y-2">
                           {['read', 'write', 'execute'].map((scope) => {
                             const hasPermission = permissions[plugin.id]?.some(
-                              p => p.type === permissionType && p.scope.includes(scope)
+                              (p) => p.type === permissionType && p.scope.includes(scope),
                             );
-                            
+
                             return (
                               <div key={scope} className="flex items-center justify-between">
                                 <span className="text-sm text-gray-600 capitalize">{scope}</span>
                                 <input
                                   type="checkbox"
                                   checked={hasPermission}
-                                  onChange={(e) => handlePermissionChange(plugin.id, permissionType, [scope], e.target.checked)}
+                                  onChange={(e) =>
+                                    handlePermissionChange(
+                                      plugin.id,
+                                      permissionType,
+                                      [scope],
+                                      e.target.checked,
+                                    )
+                                  }
                                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                 />
                               </div>

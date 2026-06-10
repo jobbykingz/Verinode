@@ -218,7 +218,7 @@ export class ProjectService {
       },
       (error: any) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // Add response interceptor for error handling
@@ -229,12 +229,12 @@ export class ProjectService {
           localStorage.removeItem('authToken');
           window.location.href = '/login';
         }
-        
+
         const message = error.response?.data?.message || error.message || 'An error occurred';
         toast.error(message);
-        
+
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -284,7 +284,7 @@ export class ProjectService {
   async getProjects(filters: ProjectFilters = {}): Promise<Project[]> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters.status) params.append('status', filters.status);
       if (filters.category) params.append('category', filters.category);
       if (filters.priority) params.append('priority', filters.priority);
@@ -292,7 +292,7 @@ export class ProjectService {
       if (filters.member) params.append('member', filters.member);
       if (filters.search) params.append('search', filters.search);
       if (filters.tags && filters.tags.length > 0) {
-        filters.tags.forEach(tag => params.append('tags', tag));
+        filters.tags.forEach((tag) => params.append('tags', tag));
       }
 
       const response = await this.apiClient.get(`/projects?${params}`);
@@ -379,25 +379,25 @@ export class ProjectService {
   async getTasks(filters: TaskFilters = {}): Promise<Task[]> {
     try {
       const params = new URLSearchParams();
-      
+
       if (filters.projectId) params.append('projectId', filters.projectId);
       if (filters.assignee) params.append('assignee', filters.assignee);
       if (filters.reporter) params.append('reporter', filters.reporter);
       if (filters.search) params.append('search', filters.search);
-      
+
       if (filters.status && filters.status.length > 0) {
-        filters.status.forEach(status => params.append('status', status));
+        filters.status.forEach((status) => params.append('status', status));
       }
       if (filters.priority && filters.priority.length > 0) {
-        filters.priority.forEach(priority => params.append('priority', priority));
+        filters.priority.forEach((priority) => params.append('priority', priority));
       }
       if (filters.type && filters.type.length > 0) {
-        filters.type.forEach(type => params.append('type', type));
+        filters.type.forEach((type) => params.append('type', type));
       }
       if (filters.labels && filters.labels.length > 0) {
-        filters.labels.forEach(label => params.append('labels', label));
+        filters.labels.forEach((label) => params.append('labels', label));
       }
-      
+
       if (filters.dueDate?.from) {
         params.append('dueDateFrom', filters.dueDate.from.toISOString());
       }
@@ -457,9 +457,15 @@ export class ProjectService {
     }
   }
 
-  async updateTaskComment(taskId: string, commentId: string, content: string): Promise<TaskComment> {
+  async updateTaskComment(
+    taskId: string,
+    commentId: string,
+    content: string,
+  ): Promise<TaskComment> {
     try {
-      const response = await this.apiClient.put(`/tasks/${taskId}/comments/${commentId}`, { content });
+      const response = await this.apiClient.put(`/tasks/${taskId}/comments/${commentId}`, {
+        content,
+      });
       toast.success('Comment updated successfully');
       return response.data;
     } catch (error) {
@@ -482,13 +488,13 @@ export class ProjectService {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await this.apiClient.post(`/tasks/${taskId}/attachments`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      
+
       toast.success('Attachment uploaded successfully');
       return response.data;
     } catch (error) {
@@ -586,7 +592,7 @@ export class ProjectService {
     try {
       const params: any = { q: query };
       if (projectId) params.projectId = projectId;
-      
+
       const response = await this.apiClient.get('/tasks/search', { params });
       return response.data;
     } catch (error) {
@@ -602,7 +608,7 @@ export class ProjectService {
         params: { format },
         responseType: 'blob',
       });
-      
+
       // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -612,7 +618,7 @@ export class ProjectService {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Project data exported successfully');
       return response.data;
     } catch (error) {
@@ -623,10 +629,14 @@ export class ProjectService {
 
   async exportTaskData(filters: TaskFilters = {}, format: 'json' | 'csv' | 'xlsx'): Promise<Blob> {
     try {
-      const response = await this.apiClient.post('/tasks/export', { filters, format }, {
-        responseType: 'blob',
-      });
-      
+      const response = await this.apiClient.post(
+        '/tasks/export',
+        { filters, format },
+        {
+          responseType: 'blob',
+        },
+      );
+
       // Create download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -636,7 +646,7 @@ export class ProjectService {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
+
       toast.success('Task data exported successfully');
       return response.data;
     } catch (error) {

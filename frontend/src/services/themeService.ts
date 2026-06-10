@@ -31,7 +31,7 @@ class ThemeService {
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
 
     this.api.interceptors.response.use(
@@ -42,7 +42,7 @@ class ThemeService {
           window.location.href = '/login';
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -154,7 +154,10 @@ class ThemeService {
     }
   }
 
-  async exportTheme(id: string, format: 'json' | 'css' = 'json'): Promise<ThemeServiceResponse<string>> {
+  async exportTheme(
+    id: string,
+    format: 'json' | 'css' = 'json',
+  ): Promise<ThemeServiceResponse<string>> {
     try {
       const response = await this.api.get(`/themes/${id}/export?format=${format}`);
       return {
@@ -170,7 +173,10 @@ class ThemeService {
     }
   }
 
-  async importTheme(themeData: string, format: 'json' | 'css' = 'json'): Promise<ThemeServiceResponse<Theme>> {
+  async importTheme(
+    themeData: string,
+    format: 'json' | 'css' = 'json',
+  ): Promise<ThemeServiceResponse<Theme>> {
     try {
       const response = await this.api.post('/themes/import', { data: themeData, format });
       return {
@@ -201,7 +207,9 @@ class ThemeService {
     }
   }
 
-  async updateBrandSettings(settings: Partial<BrandSettings>): Promise<ThemeServiceResponse<BrandSettings>> {
+  async updateBrandSettings(
+    settings: Partial<BrandSettings>,
+  ): Promise<ThemeServiceResponse<BrandSettings>> {
     try {
       const response = await this.api.put('/brand/settings', settings);
       return {
@@ -424,8 +432,10 @@ ${shadowVariables}
       if (theme.colors.background && theme.colors.text) {
         const bgLuminance = this.getLuminance(theme.colors.background);
         const textLuminance = this.getLuminance(theme.colors.text);
-        const contrastRatio = (Math.max(bgLuminance, textLuminance) + 0.05) / (Math.min(bgLuminance, textLuminance) + 0.05);
-        
+        const contrastRatio =
+          (Math.max(bgLuminance, textLuminance) + 0.05) /
+          (Math.min(bgLuminance, textLuminance) + 0.05);
+
         contrastRatios.text = {
           ratio: contrastRatio,
           AA: contrastRatio >= 4.5,
@@ -453,12 +463,12 @@ ${shadowVariables}
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;
     const b = rgb & 0xff;
-    
-    const [lr, lg, lb] = [r, g, b].map(c => {
+
+    const [lr, lg, lb] = [r, g, b].map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
   }
 }

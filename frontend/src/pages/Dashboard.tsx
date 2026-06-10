@@ -6,7 +6,7 @@ const Dashboard = () => {
     totalProofs: 0,
     verifiedProofs: 0,
     pendingProofs: 0,
-    recentActivity: []
+    recentActivity: [],
   });
 
   useEffect(() => {
@@ -18,15 +18,15 @@ const Dashboard = () => {
       recentActivity: [
         { id: 1, type: 'issued', timestamp: '2024-02-16T10:30:00Z' },
         { id: 2, type: 'verified', timestamp: '2024-02-16T09:45:00Z' },
-        { id: 3, type: 'issued', timestamp: '2024-02-16T08:20:00Z' }
-      ]
+        { id: 3, type: 'issued', timestamp: '2024-02-16T08:20:00Z' },
+      ],
     });
   }, []);
 
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-      
+
       {/* Stats Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -38,7 +38,7 @@ const Dashboard = () => {
             <Shield className="h-8 w-8 text-blue-600" />
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -48,7 +48,7 @@ const Dashboard = () => {
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -58,7 +58,7 @@ const Dashboard = () => {
             <Clock className="h-8 w-8 text-yellow-600" />
           </div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -77,11 +77,16 @@ const Dashboard = () => {
         <h2 className="text-xl font-semibold mb-6">Recent Activity</h2>
         <div className="space-y-4">
           {stats.recentActivity.map((activity) => (
-            <div key={activity.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div
+              key={activity.id}
+              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+            >
               <div className="flex items-center space-x-3">
-                <div className={`w-2 h-2 rounded-full ${
-                  activity.type === 'verified' ? 'bg-green-500' : 'bg-blue-500'
-                }`} />
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    activity.type === 'verified' ? 'bg-green-500' : 'bg-blue-500'
+                  }`}
+                />
                 <span className="font-medium">
                   Proof #{activity.id} {activity.type}
                 </span>

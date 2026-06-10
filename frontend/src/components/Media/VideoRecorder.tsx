@@ -1,18 +1,18 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { 
-  Video, 
-  StopCircle, 
-  Play, 
-  Pause, 
-  Camera, 
-  Mic, 
+import {
+  Video,
+  StopCircle,
+  Play,
+  Pause,
+  Camera,
+  Mic,
   MicOff,
   Settings,
   CheckCircle,
   AlertCircle,
   Upload,
   Download,
-  RefreshCw
+  RefreshCw,
 } from 'lucide-react';
 
 interface VideoRecorderProps {
@@ -37,7 +37,14 @@ interface MediaDevice {
   kind: 'videoinput' | 'audioinput';
 }
 
-type RecordingState = 'idle' | 'requesting' | 'ready' | 'recording' | 'paused' | 'preview' | 'processing';
+type RecordingState =
+  | 'idle'
+  | 'requesting'
+  | 'ready'
+  | 'recording'
+  | 'paused'
+  | 'preview'
+  | 'processing';
 
 const VideoRecorder: React.FC<VideoRecorderProps> = ({
   onRecordingComplete,
@@ -45,7 +52,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   maxDuration = 300, // 5 minutes default
   quality = 'high',
   enableWatermark = false,
-  watermarkText = 'Verinode'
+  watermarkText = 'Verinode',
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -71,7 +78,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   const qualitySettings = {
     low: { width: 640, height: 480, bitrate: 500000 },
     medium: { width: 1280, height: 720, bitrate: 1500000 },
-    high: { width: 1920, height: 1080, bitrate: 5000000 }
+    high: { width: 1920, height: 1080, bitrate: 5000000 },
   };
 
   // Get available media devices
@@ -79,14 +86,22 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     const getDevices = async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
-        
+
         const videoDevs = devices
-          .filter(d => d.kind === 'videoinput')
-          .map(d => ({ deviceId: d.deviceId, label: d.label || `Camera ${d.deviceId.slice(0, 8)}`, kind: 'videoinput' as const }));
-        
+          .filter((d) => d.kind === 'videoinput')
+          .map((d) => ({
+            deviceId: d.deviceId,
+            label: d.label || `Camera ${d.deviceId.slice(0, 8)}`,
+            kind: 'videoinput' as const,
+          }));
+
         const audioDevs = devices
-          .filter(d => d.kind === 'audioinput')
-          .map(d => ({ deviceId: d.deviceId, label: d.label || `Microphone ${d.deviceId.slice(0, 8)}`, kind: 'audioinput' as const }));
+          .filter((d) => d.kind === 'audioinput')
+          .map((d) => ({
+            deviceId: d.deviceId,
+            label: d.label || `Microphone ${d.deviceId.slice(0, 8)}`,
+            kind: 'audioinput' as const,
+          }));
 
         setVideoDevices(videoDevs);
         setAudioDevices(audioDevs);
@@ -112,18 +127,22 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       setError(null);
 
       const constraints: MediaStreamConstraints = {
-        video: isVideoEnabled ? {
-          deviceId: selectedVideoDevice ? { exact: selectedVideoDevice } : undefined,
-          width: { ideal: qualitySettings[quality].width },
-          height: { ideal: qualitySettings[quality].height },
-          frameRate: { ideal: 30 }
-        } : false,
-        audio: isAudioEnabled ? {
-          deviceId: selectedAudioDevice ? { exact: selectedAudioDevice } : undefined,
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 44100
-        } : false
+        video: isVideoEnabled
+          ? {
+              deviceId: selectedVideoDevice ? { exact: selectedVideoDevice } : undefined,
+              width: { ideal: qualitySettings[quality].width },
+              height: { ideal: qualitySettings[quality].height },
+              frameRate: { ideal: 30 },
+            }
+          : false,
+        audio: isAudioEnabled
+          ? {
+              deviceId: selectedAudioDevice ? { exact: selectedAudioDevice } : undefined,
+              echoCancellation: true,
+              noiseSuppression: true,
+              sampleRate: 44100,
+            }
+          : false,
       };
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -138,7 +157,8 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
       setRecordingState('ready');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to access camera/microphone';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to access camera/microphone';
       setError(errorMessage);
       setRecordingState('idle');
       onError?.(errorMessage);
@@ -153,11 +173,11 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     const checkHealth = () => {
       const settings = videoTrack.getSettings();
       const constraints = videoTrack.getConstraints();
-      
+
       // Check if actual resolution matches requested
       const targetWidth = qualitySettings[quality].width;
       const actualWidth = settings.width || 0;
-      
+
       if (actualWidth < targetWidth * 0.8) {
         setStreamHealth('poor');
       } else if (actualWidth < targetWidth * 0.95) {
@@ -169,7 +189,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
     checkHealth();
     const interval = setInterval(checkHealth, 5000);
-    
+
     return () => clearInterval(interval);
   };
 
@@ -178,10 +198,10 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     if (!streamRef.current) return;
 
     chunksRef.current = [];
-    
+
     const options: MediaRecorderOptions = {
       mimeType: getSupportedMimeType(),
-      videoBitsPerSecond: qualitySettings[quality].bitrate
+      videoBitsPerSecond: qualitySettings[quality].bitrate,
     };
 
     try {
@@ -204,7 +224,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
           duration: recordingDuration,
           size: blob.size,
           resolution: qualitySettings[quality],
-          mimeType: options.mimeType || 'video/webm'
+          mimeType: options.mimeType || 'video/webm',
         };
 
         onRecordingComplete?.(blob, metadata);
@@ -216,7 +236,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
       // Start duration timer
       timerRef.current = setInterval(() => {
-        setRecordingDuration(prev => {
+        setRecordingDuration((prev) => {
           const newDuration = prev + 1;
           if (newDuration >= maxDuration) {
             stopRecording();
@@ -257,7 +277,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       mediaRecorderRef.current.resume();
       setRecordingState('recording');
       timerRef.current = setInterval(() => {
-        setRecordingDuration(prev => prev + 1);
+        setRecordingDuration((prev) => prev + 1);
       }, 1000);
     }
   }, []);
@@ -287,7 +307,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
   // Stop stream
   const stopStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -310,7 +330,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       'video/webm;codecs=vp8,opus',
       'video/webm;codecs=h264,opus',
       'video/webm',
-      'video/mp4'
+      'video/mp4',
     ];
 
     for (const type of types) {
@@ -336,7 +356,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
     const canvas = canvasRef.current;
     const video = videoRef.current;
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) return;
 
     canvas.width = video.videoWidth;
@@ -344,14 +364,14 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
     const drawFrame = () => {
       if (video.paused || video.ended) return;
-      
+
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
+
       // Draw watermark
       ctx.font = '20px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.fillText(watermarkText, canvas.width - 150, canvas.height - 20);
-      
+
       requestAnimationFrame(drawFrame);
     };
 
@@ -368,9 +388,11 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         </div>
         <div className="flex items-center gap-2">
           {streamHealth !== 'good' && (
-            <span className={`text-xs px-2 py-1 rounded ${
-              streamHealth === 'fair' ? 'bg-yellow-600' : 'bg-red-600'
-            }`}>
+            <span
+              className={`text-xs px-2 py-1 rounded ${
+                streamHealth === 'fair' ? 'bg-yellow-600' : 'bg-red-600'
+              }`}
+            >
               {streamHealth === 'fair' ? 'Fair Quality' : 'Poor Quality'}
             </span>
           )}
@@ -397,7 +419,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
       {showSettings && (
         <div className="bg-gray-50 p-4 border-b">
           <h3 className="font-medium text-gray-700 mb-3">Settings</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-gray-600 mb-1">Camera</label>
@@ -406,7 +428,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 onChange={(e) => setSelectedVideoDevice(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md text-sm"
               >
-                {videoDevices.map(device => (
+                {videoDevices.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
@@ -421,7 +443,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
                 onChange={(e) => setSelectedAudioDevice(e.target.value)}
                 className="w-full px-3 py-2 border rounded-md text-sm"
               >
-                {audioDevices.map(device => (
+                {audioDevices.map((device) => (
                   <option key={device.deviceId} value={device.deviceId}>
                     {device.label}
                   </option>
@@ -468,10 +490,7 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
 
         {/* Watermark Canvas (overlay) */}
         {enableWatermark && recordingState === 'recording' && (
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-          />
+          <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
         )}
 
         {/* Recording Indicator */}
@@ -600,8 +619,12 @@ const VideoRecorder: React.FC<VideoRecorderProps> = ({
         {/* Recording Info */}
         {(recordingState === 'recording' || recordingState === 'paused') && (
           <div className="mt-4 text-center text-sm text-gray-600">
-            <p>Recording: {formatDuration(recordingDuration)} / {formatDuration(maxDuration)}</p>
-            <p className="text-xs mt-1">Quality: {quality} | {isAudioEnabled ? 'Audio On' : 'Audio Off'}</p>
+            <p>
+              Recording: {formatDuration(recordingDuration)} / {formatDuration(maxDuration)}
+            </p>
+            <p className="text-xs mt-1">
+              Quality: {quality} | {isAudioEnabled ? 'Audio On' : 'Audio Off'}
+            </p>
           </div>
         )}
 

@@ -25,7 +25,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <div>Test content</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Test content')).toBeInTheDocument();
@@ -35,15 +35,15 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
     expect(console.error).toHaveBeenCalledWith(
       expect.objectContaining({
         error: expect.any(Error),
-        errorInfo: expect.any(Object)
-      })
+        errorInfo: expect.any(Object),
+      }),
     );
   });
 
@@ -51,7 +51,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={<div>String error caught</div>}>
         <ThrowStringComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('String error caught')).toBeInTheDocument();
@@ -59,11 +59,11 @@ describe('ErrorBoundary', () => {
 
   it('should render custom error message when provided', () => {
     const errorMessage = 'Custom error message';
-    
+
     render(
       <ErrorBoundary fallback={<div>{errorMessage}</div>}>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText(errorMessage)).toBeInTheDocument();
@@ -71,18 +71,18 @@ describe('ErrorBoundary', () => {
 
   it('should call onError callback when provided', () => {
     const onError = jest.fn();
-    
+
     render(
       <ErrorBoundary onError={onError} fallback={<div>Error handled</div>}>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(onError).toHaveBeenCalledWith(
       expect.objectContaining({
         error: expect.any(Error),
-        errorInfo: expect.any(Object)
-      })
+        errorInfo: expect.any(Object),
+      }),
     );
     expect(screen.getByText('Error handled')).toBeInTheDocument();
   });
@@ -91,7 +91,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
@@ -108,11 +108,11 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={<div>Async error handled</div>}>
         <AsyncErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     // Wait for useEffect to run
-    await new Promise(resolve => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(screen.getByText('Async error handled')).toBeInTheDocument();
     expect(console.error).toHaveBeenCalled();
@@ -122,7 +122,7 @@ describe('ErrorBoundary', () => {
     const { rerender } = render(
       <ErrorBoundary fallback={<div>Initial error</div>}>
         <div>Normal content</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Normal content')).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('ErrorBoundary', () => {
     rerender(
       <ErrorBoundary fallback={<div>Updated error</div>}>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Updated error')).toBeInTheDocument();
@@ -140,7 +140,7 @@ describe('ErrorBoundary', () => {
     rerender(
       <ErrorBoundary fallback={<div>Updated error</div>}>
         <div>Normal content again</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Normal content again')).toBeInTheDocument();
@@ -148,9 +148,7 @@ describe('ErrorBoundary', () => {
 
   it('should handle error boundary nesting', () => {
     const InnerErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-      <ErrorBoundary fallback={<div>Inner error</div>}>
-        {children}
-      </ErrorBoundary>
+      <ErrorBoundary fallback={<div>Inner error</div>}>{children}</ErrorBoundary>
     );
 
     render(
@@ -158,7 +156,7 @@ describe('ErrorBoundary', () => {
         <InnerErrorBoundary>
           <ThrowErrorComponent />
         </InnerErrorBoundary>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(screen.getByText('Inner error')).toBeInTheDocument();
@@ -167,23 +165,23 @@ describe('ErrorBoundary', () => {
 
   it('should log error details', () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     const error = new Error('Test error with details');
     error.stack = 'Error stack trace';
 
     render(
       <ErrorBoundary fallback={<div>Error logged</div>}>
         <ThrowErrorComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         error: error,
         errorInfo: expect.objectContaining({
-          componentStack: expect.any(String)
-        })
-      })
+          componentStack: expect.any(String),
+        }),
+      }),
     );
   });
 });

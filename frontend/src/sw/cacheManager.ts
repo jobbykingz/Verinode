@@ -36,7 +36,7 @@ class CacheManager {
       version: 'v1',
       maxAge: 5 * 60 * 1000, // 5 minutes
       maxEntries: 100,
-      strategy: 'networkFirst'
+      strategy: 'networkFirst',
     });
 
     // Static assets cache configuration
@@ -45,7 +45,7 @@ class CacheManager {
       version: 'v1',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       maxEntries: 200,
-      strategy: 'cacheFirst'
+      strategy: 'cacheFirst',
     });
 
     // Images cache configuration
@@ -54,7 +54,7 @@ class CacheManager {
       version: 'v1',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       maxEntries: 100,
-      strategy: 'cacheFirst'
+      strategy: 'cacheFirst',
     });
 
     // Documents cache configuration
@@ -63,7 +63,7 @@ class CacheManager {
       version: 'v1',
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       maxEntries: 50,
-      strategy: 'staleWhileRevalidate'
+      strategy: 'staleWhileRevalidate',
     });
   }
 
@@ -91,20 +91,20 @@ class CacheManager {
 
   private async cacheFirst(request: Request, config: CacheConfig): Promise<Response> {
     const cache = await caches.open(`${config.name}-${config.version}`);
-    
+
     try {
       const cachedResponse = await cache.match(request);
-      
+
       if (cachedResponse && !this.isExpired(cachedResponse, config)) {
         return cachedResponse;
       }
 
       const networkResponse = await fetch(request);
-      
+
       if (networkResponse.ok) {
         await this.addToCache(cache, request, networkResponse.clone(), config);
       }
-      
+
       return networkResponse;
     } catch (error) {
       console.error('Cache first strategy failed:', error);
@@ -115,23 +115,23 @@ class CacheManager {
 
   private async networkFirst(request: Request, config: CacheConfig): Promise<Response> {
     const cache = await caches.open(`${config.name}-${config.version}`);
-    
+
     try {
       const networkResponse = await fetch(request);
-      
+
       if (networkResponse.ok) {
         await this.addToCache(cache, request, networkResponse.clone(), config);
       }
-      
+
       return networkResponse;
     } catch (error) {
       console.log('Network failed, trying cache:', error);
       const cachedResponse = await cache.match(request);
-      
+
       if (cachedResponse) {
         return cachedResponse;
       }
-      
+
       return this.createOfflineResponse();
     }
   }
@@ -140,15 +140,17 @@ class CacheManager {
     const cache = await caches.open(`${config.name}-${config.version}`);
     const cachedResponse = await cache.match(request);
 
-    const fetchPromise = fetch(request).then(async (networkResponse) => {
-      if (networkResponse.ok) {
-        await this.addToCache(cache, request, networkResponse.clone(), config);
-      }
-      return networkResponse;
-    }).catch(error => {
-      console.error('Background fetch failed:', error);
-      return null;
-    });
+    const fetchPromise = fetch(request)
+      .then(async (networkResponse) => {
+        if (networkResponse.ok) {
+          await this.addToCache(cache, request, networkResponse.clone(), config);
+        }
+        return networkResponse;
+      })
+      .catch((error) => {
+        console.error('Background fetch failed:', error);
+        return null;
+      });
 
     if (cachedResponse && !this.isExpired(cachedResponse, config)) {
       // Trigger background fetch but return cached response immediately
@@ -175,19 +177,19 @@ class CacheManager {
   private async cacheOnly(request: Request, config: CacheConfig): Promise<Response> {
     const cache = await caches.open(`${config.name}-${config.version}`);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse && !this.isExpired(cachedResponse, config)) {
       return cachedResponse;
     }
-    
+
     return this.createOfflineResponse();
   }
 
   private async addToCache(
-    cache: Cache, 
-    request: Request, 
-    response: Response, 
-    config: CacheConfig
+    cache: Cache,
+    request: Request,
+    response: Response,
+    config: CacheConfig,
   ): Promise<void> {
     try {
       // Check cache size limit
@@ -205,8 +207,8 @@ class CacheManager {
         headers: {
           ...response.headers,
           'x-cached-timestamp': Date.now().toString(),
-          'x-cache-expires': (Date.now() + config.maxAge).toString()
-        }
+          'x-cache-expires': (Date.now() + config.maxAge).toString(),
+        },
       });
 
       await cache.put(request, modifiedResponse);
@@ -218,32 +220,32 @@ class CacheManager {
   private isExpired(response: Response, config: CacheConfig): boolean {
     const cachedTimestamp = response.headers.get('x-cached-timestamp');
     const expires = response.headers.get('x-cache-expires');
-    
+
     if (expires) {
       return Date.now() > parseInt(expires);
     }
-    
+
     if (cachedTimestamp) {
       return Date.now() - parseInt(cachedTimestamp) > config.maxAge;
     }
-    
+
     return false;
   }
 
   private createOfflineResponse(): Response {
     return new Response(
-      JSON.stringify({ 
-        error: 'Offline', 
-        message: 'No network connection and no cached data available' 
+      JSON.stringify({
+        error: 'Offline',
+        message: 'No network connection and no cached data available',
       }),
       {
         status: 503,
         statusText: 'Service Unavailable',
         headers: {
           'Content-Type': 'application/json',
-          'x-offline': 'true'
-        }
-      }
+          'x-offline': 'true',
+        },
+      },
     );
   }
 
@@ -252,7 +254,7 @@ class CacheManager {
     if (!config) return;
 
     const cache = await caches.open(`${config.name}-${config.version}`);
-    
+
     try {
       await Promise.all(
         urls.map(async (url) => {
@@ -264,7 +266,7 @@ class CacheManager {
           } catch (error) {
             console.error(`Failed to precache ${url}:`, error);
           }
-        })
+        }),
       );
     } catch (error) {
       console.error('Precaching failed:', error);
@@ -280,9 +282,7 @@ class CacheManager {
     } else {
       // Clear all caches
       const cacheNames = await caches.keys();
-      await Promise.all(
-        cacheNames.map(name => caches.delete(name))
-      );
+      await Promise.all(cacheNames.map((name) => caches.delete(name)));
     }
   }
 
@@ -299,7 +299,7 @@ class CacheManager {
     for (const [cacheType, config] of this.cacheConfigs) {
       const cache = await caches.open(`${config.name}-${config.version}`);
       const keys = await cache.keys();
-      
+
       for (const request of keys) {
         const response = await cache.match(request);
         if (response && this.isExpired(response, config)) {

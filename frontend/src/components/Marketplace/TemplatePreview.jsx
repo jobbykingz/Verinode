@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-const TemplatePreview = ({ 
-  template, 
-  onClose, 
+const TemplatePreview = ({
+  template,
+  onClose,
   onPurchase,
   onRate,
   showPurchaseButton = true,
-  showRatingButton = true
+  showRatingButton = true,
 }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -22,14 +22,14 @@ const TemplatePreview = ({
     purchaseCount,
     creator,
     createdAt,
-    version
+    version,
   } = template;
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
@@ -39,7 +39,7 @@ const TemplatePreview = ({
       credential: 'bg-green-100 text-green-800',
       document: 'bg-purple-100 text-purple-800',
       transaction: 'bg-yellow-100 text-yellow-800',
-      custom: 'bg-gray-100 text-gray-800'
+      custom: 'bg-gray-100 text-gray-800',
     };
     return colors[cat] || colors.custom;
   };
@@ -48,26 +48,32 @@ const TemplatePreview = ({
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
-    
+
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className="text-yellow-400">★</span>
+        <span key={i} className="text-yellow-400">
+          ★
+        </span>,
       );
     }
-    
+
     if (hasHalfStar) {
       stars.push(
-        <span key="half" className="text-yellow-400">☆</span>
+        <span key="half" className="text-yellow-400">
+          ☆
+        </span>,
       );
     }
-    
+
     const emptyStars = 5 - Math.ceil(rating);
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <span key={`empty-${i}`} className="text-gray-300">☆</span>
+        <span key={`empty-${i}`} className="text-gray-300">
+          ☆
+        </span>,
       );
     }
-    
+
     return stars;
   };
 
@@ -88,13 +94,12 @@ const TemplatePreview = ({
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h2
-                  id="template-preview-title"
-                  className="text-2xl font-bold text-gray-900"
-                >
+                <h2 id="template-preview-title" className="text-2xl font-bold text-gray-900">
                   {title}
                 </h2>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(category)}`}>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(category)}`}
+                >
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </span>
                 {version && (
@@ -103,40 +108,37 @@ const TemplatePreview = ({
                   </span>
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-6 text-sm text-gray-600">
                 <div className="flex items-center">
-                  <span className="font-medium text-green-600 text-lg">
-                    {price.toFixed(2)} XLM
-                  </span>
+                  <span className="font-medium text-green-600 text-lg">{price.toFixed(2)} XLM</span>
                 </div>
-                
+
                 <div className="flex items-center">
-                  <div className="flex items-center mr-2">
-                    {renderStars(averageRating)}
-                  </div>
+                  <div className="flex items-center mr-2">{renderStars(averageRating)}</div>
                   <span>
                     {averageRating.toFixed(1)} ({totalRatings} reviews)
                   </span>
                 </div>
-                
-                <div>
-                  Purchased {purchaseCount} times
-                </div>
-                
-                <div>
-                  Created {formatDate(createdAt)}
-                </div>
+
+                <div>Purchased {purchaseCount} times</div>
+
+                <div>Created {formatDate(createdAt)}</div>
               </div>
             </div>
-            
+
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Close template preview"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -144,12 +146,16 @@ const TemplatePreview = ({
 
         {/* Tabs */}
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6" role="tablist" aria-label="Template preview sections">
+          <nav
+            className="flex space-x-8 px-6"
+            role="tablist"
+            aria-label="Template preview sections"
+          >
             {[
               { id: 'overview', label: 'Overview' },
               { id: 'content', label: 'Template Content' },
-              { id: 'details', label: 'Details' }
-            ].map(tab => (
+              { id: 'details', label: 'Details' },
+            ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -164,8 +170,8 @@ const TemplatePreview = ({
                   tab.id === 'overview'
                     ? overviewPanelId
                     : tab.id === 'content'
-                    ? contentPanelId
-                    : detailsPanelId
+                      ? contentPanelId
+                      : detailsPanelId
                 }
                 id={`template-preview-tab-${tab.id}`}
               >
@@ -208,11 +214,7 @@ const TemplatePreview = ({
           )}
 
           {activeTab === 'content' && (
-            <div
-              role="tabpanel"
-              id={contentPanelId}
-              aria-labelledby="template-preview-tab-content"
-            >
+            <div role="tabpanel" id={contentPanelId} aria-labelledby="template-preview-tab-content">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Template Content</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">
@@ -279,12 +281,8 @@ const TemplatePreview = ({
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">
-                      {creator || 'Unknown Creator'}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Created on {formatDate(createdAt)}
-                    </p>
+                    <p className="font-medium text-gray-900">{creator || 'Unknown Creator'}</p>
+                    <p className="text-sm text-gray-600">Created on {formatDate(createdAt)}</p>
                   </div>
                 </div>
               </div>

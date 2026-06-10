@@ -12,7 +12,7 @@ import {
   Fingerprint,
   Play,
   Square,
-  Settings
+  Settings,
 } from 'lucide-react';
 
 interface VoiceVerificationProps {
@@ -41,14 +41,14 @@ interface AudioAnalysis {
   volume: number;
 }
 
-type VerificationState = 
-  | 'idle' 
-  | 'requesting' 
-  | 'ready' 
-  | 'recording' 
-  | 'analyzing' 
-  | 'enrolled' 
-  | 'verified' 
+type VerificationState =
+  | 'idle'
+  | 'requesting'
+  | 'ready'
+  | 'recording'
+  | 'analyzing'
+  | 'enrolled'
+  | 'verified'
   | 'failed';
 
 const VoiceVerification: React.FC<VoiceVerificationProps> = ({
@@ -58,7 +58,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
   mode = 'verify',
   enrolledVoiceprintId,
   minRecordingDuration = 3,
-  maxRecordingDuration = 30
+  maxRecordingDuration = 30,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -74,7 +74,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
     pitch: 0,
     clarity: 0,
     backgroundNoise: 0,
-    volume: 0
+    volume: 0,
   });
   const [verificationResult, setVerificationResult] = useState<VerificationResult | null>(null);
   const [enrolledId, setEnrolledId] = useState<string | null>(null);
@@ -88,7 +88,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
     'Verify me securely',
     'Authentication complete',
     'Secure access granted',
-    'Identity confirmed'
+    'Identity confirmed',
   ];
 
   // Generate random phrase on mount
@@ -107,8 +107,8 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
           echoCancellation: true,
           noiseSuppression: true,
           sampleRate: 44100,
-          channelCount: 1
-        }
+          channelCount: 1,
+        },
       });
       streamRef.current = stream;
 
@@ -171,10 +171,10 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
       const volume = average / 255;
 
       // Update analysis
-      setAudioAnalysis(prev => ({
+      setAudioAnalysis((prev) => ({
         ...prev,
         volume: Math.round(volume * 100) / 100,
-        clarity: volume > 0.1 ? Math.min(1, volume * 1.5) : 0
+        clarity: volume > 0.1 ? Math.min(1, volume * 1.5) : 0,
       }));
 
       for (let i = 0; i < bufferLength; i++) {
@@ -231,7 +231,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
 
       // Start duration timer
       const timer = setInterval(() => {
-        setRecordingDuration(prev => {
+        setRecordingDuration((prev) => {
           const newDuration = prev + 1;
           if (newDuration >= maxRecordingDuration) {
             stopRecording();
@@ -266,7 +266,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
   const processRecording = async (audioBlob: Blob) => {
     try {
       // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       if (mode === 'enroll') {
         // Simulate enrollment
@@ -282,7 +282,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
           confidence: 0.75 + Math.random() * 0.2,
           similarityScore: 0.8 + Math.random() * 0.15,
           livenessScore: 0.85 + Math.random() * 0.1,
-          isLiveVoice: true
+          isLiveVoice: true,
         };
 
         setVerificationResult(mockResult);
@@ -311,7 +311,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
     return () => {
       stopVisualization();
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
       if (audioContextRef.current) {
         audioContextRef.current.close();
@@ -353,8 +353,8 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
                 {mode === 'enroll' ? 'Voice Enrollment' : 'Voice Verification'}
               </h2>
               <p className="text-sm text-blue-100">
-                {mode === 'enroll' 
-                  ? 'Enroll your voice for biometric authentication' 
+                {mode === 'enroll'
+                  ? 'Enroll your voice for biometric authentication'
                   : 'Verify your identity using your voice'}
               </p>
             </div>
@@ -380,12 +380,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
 
       {/* Visualization Canvas */}
       <div className="relative bg-gray-900">
-        <canvas
-          ref={canvasRef}
-          width={600}
-          height={150}
-          className="w-full h-36"
-        />
+        <canvas ref={canvasRef} width={600} height={150} className="w-full h-36" />
 
         {/* Overlay Status */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -450,9 +445,11 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Confidence</span>
-              <span className={`font-semibold ${
-                verificationResult.confidence >= 0.8 ? 'text-green-600' : 'text-yellow-600'
-              }`}>
+              <span
+                className={`font-semibold ${
+                  verificationResult.confidence >= 0.8 ? 'text-green-600' : 'text-yellow-600'
+                }`}
+              >
                 {Math.round(verificationResult.confidence * 100)}%
               </span>
             </div>
@@ -464,9 +461,11 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Liveness</span>
-              <span className={`font-semibold ${
-                verificationResult.isLiveVoice ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span
+                className={`font-semibold ${
+                  verificationResult.isLiveVoice ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 {verificationResult.isLiveVoice ? 'Live Voice' : 'Possible Replay'}
               </span>
             </div>
@@ -482,9 +481,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
             <div>Volume: {Math.round(audioAnalysis.volume * 100)}%</div>
             <div>Clarity: {Math.round(audioAnalysis.clarity * 100)}%</div>
           </div>
-          {enrolledId && (
-            <div className="mt-2 text-gray-500">Voiceprint: {enrolledId}</div>
-          )}
+          {enrolledId && <div className="mt-2 text-gray-500">Voiceprint: {enrolledId}</div>}
         </div>
       )}
 
@@ -522,8 +519,8 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
             </button>
           )}
 
-          {(verificationState === 'verified' || 
-            verificationState === 'failed' || 
+          {(verificationState === 'verified' ||
+            verificationState === 'failed' ||
             verificationState === 'enrolled') && (
             <button
               onClick={handleRetry}
@@ -545,7 +542,7 @@ const VoiceVerification: React.FC<VoiceVerificationProps> = ({
               />
             </div>
             <p className="text-center text-sm text-gray-500 mt-2">
-              {recordingDuration < minRecordingDuration 
+              {recordingDuration < minRecordingDuration
                 ? `Record at least ${minRecordingDuration - recordingDuration} more seconds`
                 : 'Recording... speak clearly'}
             </p>

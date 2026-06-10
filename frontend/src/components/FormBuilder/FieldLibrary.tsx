@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import { Droppable } from 'react-beautiful-dnd';
 import { FieldType, FieldLibraryItem } from '../../types/formBuilder';
-import { 
-  Type, 
-  Hash, 
-  Mail, 
-  Phone, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  Image, 
-  List, 
-  CheckSquare, 
-  Radio, 
-  MessageSquare, 
-  Link, 
-  Upload, 
-  Star, 
-  Sliders, 
+import {
+  Type,
+  Hash,
+  Mail,
+  Phone,
+  Calendar,
+  Clock,
+  FileText,
+  Image,
+  List,
+  CheckSquare,
+  Radio,
+  MessageSquare,
+  Link,
+  Upload,
+  Star,
+  Sliders,
   PenTool,
   Search,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 
 interface FieldLibraryProps {
@@ -31,7 +31,9 @@ interface FieldLibraryProps {
 
 const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'basic' | 'advanced' | 'special'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<
+    'all' | 'basic' | 'advanced' | 'special'
+  >('all');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     basic: true,
     advanced: false,
@@ -301,23 +303,27 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
     return icons[iconName] || Type;
   };
 
-  const filteredItems = fieldLibraryItems.filter(item => {
-    const matchesSearch = item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredItems = fieldLibraryItems.filter((item) => {
+    const matchesSearch =
+      item.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const groupedItems = filteredItems.reduce((groups, item) => {
-    if (!groups[item.category]) {
-      groups[item.category] = [];
-    }
-    groups[item.category].push(item);
-    return groups;
-  }, {} as Record<string, FieldLibraryItem[]>);
+  const groupedItems = filteredItems.reduce(
+    (groups, item) => {
+      if (!groups[item.category]) {
+        groups[item.category] = [];
+      }
+      groups[item.category].push(item);
+      return groups;
+    },
+    {} as Record<string, FieldLibraryItem[]>,
+  );
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({
+    setExpandedCategories((prev) => ({
       ...prev,
       [category]: !prev[category],
     }));
@@ -333,10 +339,7 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Field Library</h2>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-gray-100"
-          >
+          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
             ×
           </button>
         </div>
@@ -360,7 +363,7 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
             { key: 'basic', label: 'Basic' },
             { key: 'advanced', label: 'Advanced' },
             { key: 'special', label: 'Special' },
-          ].map(category => (
+          ].map((category) => (
             <button
               key={category.key}
               onClick={() => setSelectedCategory(category.key as any)}
@@ -380,11 +383,7 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
       <div className="flex-1 overflow-y-auto p-4">
         <Droppable droppableId="field-library" isDropDisabled={true}>
           {(provided, snapshot) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-4"
-            >
+            <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
               {Object.entries(groupedItems).map(([category, items]) => (
                 <div key={category}>
                   <button
@@ -396,12 +395,8 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
                     ) : (
                       <ChevronRight className="w-4 h-4 text-gray-400" />
                     )}
-                    <h3 className="text-sm font-medium text-gray-700 capitalize">
-                      {category}
-                    </h3>
-                    <span className="text-xs text-gray-500">
-                      ({items.length})
-                    </span>
+                    <h3 className="text-sm font-medium text-gray-700 capitalize">{category}</h3>
+                    <span className="text-xs text-gray-500">({items.length})</span>
                   </button>
 
                   {expandedCategories[category] && (
@@ -421,9 +416,7 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
                               <h4 className="text-sm font-medium text-gray-900 truncate">
                                 {item.label}
                               </h4>
-                              <p className="text-xs text-gray-500 truncate">
-                                {item.description}
-                              </p>
+                              <p className="text-xs text-gray-500 truncate">{item.description}</p>
                             </div>
                             <div className="flex-shrink-0">
                               <div className="w-2 h-2 bg-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -446,9 +439,7 @@ const FieldLibrary: React.FC<FieldLibraryProps> = ({ onFieldSelect, onClose }) =
               <Search className="w-8 h-8 mx-auto" />
             </div>
             <p className="text-sm text-gray-500">No fields found</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Try adjusting your search or filters
-            </p>
+            <p className="text-xs text-gray-400 mt-1">Try adjusting your search or filters</p>
           </div>
         )}
       </div>

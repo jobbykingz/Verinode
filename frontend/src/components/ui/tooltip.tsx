@@ -39,7 +39,11 @@ const sideStyles: Record<string, string> = {
   left: 'right-full top-1/2 -translate-y-1/2 mr-2',
 };
 
-export const TooltipContent: React.FC<TooltipContentProps> = ({ children, className = '', side = 'top' }) => {
+export const TooltipContent: React.FC<TooltipContentProps> = ({
+  children,
+  className = '',
+  side = 'top',
+}) => {
   return (
     <div
       className={`absolute z-50 hidden group-hover:block rounded-md bg-gray-900 px-3 py-1.5 text-xs text-white shadow-md ${sideStyles[side]} ${className}`}

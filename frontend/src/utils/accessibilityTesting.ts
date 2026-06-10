@@ -49,31 +49,31 @@ class AccessibilityTester {
   private initializeTestSuites(): void {
     // Image accessibility tests
     this.testSuites.set('images', this.testImages.bind(this));
-    
+
     // Heading structure tests
     this.testSuites.set('headings', this.testHeadings.bind(this));
-    
+
     // Form accessibility tests
     this.testSuites.set('forms', this.testForms.bind(this));
-    
+
     // Focus management tests
     this.testSuites.set('focus', this.testFocusManagement.bind(this));
-    
+
     // Color contrast tests
     this.testSuites.set('contrast', this.testColorContrast.bind(this));
-    
+
     // ARIA attribute tests
     this.testSuites.set('aria', this.testAriaAttributes.bind(this));
-    
+
     // Link accessibility tests
     this.testSuites.set('links', this.testLinks.bind(this));
-    
+
     // Table accessibility tests
     this.testSuites.set('tables', this.testTables.bind(this));
-    
+
     // Keyboard navigation tests
     this.testSuites.set('keyboard', this.testKeyboardNavigation.bind(this));
-    
+
     // Landmark tests
     this.testSuites.set('landmarks', this.testLandmarks.bind(this));
   }
@@ -91,13 +91,14 @@ class AccessibilityTester {
           message: `Image ${index + 1} is missing alt attribute`,
           element: img,
           rule: 'WCAG 1.1.1 - Non-text Content',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       } else if (img.alt === '' && img.getAttribute('role') !== 'presentation') {
         // Check if image should be decorative
-        const isDecorative = img.alt === '' && 
-          (img.closest('figure')?.querySelector('figcaption') || 
-           img.getAttribute('role') === 'presentation');
+        const isDecorative =
+          img.alt === '' &&
+          (img.closest('figure')?.querySelector('figcaption') ||
+            img.getAttribute('role') === 'presentation');
 
         if (!isDecorative) {
           results.push({
@@ -106,7 +107,7 @@ class AccessibilityTester {
             message: `Image ${index + 1} has empty alt text but may not be decorative`,
             element: img,
             rule: 'WCAG 1.1.1 - Non-text Content',
-            wcagLevel: 'A'
+            wcagLevel: 'A',
           });
         }
       }
@@ -119,7 +120,7 @@ class AccessibilityTester {
           message: `Image ${index + 1} has very short alt text: "${img.alt}"`,
           element: img,
           rule: 'WCAG 1.1.1 - Non-text Content',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
     });
@@ -131,7 +132,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `All ${images.length} images have appropriate alt text`,
         rule: 'WCAG 1.1.1 - Non-text Content',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -154,7 +155,7 @@ class AccessibilityTester {
           message: 'Page should start with h1 heading',
           element: heading,
           rule: 'WCAG 1.3.1 - Info and Relationships',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
 
@@ -166,7 +167,7 @@ class AccessibilityTester {
           message: `Heading level skipped: h${lastLevel} to h${currentLevel}`,
           element: heading,
           rule: 'WCAG 1.3.1 - Info and Relationships',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
 
@@ -178,7 +179,7 @@ class AccessibilityTester {
           message: `Empty ${heading.tagName.toLowerCase()} heading found`,
           element: heading,
           rule: 'WCAG 2.4.6 - Headings and Labels',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
 
@@ -192,7 +193,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `Heading structure is proper with ${headings.length} headings`,
         rule: 'WCAG 1.3.1 - Info and Relationships',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -204,10 +205,11 @@ class AccessibilityTester {
     const inputs = document.querySelectorAll('input, select, textarea');
 
     inputs.forEach((input, index) => {
-      const hasLabel = input.hasAttribute('aria-label') || 
-                      input.hasAttribute('aria-labelledby') ||
-                      document.querySelector(`label[for="${input.id}"]`) ||
-                      input.closest('label');
+      const hasLabel =
+        input.hasAttribute('aria-label') ||
+        input.hasAttribute('aria-labelledby') ||
+        document.querySelector(`label[for="${input.id}"]`) ||
+        input.closest('label');
 
       if (!hasLabel) {
         results.push({
@@ -216,7 +218,7 @@ class AccessibilityTester {
           message: `Form input ${index + 1} is missing label or aria-label`,
           element: input,
           rule: 'WCAG 3.3.2 - Labels or Instructions',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
 
@@ -228,7 +230,7 @@ class AccessibilityTester {
           message: `Required field should have aria-required="true"`,
           element: input,
           rule: 'WCAG 3.3.2 - Labels or Instructions',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
 
@@ -240,7 +242,7 @@ class AccessibilityTester {
           message: `Input element should have a type attribute`,
           element: input,
           rule: 'WCAG 4.1.2 - Name, Role, Value',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
     });
@@ -252,7 +254,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `All ${inputs.length} form inputs have proper labels`,
         rule: 'WCAG 3.3.2 - Labels or Instructions',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -264,7 +266,7 @@ class AccessibilityTester {
 
     // Test for tabindex abuse
     const elementsWithTabindex = document.querySelectorAll('[tabindex]');
-    elementsWithTabindex.forEach(element => {
+    elementsWithTabindex.forEach((element) => {
       const tabindex = element.getAttribute('tabindex');
       if (tabindex && parseInt(tabindex) > 0) {
         results.push({
@@ -273,14 +275,16 @@ class AccessibilityTester {
           message: `Element has positive tabindex: ${element.tagName.toLowerCase()}`,
           element: element,
           rule: 'WCAG 2.4.3 - Focus Order',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
     });
 
     // Test for disabled focusable elements
-    const disabledFocusable = document.querySelectorAll('button:disabled, input:disabled, select:disabled');
-    disabledFocusable.forEach(element => {
+    const disabledFocusable = document.querySelectorAll(
+      'button:disabled, input:disabled, select:disabled',
+    );
+    disabledFocusable.forEach((element) => {
       if (element.getAttribute('tabindex') !== '-1') {
         results.push({
           passed: false,
@@ -288,7 +292,7 @@ class AccessibilityTester {
           message: `Disabled element should have tabindex="-1"`,
           element: element,
           rule: 'WCAG 1.3.2 - Meaningful Sequence',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
     });
@@ -307,7 +311,7 @@ class AccessibilityTester {
         severity: 'info',
         message: 'Focus management is properly implemented',
         rule: 'WCAG 2.4.3 - Focus Order',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -317,7 +321,9 @@ class AccessibilityTester {
 
   private testColorContrast(): TestResult[] {
     const results: TestResult[] = [];
-    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, a, button, label');
+    const textElements = document.querySelectorAll(
+      'p, h1, h2, h3, h4, h5, h6, span, a, button, label',
+    );
 
     // This is a simplified contrast test
     // In production, you'd want to use a library like axe-core for accurate contrast testing
@@ -335,10 +341,16 @@ class AccessibilityTester {
       const rgbToHex = (rgb: string) => {
         const match = rgb.match(/\d+/g);
         if (!match) return '#000000';
-        return '#' + match.slice(0, 3).map(x => {
-          const hex = parseInt(x).toString(16);
-          return hex.length === 1 ? '0' + hex : hex;
-        }).join('');
+        return (
+          '#' +
+          match
+            .slice(0, 3)
+            .map((x) => {
+              const hex = parseInt(x).toString(16);
+              return hex.length === 1 ? '0' + hex : hex;
+            })
+            .join('')
+        );
       };
 
       const foregroundHex = rgbToHex(color);
@@ -346,7 +358,7 @@ class AccessibilityTester {
 
       try {
         const ratio = ColorContrast.getContrastRatio(foregroundHex, backgroundHex);
-        
+
         if (ratio < 4.5) {
           results.push({
             passed: false,
@@ -354,7 +366,7 @@ class AccessibilityTester {
             message: `Low contrast ratio: ${ratio.toFixed(2)}:1 (minimum 4.5:1 required)`,
             element: element,
             rule: 'WCAG 1.4.3 - Contrast (Minimum)',
-            wcagLevel: 'AA'
+            wcagLevel: 'AA',
           });
         } else if (ratio < 7) {
           results.push({
@@ -363,7 +375,7 @@ class AccessibilityTester {
             message: `Contrast ratio: ${ratio.toFixed(2)}:1 (meets AA but not AAA)`,
             element: element,
             rule: 'WCAG 1.4.3 - Contrast (Minimum)',
-            wcagLevel: 'AA'
+            wcagLevel: 'AA',
           });
         }
       } catch (error) {
@@ -372,14 +384,14 @@ class AccessibilityTester {
     });
 
     // Add passing test if no critical issues found
-    const errors = results.filter(r => r.severity === 'error');
+    const errors = results.filter((r) => r.severity === 'error');
     if (errors.length === 0) {
       results.push({
         passed: true,
         severity: 'info',
         message: 'Color contrast meets WCAG AA requirements',
         rule: 'WCAG 1.4.3 - Contrast (Minimum)',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -391,20 +403,24 @@ class AccessibilityTester {
 
     // Test for invalid ARIA attributes
     const elementsWithAria = document.querySelectorAll('[aria-*]');
-    elementsWithAria.forEach(element => {
+    elementsWithAria.forEach((element) => {
       const attributes = Array.from(element.attributes)
-        .filter(attr => attr.name.startsWith('aria-'))
-        .map(attr => attr.name);
+        .filter((attr) => attr.name.startsWith('aria-'))
+        .map((attr) => attr.name);
 
       // Test for aria-label on interactive elements
-      if (element.tagName === 'BUTTON' && !element.textContent?.trim() && !element.hasAttribute('aria-label')) {
+      if (
+        element.tagName === 'BUTTON' &&
+        !element.textContent?.trim() &&
+        !element.hasAttribute('aria-label')
+      ) {
         results.push({
           passed: false,
           severity: 'error',
           message: 'Button without text content should have aria-label',
           element: element,
           rule: 'WCAG 4.1.2 - Name, Role, Value',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
 
@@ -412,7 +428,7 @@ class AccessibilityTester {
       if (element.hasAttribute('aria-expanded')) {
         const isExpanded = element.getAttribute('aria-expanded') === 'true';
         const hasExpandedContent = element.querySelector('[aria-hidden="false"]');
-        
+
         if (isExpanded && !hasExpandedContent) {
           results.push({
             passed: false,
@@ -420,7 +436,7 @@ class AccessibilityTester {
             message: 'aria-expanded="true" but no visible expanded content found',
             element: element,
             rule: 'WCAG 4.1.2 - Name, Role, Value',
-            wcagLevel: 'A'
+            wcagLevel: 'A',
           });
         }
       }
@@ -433,7 +449,7 @@ class AccessibilityTester {
         severity: 'info',
         message: 'ARIA attributes are properly implemented',
         rule: 'WCAG 4.1.2 - Name, Role, Value',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -456,7 +472,7 @@ class AccessibilityTester {
           message: `Link ${index + 1} has insufficient text content`,
           element: link,
           rule: 'WCAG 2.4.4 - Link Purpose',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
 
@@ -469,7 +485,7 @@ class AccessibilityTester {
           message: `Link uses generic text: "${text}"`,
           element: link,
           rule: 'WCAG 2.4.4 - Link Purpose',
-          wcagLevel: 'AA'
+          wcagLevel: 'AA',
         });
       }
 
@@ -481,7 +497,7 @@ class AccessibilityTester {
           message: `Link points to non-existent destination: ${href}`,
           element: link,
           rule: 'WCAG 2.4.4 - Link Purpose',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
     });
@@ -493,7 +509,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `All ${links.length} links have meaningful text and destinations`,
         rule: 'WCAG 2.4.4 - Link Purpose',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -513,7 +529,7 @@ class AccessibilityTester {
           message: `Table ${index + 1} should have a caption`,
           element: table,
           rule: 'WCAG 1.3.1 - Info and Relationships',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
 
@@ -526,12 +542,12 @@ class AccessibilityTester {
           message: `Table ${index + 1} has no header cells`,
           element: table,
           rule: 'WCAG 1.3.1 - Info and Relationships',
-          wcagLevel: 'A'
+          wcagLevel: 'A',
         });
       }
 
       // Test for scope attributes
-      headers.forEach(header => {
+      headers.forEach((header) => {
         if (!header.hasAttribute('scope') && !header.hasAttribute('id')) {
           results.push({
             passed: false,
@@ -539,7 +555,7 @@ class AccessibilityTester {
             message: 'Table header should have scope or id attribute',
             element: header,
             rule: 'WCAG 1.3.1 - Info and Relationships',
-            wcagLevel: 'AA'
+            wcagLevel: 'AA',
           });
         }
       });
@@ -552,7 +568,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `All ${tables.length} tables are properly structured`,
         rule: 'WCAG 1.3.1 - Info and Relationships',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -563,11 +579,13 @@ class AccessibilityTester {
     const results: TestResult[] = [];
 
     // Test for keyboard accessibility
-    const interactiveElements = document.querySelectorAll('button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    
+    const interactiveElements = document.querySelectorAll(
+      'button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+
     // Simulate tab navigation
     let currentFocus = 0;
-    const tabbableElements = Array.from(interactiveElements).filter(el => {
+    const tabbableElements = Array.from(interactiveElements).filter((el) => {
       const tabindex = el.getAttribute('tabindex');
       return !tabindex || parseInt(tabindex) >= 0;
     });
@@ -578,7 +596,7 @@ class AccessibilityTester {
         severity: 'error',
         message: 'No keyboard-navigable elements found',
         rule: 'WCAG 2.1.1 - Keyboard',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     } else {
       results.push({
@@ -586,7 +604,7 @@ class AccessibilityTester {
         severity: 'info',
         message: `${tabbableElements.length} keyboard-navigable elements found`,
         rule: 'WCAG 2.1.1 - Keyboard',
-        wcagLevel: 'A'
+        wcagLevel: 'A',
       });
     }
 
@@ -598,7 +616,7 @@ class AccessibilityTester {
         severity: 'warning',
         message: 'No skip link found for keyboard navigation',
         rule: 'WCAG 2.4.1 - Bypass Blocks',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -616,7 +634,7 @@ class AccessibilityTester {
         severity: 'error',
         message: 'No main landmark found',
         rule: 'WCAG 1.3.6 - Identify Purpose',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -628,7 +646,7 @@ class AccessibilityTester {
         severity: 'warning',
         message: 'No navigation landmark found',
         rule: 'WCAG 1.3.6 - Identify Purpose',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -640,7 +658,7 @@ class AccessibilityTester {
         severity: 'warning',
         message: 'No header/banner landmark found',
         rule: 'WCAG 1.3.6 - Identify Purpose',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -652,7 +670,7 @@ class AccessibilityTester {
         severity: 'warning',
         message: 'No footer/contentinfo landmark found',
         rule: 'WCAG 1.3.6 - Identify Purpose',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -663,7 +681,7 @@ class AccessibilityTester {
         severity: 'info',
         message: 'Page has proper landmark structure',
         rule: 'WCAG 1.3.6 - Identify Purpose',
-        wcagLevel: 'AA'
+        wcagLevel: 'AA',
       });
     }
 
@@ -681,28 +699,28 @@ class AccessibilityTester {
     // Run all test suites
     this.testSuites.forEach((testFunction, name) => {
       const tests = testFunction();
-      const suiteScore = tests.filter(t => t.passed).length / tests.length * 100;
-      
+      const suiteScore = (tests.filter((t) => t.passed).length / tests.length) * 100;
+
       const suite: TestSuite = {
         name: name.charAt(0).toUpperCase() + name.slice(1),
         description: this.getSuiteDescription(name),
         tests,
         score: suiteScore,
-        compliance: this.getComplianceLevel(tests)
+        compliance: this.getComplianceLevel(tests),
       };
 
       testSuites.push(suite);
 
       // Update totals
       totalTests += tests.length;
-      passedTests += tests.filter(t => t.passed).length;
-      failedTests += tests.filter(t => !t.passed).length;
-      warnings += tests.filter(t => t.severity === 'warning').length;
-      errors += tests.filter(t => t.severity === 'error').length;
+      passedTests += tests.filter((t) => t.passed).length;
+      failedTests += tests.filter((t) => !t.passed).length;
+      warnings += tests.filter((t) => t.severity === 'warning').length;
+      errors += tests.filter((t) => t.severity === 'error').length;
     });
 
-    const overallScore = passedTests / totalTests * 100;
-    const overallCompliance = this.getComplianceLevel(testSuites.flatMap(s => s.tests));
+    const overallScore = (passedTests / totalTests) * 100;
+    const overallCompliance = this.getComplianceLevel(testSuites.flatMap((s) => s.tests));
 
     const report: AccessibilityReport = {
       timestamp: new Date().toISOString(),
@@ -715,9 +733,9 @@ class AccessibilityTester {
         passedTests,
         failedTests,
         warnings,
-        errors
+        errors,
       },
-      recommendations: this.generateRecommendations(testSuites)
+      recommendations: this.generateRecommendations(testSuites),
     };
 
     return report;
@@ -734,15 +752,15 @@ class AccessibilityTester {
       links: 'Tests for link accessibility and purpose',
       tables: 'Tests for table structure and headers',
       keyboard: 'Tests for keyboard accessibility',
-      landmarks: 'Tests for landmark roles and page structure'
+      landmarks: 'Tests for landmark roles and page structure',
     };
     return descriptions[name] || 'Accessibility tests';
   }
 
   private getComplianceLevel(tests: TestResult[]): 'A' | 'AA' | 'AAA' | 'Non-compliant' {
-    const errors = tests.filter(t => t.severity === 'error').length;
-    const warnings = tests.filter(t => t.severity === 'warning').length;
-    
+    const errors = tests.filter((t) => t.severity === 'error').length;
+    const warnings = tests.filter((t) => t.severity === 'warning').length;
+
     if (errors > 0) return 'Non-compliant';
     if (warnings > 0) return 'A';
     return 'AA';
@@ -750,11 +768,11 @@ class AccessibilityTester {
 
   private generateRecommendations(testSuites: TestSuite[]): string[] {
     const recommendations: string[] = [];
-    
-    testSuites.forEach(suite => {
-      const failedTests = suite.tests.filter(t => !t.passed);
-      
-      failedTests.forEach(test => {
+
+    testSuites.forEach((suite) => {
+      const failedTests = suite.tests.filter((t) => !t.passed);
+
+      failedTests.forEach((test) => {
         if (!recommendations.includes(test.message)) {
           recommendations.push(test.message);
         }
@@ -765,7 +783,9 @@ class AccessibilityTester {
     if (recommendations.length === 0) {
       recommendations.push('Great job! Your page meets WCAG 2.2 AA compliance standards.');
     } else {
-      recommendations.push('Consider using automated accessibility testing tools in your CI/CD pipeline.');
+      recommendations.push(
+        'Consider using automated accessibility testing tools in your CI/CD pipeline.',
+      );
       recommendations.push('Test with screen readers and keyboard-only navigation.');
       recommendations.push('Include users with disabilities in your testing process.');
     }
@@ -818,27 +838,35 @@ class AccessibilityTester {
         <li>Errors: ${report.summary.errors}</li>
     </ul>
 
-    ${report.testSuites.map((suite: TestSuite) => `
+    ${report.testSuites
+      .map(
+        (suite: TestSuite) => `
     <div class="test-suite">
         <div class="suite-header">
             ${suite.name} (${suite.score.toFixed(1)}% - ${suite.compliance})
         </div>
         <div class="suite-content">
             <p>${suite.description}</p>
-            ${suite.tests.map((test: TestResult) => `
+            ${suite.tests
+              .map(
+                (test: TestResult) => `
             <div class="test-result ${test.severity}">
                 <strong>${test.passed ? '✓' : '✗'}</strong> ${test.message}
                 <br><small>${test.rule} (${test.wcagLevel})</small>
             </div>
-            `).join('')}
+            `,
+              )
+              .join('')}
         </div>
     </div>
-    `).join('')}
+    `,
+      )
+      .join('')}
 
     <div class="recommendations">
         <h2>Recommendations</h2>
         <ul>
-            ${report.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+            ${report.recommendations.map((rec) => `<li>${rec}</li>`).join('')}
         </ul>
     </div>
 </body>

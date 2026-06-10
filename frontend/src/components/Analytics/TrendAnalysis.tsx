@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import { TrendingUp, TrendingDown, Minus, Calendar, Filter } from 'lucide-react';
 
 interface TrendData {
@@ -19,7 +28,7 @@ interface TrendAnalysisProps {
 export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
   timeframe = '30d',
   granularity = 'daily',
-  metric = 'proofs_created'
+  metric = 'proofs_created',
 }) => {
   const [data, setData] = useState<TrendData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +42,9 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
   const fetchTrendData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/analytics/usage-trends?timeframe=${selectedTimeframe}&granularity=${selectedGranularity}`);
+      const response = await fetch(
+        `/api/analytics/usage-trends?timeframe=${selectedTimeframe}&granularity=${selectedGranularity}`,
+      );
       const result = await response.json();
       setData(result);
     } catch (error) {
@@ -76,7 +87,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
           <h2 className="text-xl font-semibold text-gray-900">Usage Trends</h2>
           <p className="text-sm text-gray-600 mt-1">Track usage patterns and growth over time</p>
         </div>
-        
+
         <div className="flex gap-2">
           <select
             value={selectedTimeframe}
@@ -89,7 +100,7 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
             <option value="90d">Last 90 Days</option>
             <option value="1y">Last Year</option>
           </select>
-          
+
           <select
             value={selectedGranularity}
             onChange={(e) => setSelectedGranularity(e.target.value)}
@@ -115,25 +126,27 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
             <Calendar className="w-8 h-8 text-blue-500" />
           </div>
         </div>
-        
+
         <div className="bg-green-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-green-600 font-medium">Change</p>
               <p className={`text-2xl font-bold ${getTrendColor(latestValue?.change || 0)}`}>
-                {latestValue?.change > 0 ? '+' : ''}{latestValue?.change.toFixed(1)}
+                {latestValue?.change > 0 ? '+' : ''}
+                {latestValue?.change.toFixed(1)}
               </p>
             </div>
             {getTrendIcon(latestValue?.change || 0)}
           </div>
         </div>
-        
+
         <div className="bg-purple-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-purple-600 font-medium">Change %</p>
               <p className={`text-2xl font-bold ${getTrendColor(latestValue?.changePercent || 0)}`}>
-                {latestValue?.changePercent > 0 ? '+' : ''}{latestValue?.changePercent.toFixed(1)}%
+                {latestValue?.changePercent > 0 ? '+' : ''}
+                {latestValue?.changePercent.toFixed(1)}%
               </p>
             </div>
             {getTrendIcon(latestValue?.changePercent || 0)}
@@ -145,32 +158,32 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="date" 
+            <XAxis
+              dataKey="date"
               tick={{ fontSize: 12 }}
               tickFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip 
+            <Tooltip
               labelFormatter={(value) => new Date(value).toLocaleDateString()}
               formatter={(value: any, name: string) => [
                 typeof value === 'number' ? value.toLocaleString() : value,
-                name === 'value' ? 'Actual' : 'Forecast'
+                name === 'value' ? 'Actual' : 'Forecast',
               ]}
             />
             <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="value" 
-              stroke="#3b82f6" 
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#3b82f6"
               strokeWidth={2}
               name="Actual"
               dot={{ r: 3 }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="forecast" 
-              stroke="#10b981" 
+            <Line
+              type="monotone"
+              dataKey="forecast"
+              stroke="#10b981"
               strokeWidth={2}
               strokeDasharray="5 5"
               name="Forecast"
@@ -192,13 +205,15 @@ export const TrendAnalysis: React.FC<TrendAnalysisProps> = ({
           <div className="flex items-start gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
             <p className="text-sm text-gray-600">
-              {latestValue?.changePercent > 0 ? 'Positive' : 'Negative'} growth trend over selected period
+              {latestValue?.changePercent > 0 ? 'Positive' : 'Negative'} growth trend over selected
+              period
             </p>
           </div>
           <div className="flex items-start gap-2">
             <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
             <p className="text-sm text-gray-600">
-              Weekend usage typically {latestValue?.changePercent > 0 ? 'higher' : 'lower'} than weekdays
+              Weekend usage typically {latestValue?.changePercent > 0 ? 'higher' : 'lower'} than
+              weekdays
             </p>
           </div>
           <div className="flex items-start gap-2">

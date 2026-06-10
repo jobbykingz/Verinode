@@ -5,7 +5,10 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAccessibility } from '../../hooks/useAccessibility';
-import { KeyboardNavigation as KeyboardNavUtils, FocusManager } from '../../utils/accessibilityUtils';
+import {
+  KeyboardNavigation as KeyboardNavUtils,
+  FocusManager,
+} from '../../utils/accessibilityUtils';
 
 interface KeyboardNavigationProps {
   children?: React.ReactNode;
@@ -27,7 +30,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
   className = '',
   enableShortcuts = true,
   customShortcuts = {},
-  showHelp = false
+  showHelp = false,
 }) => {
   const { preferences, updatePreference, announce } = useAccessibility();
   const [isHelpVisible, setIsHelpVisible] = useState(false);
@@ -36,11 +39,14 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
   const helpButtonRef = useRef<HTMLButtonElement>(null);
 
   // Default keyboard shortcuts
-  const defaultShortcuts: Record<string, { description: string; action: () => void; category: string }> = {
+  const defaultShortcuts: Record<
+    string,
+    { description: string; action: () => void; category: string }
+  > = {
     'Alt+H': {
       description: 'Show keyboard shortcuts help',
-      action: () => setIsHelpVisible(prev => !prev),
-      category: 'Navigation'
+      action: () => setIsHelpVisible((prev) => !prev),
+      category: 'Navigation',
     },
     'Alt+S': {
       description: 'Skip to main content',
@@ -51,30 +57,34 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
           announce('Skipped to main content');
         }
       },
-      category: 'Navigation'
+      category: 'Navigation',
     },
     'Alt+N': {
       description: 'Go to navigation',
       action: () => {
         const nav = document.querySelector('nav');
         if (nav) {
-          const firstFocusable = nav.querySelectorAll('button, [href], input, select, textarea')[0] as HTMLElement;
+          const firstFocusable = nav.querySelectorAll(
+            'button, [href], input, select, textarea',
+          )[0] as HTMLElement;
           firstFocusable?.focus();
           announce('Focused on navigation');
         }
       },
-      category: 'Navigation'
+      category: 'Navigation',
     },
     'Alt+F': {
       description: 'Go to search',
       action: () => {
-        const searchInput = document.querySelector('input[type="search"], input[placeholder*="search" i]') as HTMLInputElement;
+        const searchInput = document.querySelector(
+          'input[type="search"], input[placeholder*="search" i]',
+        ) as HTMLInputElement;
         if (searchInput) {
           searchInput.focus();
           announce('Focused on search');
         }
       },
-      category: 'Navigation'
+      category: 'Navigation',
     },
     'Alt+A': {
       description: 'Toggle accessibility menu',
@@ -83,7 +93,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         document.dispatchEvent(event);
         announce('Accessibility menu toggled');
       },
-      category: 'Accessibility'
+      category: 'Accessibility',
     },
     'Alt+C': {
       description: 'Toggle high contrast',
@@ -91,7 +101,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         updatePreference('highContrast', !preferences.highContrast);
         announce(`High contrast ${!preferences.highContrast ? 'enabled' : 'disabled'}`);
       },
-      category: 'Accessibility'
+      category: 'Accessibility',
     },
     'Alt+M': {
       description: 'Toggle reduced motion',
@@ -99,7 +109,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         updatePreference('reducedMotion', !preferences.reducedMotion);
         announce(`Reduced motion ${!preferences.reducedMotion ? 'enabled' : 'disabled'}`);
       },
-      category: 'Accessibility'
+      category: 'Accessibility',
     },
     'Alt+L': {
       description: 'Toggle large text',
@@ -107,30 +117,30 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         updatePreference('largeText', !preferences.largeText);
         announce(`Large text ${!preferences.largeText ? 'enabled' : 'disabled'}`);
       },
-      category: 'Accessibility'
+      category: 'Accessibility',
     },
-    'Escape': {
+    Escape: {
       description: 'Close dialogs or cancel actions',
       action: () => {
         // Close any open modals
         const modals = document.querySelectorAll('[role="dialog"][aria-hidden="false"]');
-        modals.forEach(modal => {
+        modals.forEach((modal) => {
           (modal as HTMLElement).setAttribute('aria-hidden', 'true');
         });
-        
+
         // Restore focus
         FocusManager.restoreFocus();
         announce('Dialog closed');
       },
-      category: 'General'
+      category: 'General',
     },
-    'Tab': {
+    Tab: {
       description: 'Navigate to next focusable element',
       action: () => {
         // Handled by browser default
         announce('Tab navigation');
       },
-      category: 'Navigation'
+      category: 'Navigation',
     },
     'Shift+Tab': {
       description: 'Navigate to previous focusable element',
@@ -138,8 +148,8 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         // Handled by browser default
         announce('Shift+Tab navigation');
       },
-      category: 'Navigation'
-    }
+      category: 'Navigation',
+    },
   };
 
   // Initialize shortcuts
@@ -148,7 +158,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 
     // Combine default and custom shortcuts
     const allShortcuts = { ...defaultShortcuts, ...customShortcuts };
-    
+
     // Clear existing shortcuts
     shortcutsRef.current.clear();
 
@@ -158,7 +168,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
         key: keyCombo,
         description: config.description,
         action: config.action,
-        category: (config as any).category || 'Custom'
+        category: (config as any).category || 'Custom',
       };
       shortcutsRef.current.set(keyCombo, shortcut);
     });
@@ -167,7 +177,11 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't trigger shortcuts when typing in input fields
       const target = event.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.contentEditable === 'true') {
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.contentEditable === 'true'
+      ) {
         // Allow Escape key even in inputs
         if (event.key !== 'Escape') return;
       }
@@ -178,7 +192,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
       if (event.ctrlKey) parts.push('Ctrl');
       if (event.shiftKey) parts.push('Shift');
       if (event.metaKey) parts.push('Meta');
-      
+
       let key = event.key;
       if (key === ' ') key = 'Space';
       parts.push(key);
@@ -266,8 +280,8 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
   // Categorize shortcuts for help display
   const getShortcutsByCategory = useCallback(() => {
     const categories: Record<string, Shortcut[]> = {};
-    
-    shortcutsRef.current.forEach(shortcut => {
+
+    shortcutsRef.current.forEach((shortcut) => {
       if (!categories[shortcut.category]) {
         categories[shortcut.category] = [];
       }
@@ -280,7 +294,11 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
   const shortcutsByCategory = getShortcutsByCategory();
 
   return (
-    <div className={`keyboard-navigation ${className}`} role="region" aria-label="Keyboard navigation">
+    <div
+      className={`keyboard-navigation ${className}`}
+      role="region"
+      aria-label="Keyboard navigation"
+    >
       {/* Keyboard navigation status */}
       <div className="sr-only" aria-live="polite">
         Keyboard navigation is {preferences.keyboardNavigation ? 'enabled' : 'disabled'}
@@ -312,13 +330,14 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
             <h2 id="keyboard-help-title" className="text-2xl font-bold mb-4">
               Keyboard Shortcuts
             </h2>
-            
+
             <div className="mb-4">
               <p className="text-gray-600 mb-2">
                 Use these keyboard shortcuts to navigate the application more efficiently.
               </p>
               <p className="text-sm text-gray-500">
-                Press <kbd className="px-2 py-1 bg-gray-100 rounded">Escape</kbd> to close this help.
+                Press <kbd className="px-2 py-1 bg-gray-100 rounded">Escape</kbd> to close this
+                help.
               </p>
             </div>
 
@@ -326,8 +345,11 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
               <div key={category} className="mb-6">
                 <h3 className="text-lg font-semibold mb-3 text-gray-800">{category}</h3>
                 <div className="space-y-2">
-                  {shortcuts.map(shortcut => (
-                    <div key={shortcut.key} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  {shortcuts.map((shortcut) => (
+                    <div
+                      key={shortcut.key}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    >
                       <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono">
                         {shortcut.key}
                       </kbd>
@@ -353,8 +375,9 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
       {/* Focus indicator for development */}
       {process.env.NODE_ENV === 'development' && currentFocus && (
         <div className="sr-only" aria-live="polite">
-          Currently focused: {currentFocus.tagName.toLowerCase()} 
-          {currentFocus.getAttribute('aria-label') && ` - ${currentFocus.getAttribute('aria-label')}`}
+          Currently focused: {currentFocus.tagName.toLowerCase()}
+          {currentFocus.getAttribute('aria-label') &&
+            ` - ${currentFocus.getAttribute('aria-label')}`}
         </div>
       )}
 

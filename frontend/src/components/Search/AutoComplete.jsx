@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const AutoComplete = ({ 
+const AutoComplete = ({
   query,
   onSuggestionSelect,
   maxSuggestions = 8,
-  className = "",
-  debounceMs = 300
+  className = '',
+  debounceMs = 300,
 }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,9 +32,9 @@ const AutoComplete = ({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=${maxSuggestions}`
+          `/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=${maxSuggestions}`,
         );
-        
+
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data.data || []);
@@ -64,31 +64,27 @@ const AutoComplete = ({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : 0
-        );
+        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : 0));
         break;
-      
+
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev > 0 ? prev - 1 : suggestions.length - 1
-        );
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
         break;
-      
+
       case 'Enter':
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
           handleSuggestionSelect(suggestions[selectedIndex]);
         }
         break;
-      
+
       case 'Escape':
         e.preventDefault();
         setShowSuggestions(false);
         setSelectedIndex(-1);
         break;
-      
+
       default:
         setSelectedIndex(-1);
     }
@@ -111,7 +107,9 @@ const AutoComplete = ({
   }
 
   return (
-    <div className={`absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg ${className}`}>
+    <div
+      className={`absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg ${className}`}
+    >
       {/* Loading indicator */}
       {isLoading && (
         <div className="px-4 py-3 text-center text-gray-500">
@@ -137,15 +135,20 @@ const AutoComplete = ({
               } first:rounded-t-lg last:rounded-b-lg`}
             >
               <div className="flex items-center">
-                <svg 
+                <svg
                   className={`w-4 h-4 mr-2 flex-shrink-0 ${
                     selectedIndex === index ? 'text-blue-500' : 'text-gray-400'
-                  }`} 
-                  fill="none" 
-                  stroke="currentColor" 
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
                 <span className="truncate">{suggestion}</span>
               </div>
@@ -166,13 +169,13 @@ const AutoComplete = ({
 };
 
 // Enhanced version with search history integration
-export const EnhancedAutoComplete = ({ 
+export const EnhancedAutoComplete = ({
   query,
   onSuggestionSelect,
   recentSearches = [],
   popularSearches = [],
   maxSuggestions = 8,
-  className = ""
+  className = '',
 }) => {
   const [allSuggestions, setAllSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -184,18 +187,18 @@ export const EnhancedAutoComplete = ({
     if (!query || query.length < 2) {
       // Show recent and popular searches when no query
       const combined = [
-        ...recentSearches.slice(0, 3).map(search => ({ 
-          type: 'recent', 
+        ...recentSearches.slice(0, 3).map((search) => ({
+          type: 'recent',
           text: search.query,
-          data: search 
+          data: search,
         })),
-        ...popularSearches.slice(0, 5).map(search => ({ 
-          type: 'popular', 
+        ...popularSearches.slice(0, 5).map((search) => ({
+          type: 'popular',
           text: search.query || search,
-          count: search.count
-        }))
+          count: search.count,
+        })),
       ];
-      
+
       setAllSuggestions(combined);
       setShowSuggestions(combined.length > 0);
       setSelectedIndex(-1);
@@ -207,16 +210,16 @@ export const EnhancedAutoComplete = ({
       setIsLoading(true);
       try {
         const response = await fetch(
-          `/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=${maxSuggestions}`
+          `/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=${maxSuggestions}`,
         );
-        
+
         if (response.ok) {
           const data = await response.json();
-          const autoCompleteSuggestions = (data.data || []).map(text => ({
+          const autoCompleteSuggestions = (data.data || []).map((text) => ({
             type: 'autocomplete',
-            text
+            text,
           }));
-          
+
           setAllSuggestions(autoCompleteSuggestions);
           setShowSuggestions(autoCompleteSuggestions.length > 0);
           setSelectedIndex(-1);
@@ -246,31 +249,46 @@ export const EnhancedAutoComplete = ({
       case 'recent':
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
         );
       case 'popular':
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+            />
           </svg>
         );
       default:
         return (
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         );
     }
   };
 
   const getSuggestionClass = (type, isSelected) => {
-    const baseClasses = "w-full px-4 py-2.5 text-left transition-colors text-sm flex items-center";
-    
+    const baseClasses = 'w-full px-4 py-2.5 text-left transition-colors text-sm flex items-center';
+
     if (isSelected) {
       return `${baseClasses} bg-blue-50 text-blue-700 border-l-2 border-blue-500`;
     }
-    
+
     switch (type) {
       case 'recent':
         return `${baseClasses} text-gray-700 hover:bg-gray-50`;
@@ -286,7 +304,9 @@ export const EnhancedAutoComplete = ({
   }
 
   return (
-    <div className={`absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg ${className}`}>
+    <div
+      className={`absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg ${className}`}
+    >
       {/* Loading indicator */}
       {isLoading && (
         <div className="px-4 py-3 text-center text-gray-500">
@@ -308,10 +328,15 @@ export const EnhancedAutoComplete = ({
               className={getSuggestionClass(suggestion.type, selectedIndex === index)}
             >
               <div className="flex items-center w-full">
-                <div className={`mr-3 flex-shrink-0 ${
-                  selectedIndex === index ? 'text-blue-500' : 
-                  suggestion.type === 'popular' ? 'text-yellow-500' : 'text-gray-400'
-                }`}>
+                <div
+                  className={`mr-3 flex-shrink-0 ${
+                    selectedIndex === index
+                      ? 'text-blue-500'
+                      : suggestion.type === 'popular'
+                        ? 'text-yellow-500'
+                        : 'text-gray-400'
+                  }`}
+                >
                   {getSuggestionIcon(suggestion.type)}
                 </div>
                 <div className="flex-1 min-w-0">

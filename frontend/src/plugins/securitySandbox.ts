@@ -7,22 +7,22 @@ export class SecuritySandbox {
   private allowedDomains = new Set<string>([
     'https://api.stellar.org',
     'https://horizon.stellar.org',
-    'https://soroban.stellar.org'
+    'https://soroban.stellar.org',
   ]);
 
   async initializePlugin(pluginId: string, pluginData: any): Promise<void> {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.sandbox.add('allow-scripts', 'allow-same-origin');
-    
+
     document.body.appendChild(iframe);
-    
+
     const environment = {
       iframe,
       pluginId,
-      allowedAPIs: this.getAllowedAPIs(pluginData.metadata.permissions)
+      allowedAPIs: this.getAllowedAPIs(pluginData.metadata.permissions),
     };
-    
+
     this.pluginEnvironments.set(pluginId, environment);
   }
 
@@ -32,7 +32,7 @@ export class SecuritySandbox {
       environment.iframe.remove();
       this.pluginEnvironments.delete(pluginId);
     }
-    
+
     this.pluginStorages.delete(pluginId);
     this.pluginEventEmitters.delete(pluginId);
   }
@@ -40,13 +40,13 @@ export class SecuritySandbox {
   async executePlugin(pluginData: any): Promise<any> {
     const pluginId = pluginData.metadata.id;
     const environment = this.pluginEnvironments.get(pluginId);
-    
+
     if (!environment) {
       throw new Error(`Plugin environment not found for ${pluginId}`);
     }
 
     const pluginCode = this.wrapPluginCode(pluginData.code, environment.allowedAPIs);
-    
+
     return new Promise((resolve, reject) => {
       const messageHandler = (event: MessageEvent) => {
         if (event.source === environment.iframe.contentWindow) {
@@ -61,17 +61,25 @@ export class SecuritySandbox {
       };
 
       window.addEventListener('message', messageHandler);
-      
-      environment.iframe.contentWindow?.postMessage({
-        type: 'execute-plugin',
-        code: pluginCode
-      }, '*');
+
+      environment.iframe.contentWindow?.postMessage(
+        {
+          type: 'execute-plugin',
+          code: pluginCode,
+        },
+        '*',
+      );
     });
   }
 
-  async executeWithPermission(pluginId: string, apiType: string, method: string, args: any[]): Promise<any> {
+  async executeWithPermission(
+    pluginId: string,
+    apiType: string,
+    method: string,
+    args: any[],
+  ): Promise<any> {
     const environment = this.pluginEnvironments.get(pluginId);
-    
+
     if (!environment) {
       throw new Error(`Plugin environment not found for ${pluginId}`);
     }
@@ -113,12 +121,12 @@ export class SecuritySandbox {
       },
       clear: async () => {
         const keys = Object.keys(localStorage);
-        keys.forEach(key => {
+        keys.forEach((key) => {
           if (key.startsWith(`plugin_${pluginId}_`)) {
             localStorage.removeItem(key);
           }
         });
-      }
+      },
     };
 
     this.pluginStorages.set(pluginId, storage);
@@ -148,7 +156,7 @@ export class SecuritySandbox {
       emit: (event: string, data?: any) => {
         const eventListeners = listeners.get(event);
         if (eventListeners) {
-          eventListeners.forEach(handler => {
+          eventListeners.forEach((handler) => {
             try {
               handler(data);
             } catch (error) {
@@ -156,7 +164,7 @@ export class SecuritySandbox {
             }
           });
         }
-      }
+      },
     };
 
     this.pluginEventEmitters.set(pluginId, eventEmitter);
@@ -202,10 +210,10 @@ export class SecuritySandbox {
     const allowedAPIs: any = {
       stellar: [],
       ui: [],
-      network: []
+      network: [],
     };
 
-    permissions.forEach(permission => {
+    permissions.forEach((permission) => {
       switch (permission.type) {
         case 'stellar':
           allowedAPIs.stellar.push(...permission.scope);
@@ -281,7 +289,10 @@ export class SecuritySandbox {
     return { hash: 'transaction-hash', successful: true };
   }
 
-  private async showNotification(message: string, type: 'success' | 'error' | 'info'): Promise<void> {
+  private async showNotification(
+    message: string,
+    type: 'success' | 'error' | 'info',
+  ): Promise<void> {
     console.log(`Plugin notification [${type}]: ${message}`);
   }
 
@@ -320,7 +331,7 @@ export class SecuritySandbox {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
   }
 

@@ -15,7 +15,7 @@ class PWAUtils {
   private static instance: PWAUtils;
   private networkStatusCallbacks: ((status: NetworkStatus) => void)[] = [];
   private currentNetworkStatus: NetworkStatus = {
-    online: navigator.onLine
+    online: navigator.onLine,
   };
 
   private constructor() {
@@ -32,16 +32,17 @@ class PWAUtils {
 
   private initializeNetworkMonitoring(): void {
     const updateNetworkStatus = () => {
-      const connection = (navigator as any).connection || 
-                        (navigator as any).mozConnection || 
-                        (navigator as any).webkitConnection;
+      const connection =
+        (navigator as any).connection ||
+        (navigator as any).mozConnection ||
+        (navigator as any).webkitConnection;
 
       this.currentNetworkStatus = {
         online: navigator.onLine,
         effectiveType: connection?.effectiveType,
         downlink: connection?.downlink,
         rtt: connection?.rtt,
-        saveData: connection?.saveData
+        saveData: connection?.saveData,
       };
 
       this.notifyNetworkStatusChange();
@@ -78,7 +79,6 @@ class PWAUtils {
         navigator.serviceWorker.addEventListener('controllerchange', () => {
           window.location.reload();
         });
-
       } catch (error) {
         console.error('Service Worker registration failed:', error);
       }
@@ -86,13 +86,15 @@ class PWAUtils {
   }
 
   private notifyNetworkStatusChange(): void {
-    this.networkStatusCallbacks.forEach(callback => callback(this.currentNetworkStatus));
+    this.networkStatusCallbacks.forEach((callback) => callback(this.currentNetworkStatus));
   }
 
   private notifyAppUpdateAvailable(): void {
-    window.dispatchEvent(new CustomEvent('app-update-available', {
-      detail: { version: 'new' }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('app-update-available', {
+        detail: { version: 'new' },
+      }),
+    );
   }
 
   // Network status methods
@@ -105,14 +107,16 @@ class PWAUtils {
   }
 
   isSlowConnection(): boolean {
-    return this.currentNetworkStatus.effectiveType === 'slow-2g' || 
-           this.currentNetworkStatus.effectiveType === '2g' ||
-           this.currentNetworkStatus.saveData === true;
+    return (
+      this.currentNetworkStatus.effectiveType === 'slow-2g' ||
+      this.currentNetworkStatus.effectiveType === '2g' ||
+      this.currentNetworkStatus.saveData === true
+    );
   }
 
   onNetworkStatusChange(callback: (status: NetworkStatus) => void): () => void {
     this.networkStatusCallbacks.push(callback);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.networkStatusCallbacks.indexOf(callback);
@@ -132,11 +136,11 @@ class PWAUtils {
       const handleBeforeInstallPrompt = (e: Event) => {
         e.preventDefault();
         const promptEvent = e as any;
-        
+
         promptEvent.prompt().then((result: any) => {
           resolve({
             accepted: result.outcome === 'accepted',
-            platform: result.platform
+            platform: result.platform,
           });
         });
 
@@ -144,7 +148,7 @@ class PWAUtils {
       };
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      
+
       // If the event doesn't fire within 5 seconds, resolve with rejected
       setTimeout(() => {
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -157,7 +161,7 @@ class PWAUtils {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
     const isInWebAppChrome = window.matchMedia('(display-mode: minimal-ui)').matches;
-    
+
     return isStandalone || isInWebAppiOS || isInWebAppChrome;
   }
 
@@ -216,13 +220,15 @@ class PWAUtils {
   } {
     return {
       touch: 'ontouchstart' in window,
-      mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+      mobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      ),
       standalone: this.isAppInstalled(),
       notifications: 'Notification' in window,
       pushNotifications: 'PushManager' in window,
       backgroundSync: 'serviceWorker' in navigator && 'SyncManager' in window,
       wakeLock: 'wakeLock' in navigator,
-      installPrompt: 'beforeinstallprompt' in window
+      installPrompt: 'beforeinstallprompt' in window,
     };
   }
 
@@ -259,18 +265,18 @@ class PWAUtils {
         const estimate = await navigator.storage.estimate();
         const quota = estimate.quota || 0;
         const usage = estimate.usage || 0;
-        
+
         return {
           quota,
           usage,
           available: quota - usage,
-          usagePercentage: quota > 0 ? (usage / quota) * 100 : 0
+          usagePercentage: quota > 0 ? (usage / quota) * 100 : 0,
         };
       } catch (error) {
         console.warn('Failed to get storage usage:', error);
       }
     }
-    
+
     return { quota: 0, usage: 0, available: 0, usagePercentage: 0 };
   }
 
@@ -335,13 +341,13 @@ class PWAUtils {
 
   onThemeChange(callback: (isDark: boolean) => void): () => void {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
+
     const handleChange = (e: MediaQueryListEvent) => callback(e.matches);
     mediaQuery.addEventListener('change', handleChange);
-    
+
     // Call immediately with current preference
     callback(mediaQuery.matches);
-    
+
     // Return unsubscribe function
     return () => {
       mediaQuery.removeEventListener('change', handleChange);

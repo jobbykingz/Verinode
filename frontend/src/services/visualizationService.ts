@@ -89,12 +89,12 @@ class VisualizationService {
   private getCache(key: string): any | null {
     const cached = this.cache.get(key);
     if (!cached) return null;
-    
+
     if (Date.now() - cached.timestamp > this.cacheTimeout) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return cached.data;
   }
 
@@ -172,12 +172,9 @@ class VisualizationService {
   }
 
   // Real-time data streaming
-  subscribeToRealTimeUpdates(
-    dataType: string,
-    callback: (data: any) => void
-  ): () => void {
+  subscribeToRealTimeUpdates(dataType: string, callback: (data: any) => void): () => void {
     const eventSource = new EventSource(`${this.baseUrl}/realtime/${dataType}`);
-    
+
     eventSource.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -205,7 +202,7 @@ class VisualizationService {
       groupBy?: string[];
       timeInterval?: 'hour' | 'day' | 'week' | 'month';
     },
-    filters?: FilterOptions
+    filters?: FilterOptions,
   ): Promise<any> {
     try {
       const response = await axios.post(`${this.baseUrl}/aggregate/${dataId}`, {
@@ -220,18 +217,11 @@ class VisualizationService {
   }
 
   // Export functionality
-  async exportData(
-    dataId: string,
-    options: ExportOptions
-  ): Promise<Blob> {
+  async exportData(dataId: string, options: ExportOptions): Promise<Blob> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/export/${dataId}`,
-        options,
-        {
-          responseType: 'blob',
-        }
-      );
+      const response = await axios.post(`${this.baseUrl}/export/${dataId}`, options, {
+        responseType: 'blob',
+      });
       return response.data;
     } catch (error) {
       console.error('Error exporting data:', error);
@@ -256,7 +246,9 @@ class VisualizationService {
     }
   }
 
-  async saveVisualizationTemplate(template: Omit<VisualizationData, 'id' | 'metadata'>): Promise<VisualizationData> {
+  async saveVisualizationTemplate(
+    template: Omit<VisualizationData, 'id' | 'metadata'>,
+  ): Promise<VisualizationData> {
     try {
       const response = await axios.post(`${this.baseUrl}/templates`, template);
       this.cache.clear(); // Clear cache to ensure fresh data
@@ -269,7 +261,7 @@ class VisualizationService {
 
   async updateVisualizationTemplate(
     templateId: string,
-    updates: Partial<VisualizationData>
+    updates: Partial<VisualizationData>,
   ): Promise<VisualizationData> {
     try {
       const response = await axios.put(`${this.baseUrl}/templates/${templateId}`, updates);
@@ -324,25 +316,28 @@ class VisualizationService {
   }
 
   // Data transformation utilities
-  transformToChartFormat(data: any[], options: {
-    xField: string;
-    yField: string;
-    groupBy?: string;
-    aggregation?: 'sum' | 'average' | 'count';
-  }): ChartData {
+  transformToChartFormat(
+    data: any[],
+    options: {
+      xField: string;
+      yField: string;
+      groupBy?: string;
+      aggregation?: 'sum' | 'average' | 'count';
+    },
+  ): ChartData {
     const { xField, yField, groupBy, aggregation = 'sum' } = options;
 
     if (!groupBy) {
-      const labels = [...new Set(data.map(item => item[xField]))];
+      const labels = [...new Set(data.map((item) => item[xField]))];
       const dataset = {
         label: yField,
-        data: labels.map(label => {
-          const items = data.filter(item => item[xField] === label);
-          return aggregation === 'sum' 
+        data: labels.map((label) => {
+          const items = data.filter((item) => item[xField] === label);
+          return aggregation === 'sum'
             ? items.reduce((sum, item) => sum + Number(item[yField]), 0)
             : aggregation === 'average'
-            ? items.reduce((sum, item) => sum + Number(item[yField]), 0) / items.length
-            : items.length;
+              ? items.reduce((sum, item) => sum + Number(item[yField]), 0) / items.length
+              : items.length;
         }),
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderColor: 'rgba(59, 130, 246, 1)',
@@ -355,9 +350,9 @@ class VisualizationService {
     }
 
     // Group by logic
-    const groups = [...new Set(data.map(item => item[groupBy]))];
-    const labels = [...new Set(data.map(item => item[xField]))];
-    
+    const groups = [...new Set(data.map((item) => item[groupBy]))];
+    const labels = [...new Set(data.map((item) => item[xField]))];
+
     const datasets = groups.map((group, index) => {
       const colors = [
         'rgba(59, 130, 246, 0.8)',
@@ -366,16 +361,16 @@ class VisualizationService {
         'rgba(147, 51, 234, 0.8)',
         'rgba(236, 72, 153, 0.8)',
       ];
-      
+
       return {
         label: String(group),
-        data: labels.map(label => {
-          const items = data.filter(item => item[xField] === label && item[groupBy] === group);
+        data: labels.map((label) => {
+          const items = data.filter((item) => item[xField] === label && item[groupBy] === group);
           return aggregation === 'sum'
             ? items.reduce((sum, item) => sum + Number(item[yField]), 0)
             : aggregation === 'average'
-            ? items.reduce((sum, item) => sum + Number(item[yField]), 0) / items.length
-            : items.length;
+              ? items.reduce((sum, item) => sum + Number(item[yField]), 0) / items.length
+              : items.length;
         }),
         backgroundColor: colors[index % colors.length],
         borderColor: colors[index % colors.length],

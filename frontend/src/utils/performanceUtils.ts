@@ -22,7 +22,10 @@ export const performanceUtils = {
   /**
    * Simple debouncing function for optimized interaction handlers
    */
-  debounce<T extends (...args: any[]) => any>(fn: T, delay: number): (...args: Parameters<T>) => void {
+  debounce<T extends (...args: any[]) => any>(
+    fn: T,
+    delay: number,
+  ): (...args: Parameters<T>) => void {
     let timeoutId: NodeJS.Timeout;
     return (...args: Parameters<T>) => {
       clearTimeout(timeoutId);
@@ -44,13 +47,13 @@ export const performanceUtils = {
   reportWebVital(metric: any): void {
     const body = JSON.stringify(metric);
     const url = '/api/performance/vitals';
-    
+
     if (navigator.sendBeacon) {
       navigator.sendBeacon(url, body);
     } else {
       fetch(url, { body, method: 'POST', keepalive: true });
     }
-  }
+  },
 };
 
 export default performanceUtils;

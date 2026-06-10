@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Alert, 
-  AlertTitle, 
-  Button, 
-  Box, 
-  Collapse, 
+import {
+  Alert,
+  AlertTitle,
+  Button,
+  Box,
+  Collapse,
   IconButton,
   Typography,
-  LinearProgress
+  LinearProgress,
 } from '@mui/material';
-import { 
-  WifiOff, 
-  Refresh, 
-  Close, 
-  Sync, 
+import {
+  WifiOff,
+  Refresh,
+  Close,
+  Sync,
   CloudSync,
   CheckCircle,
-  Error as ErrorIcon
+  Error as ErrorIcon,
 } from '@mui/icons-material';
 
 interface SyncQueueStatus {
@@ -136,33 +136,25 @@ const OfflineBanner: React.FC = () => {
           severity="warning"
           icon={<WifiOff />}
           action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={handleDismiss}
-            >
+            <IconButton aria-label="close" color="inherit" size="small" onClick={handleDismiss}>
               <Close fontSize="inherit" />
             </IconButton>
           }
           sx={{
             borderRadius: 0,
             '& .MuiAlert-message': {
-              width: '100%'
-            }
+              width: '100%',
+            },
           }}
         >
           <AlertTitle>You're offline</AlertTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}
+          >
             <Typography variant="body2">
               Some features may be unavailable. Your actions will be synced when you're back online.
             </Typography>
-            <Button
-              size="small"
-              startIcon={<Refresh />}
-              onClick={handleRetry}
-              sx={{ ml: 2 }}
-            >
+            <Button size="small" startIcon={<Refresh />} onClick={handleRetry} sx={{ ml: 2 }}>
               Retry
             </Button>
           </Box>
@@ -176,36 +168,35 @@ const OfflineBanner: React.FC = () => {
     return (
       <Collapse in={!dismissed}>
         <Alert
-          severity={syncStatus.failed > 0 ? "error" : "info"}
+          severity={syncStatus.failed > 0 ? 'error' : 'info'}
           icon={syncStatus.failed > 0 ? <ErrorIcon /> : <CloudSync />}
           action={
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={handleDismiss}
-            >
+            <IconButton aria-label="close" color="inherit" size="small" onClick={handleDismiss}>
               <Close fontSize="inherit" />
             </IconButton>
           }
           sx={{
             borderRadius: 0,
             '& .MuiAlert-message': {
-              width: '100%'
-            }
+              width: '100%',
+            },
           }}
         >
           <AlertTitle>
             {syncStatus.failed > 0 ? 'Sync Issues Detected' : 'Syncing in Progress'}
           </AlertTitle>
-          
+
           {isSyncing && <LinearProgress sx={{ mb: 1 }} />}
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}
+          >
             <Typography variant="body2">
-              {syncStatus.pending > 0 && `${syncStatus.pending} pending item${syncStatus.pending > 1 ? 's' : ''}`}
+              {syncStatus.pending > 0 &&
+                `${syncStatus.pending} pending item${syncStatus.pending > 1 ? 's' : ''}`}
               {syncStatus.pending > 0 && syncStatus.failed > 0 && ', '}
-              {syncStatus.failed > 0 && `${syncStatus.failed} failed item${syncStatus.failed > 1 ? 's' : ''}`}
+              {syncStatus.failed > 0 &&
+                `${syncStatus.failed} failed item${syncStatus.failed > 1 ? 's' : ''}`}
               {lastSyncTime && ` • Last sync: ${lastSyncTime.toLocaleTimeString()}`}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -214,7 +205,9 @@ const OfflineBanner: React.FC = () => {
                   size="small"
                   variant="outlined"
                   startIcon={<ErrorIcon />}
-                  onClick={() => {/* Show error details */}}
+                  onClick={() => {
+                    /* Show error details */
+                  }}
                 >
                   View Errors
                 </Button>
@@ -222,7 +215,9 @@ const OfflineBanner: React.FC = () => {
               <Button
                 size="small"
                 variant="contained"
-                startIcon={isSyncing ? <Sync sx={{ animation: 'spin 1s linear infinite' }} /> : <Refresh />}
+                startIcon={
+                  isSyncing ? <Sync sx={{ animation: 'spin 1s linear infinite' }} /> : <Refresh />
+                }
                 onClick={triggerSync}
                 disabled={isSyncing}
               >
@@ -247,9 +242,7 @@ const OfflineBanner: React.FC = () => {
           }}
         >
           <AlertTitle>All synced!</AlertTitle>
-          <Typography variant="body2">
-            Your data is up to date.
-          </Typography>
+          <Typography variant="body2">Your data is up to date.</Typography>
         </Alert>
       </Collapse>
     );

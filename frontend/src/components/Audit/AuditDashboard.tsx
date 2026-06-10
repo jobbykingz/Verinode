@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
@@ -44,7 +38,14 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-react';
-import { auditService, AuditService, AuditLog, ServiceStatistics, MonitoringAlert, AuditAnalytics } from '../../services/auditService';
+import {
+  auditService,
+  AuditService,
+  AuditLog,
+  ServiceStatistics,
+  MonitoringAlert,
+  AuditAnalytics,
+} from '../../services/auditService';
 import { AuditSeverity, AuditStatus, AuditEventType } from '../../services/auditService';
 
 /**
@@ -57,7 +58,7 @@ interface AuditDashboardProps {
 
 /**
  * Audit Dashboard Component
- * 
+ *
  * Provides a comprehensive overview of the audit system:
  * - Real-time statistics and metrics
  * - Security alerts and monitoring
@@ -78,7 +79,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const [stats, analyticsData, alertsData, recentData] = await Promise.all([
         auditService.getStatistics(),
         auditService.getAnalytics(getTimeRangeFilter(selectedTimeRange)),
@@ -86,8 +87,8 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
         auditService.searchLogs(getTimeRangeFilter(selectedTimeRange), {
           limit: 10,
           sortBy: 'timestamp',
-          sortOrder: 'desc'
-        })
+          sortOrder: 'desc',
+        }),
       ]);
 
       setStatistics(stats);
@@ -112,17 +113,21 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
     auditService.connectRealTime();
 
     auditService.on('auditEvent', (event: AuditLog) => {
-      setRecentEvents(prev => [event, ...prev.slice(0, 9)]);
-      setStatistics(prev => prev ? {
-        ...prev,
-        logsThisHour: prev.logsThisHour + 1,
-        logsToday: prev.logsToday + 1,
-        totalLogs: prev.totalLogs + 1
-      } : null);
+      setRecentEvents((prev) => [event, ...prev.slice(0, 9)]);
+      setStatistics((prev) =>
+        prev
+          ? {
+              ...prev,
+              logsThisHour: prev.logsThisHour + 1,
+              logsToday: prev.logsToday + 1,
+              totalLogs: prev.totalLogs + 1,
+            }
+          : null,
+      );
     });
 
     auditService.on('alertCreated', (alert: MonitoringAlert) => {
-      setAlerts(prev => [alert, ...prev]);
+      setAlerts((prev) => [alert, ...prev]);
     });
 
     return () => {
@@ -138,9 +143,9 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
   const handleResolveAlert = async (alertId: string) => {
     try {
       await auditService.resolveAlert(alertId, 'current_user');
-      setAlerts(prev => prev.map(alert => 
-        alert.id === alertId ? { ...alert, resolved: true } : alert
-      ));
+      setAlerts((prev) =>
+        prev.map((alert) => (alert.id === alertId ? { ...alert, resolved: true } : alert)),
+      );
     } catch (error) {
       console.error('Failed to resolve alert:', error);
     }
@@ -169,7 +174,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
 
     return {
       fromDate: AuditService.formatDate(fromDate),
-      toDate: AuditService.formatDate(now)
+      toDate: AuditService.formatDate(now),
     };
   };
 
@@ -259,12 +264,8 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
             <AlertTriangle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {statistics?.criticalEvents || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Requires immediate attention
-            </p>
+            <div className="text-2xl font-bold text-red-600">{statistics?.criticalEvents || 0}</div>
+            <p className="text-xs text-muted-foreground">Requires immediate attention</p>
           </CardContent>
         </Card>
 
@@ -277,9 +278,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
             <div className="text-2xl font-bold text-orange-600">
               {statistics?.securityEvents || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Security-related incidents
-            </p>
+            <p className="text-xs text-muted-foreground">Security-related incidents</p>
           </CardContent>
         </Card>
 
@@ -292,9 +291,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
             <div className="text-2xl font-bold text-green-600">
               {statistics?.complianceScore || 0}%
             </div>
-            <p className="text-xs text-muted-foreground">
-              Overall compliance status
-            </p>
+            <p className="text-xs text-muted-foreground">Overall compliance status</p>
           </CardContent>
         </Card>
       </div>
@@ -321,19 +318,17 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                 <ResponsiveContainer width="100%" height={300}>
                   <AreaChart data={analytics?.timeline || []}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="timestamp" 
+                    <XAxis
+                      dataKey="timestamp"
                       tickFormatter={(value) => new Date(value).toLocaleDateString()}
                     />
                     <YAxis />
-                    <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleString()}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="count" 
-                      stroke="#3b82f6" 
-                      fill="#3b82f6" 
+                    <Tooltip labelFormatter={(value) => new Date(value).toLocaleString()} />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#3b82f6"
+                      fill="#3b82f6"
                       fillOpacity={0.3}
                     />
                   </AreaChart>
@@ -352,10 +347,35 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Critical', value: analytics?.summary.criticalEvents || 0, color: '#ef4444' },
-                        { name: 'High', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.high || 0), 0), color: '#f59e0b' },
-                        { name: 'Medium', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.medium || 0), 0), color: '#3b82f6' },
-                        { name: 'Low', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.low || 0), 0), color: '#10b981' },
+                        {
+                          name: 'Critical',
+                          value: analytics?.summary.criticalEvents || 0,
+                          color: '#ef4444',
+                        },
+                        {
+                          name: 'High',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.high || 0),
+                            0,
+                          ),
+                          color: '#f59e0b',
+                        },
+                        {
+                          name: 'Medium',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.medium || 0),
+                            0,
+                          ),
+                          color: '#3b82f6',
+                        },
+                        {
+                          name: 'Low',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.low || 0),
+                            0,
+                          ),
+                          color: '#10b981',
+                        },
                       ]}
                       cx="50%"
                       cy="50%"
@@ -366,10 +386,35 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                       dataKey="value"
                     >
                       {[
-                        { name: 'Critical', value: analytics?.summary.criticalEvents || 0, color: '#ef4444' },
-                        { name: 'High', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.high || 0), 0), color: '#f59e0b' },
-                        { name: 'Medium', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.medium || 0), 0), color: '#3b82f6' },
-                        { name: 'Low', value: analytics?.timeline.reduce((sum, period) => sum + (period.severityBreakdown.low || 0), 0), color: '#10b981' },
+                        {
+                          name: 'Critical',
+                          value: analytics?.summary.criticalEvents || 0,
+                          color: '#ef4444',
+                        },
+                        {
+                          name: 'High',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.high || 0),
+                            0,
+                          ),
+                          color: '#f59e0b',
+                        },
+                        {
+                          name: 'Medium',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.medium || 0),
+                            0,
+                          ),
+                          color: '#3b82f6',
+                        },
+                        {
+                          name: 'Low',
+                          value: analytics?.timeline.reduce(
+                            (sum, period) => sum + (period.severityBreakdown.low || 0),
+                            0,
+                          ),
+                          color: '#10b981',
+                        },
                       ].map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
@@ -396,7 +441,10 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
               ) : (
                 <div className="space-y-3">
                   {alerts.slice(0, 5).map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={alert.id}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex items-center space-x-3">
                         {getSeverityIcon(alert.severity as AuditSeverity)}
                         <div>
@@ -408,7 +456,9 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>
+                        <Badge
+                          variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}
+                        >
                           {alert.severity}
                         </Badge>
                         {!alert.resolved && (
@@ -470,14 +520,16 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={analytics?.topEventTypes.slice(0, 5) || []}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="eventType" 
+                    <XAxis
+                      dataKey="eventType"
                       tickFormatter={(value) => AuditService.truncateText(value, 10)}
                     />
                     <YAxis />
-                    <Tooltip 
+                    <Tooltip
                       formatter={(value, name) => [value, 'Count']}
-                      labelFormatter={(value) => AuditService.getEventTypeLabel(value as AuditEventType)}
+                      labelFormatter={(value) =>
+                        AuditService.getEventTypeLabel(value as AuditEventType)
+                      }
                     />
                     <Bar dataKey="count" fill="#3b82f6" />
                   </BarChart>
@@ -539,7 +591,10 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
               ) : (
                 <div className="space-y-3">
                   {alerts.map((alert) => (
-                    <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={alert.id}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div className="flex items-center space-x-3">
                         {getSeverityIcon(alert.severity as AuditSeverity)}
                         <div>
@@ -551,7 +606,9 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Badge variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}>
+                        <Badge
+                          variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}
+                        >
                           {alert.severity}
                         </Badge>
                         <Badge variant="outline">{alert.type}</Badge>
@@ -583,7 +640,10 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
             <CardContent>
               <div className="space-y-3">
                 {recentEvents.map((event) => (
-                  <div key={event.auditId} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={event.auditId}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-3">
                       {getSeverityIcon(event.severity)}
                       {getStatusIcon(event.status)}
@@ -599,7 +659,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">{event.eventType}</Badge>
-                      <Badge 
+                      <Badge
                         style={{ backgroundColor: AuditService.getSeverityColor(event.severity) }}
                         className="text-white"
                       >
@@ -622,31 +682,19 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => onNavigate?.('search')}
-            >
+            <Button variant="outline" onClick={() => onNavigate?.('search')}>
               <Search className="h-4 w-4 mr-2" />
               Search Logs
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => onNavigate?.('reports')}
-            >
+            <Button variant="outline" onClick={() => onNavigate?.('reports')}>
               <FileText className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => onNavigate?.('export')}
-            >
+            <Button variant="outline" onClick={() => onNavigate?.('export')}>
               <Download className="h-4 w-4 mr-2" />
               Export Data
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => onNavigate?.('integrity')}
-            >
+            <Button variant="outline" onClick={() => onNavigate?.('integrity')}>
               <Shield className="h-4 w-4 mr-2" />
               Verify Integrity
             </Button>

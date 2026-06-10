@@ -27,7 +27,7 @@ export default function ThemeTest() {
 
   const runTests = () => {
     const results: string[] = [];
-    
+
     // Test 1: Theme switching
     try {
       switchTheme('dark');
@@ -53,7 +53,9 @@ export default function ThemeTest() {
       const isDark = isDarkTheme;
       const isLight = isLightTheme;
       const isHighContrast = isHighContrastTheme;
-      results.push(`✅ Theme detection: Dark=${isDark}, Light=${isLight}, HighContrast=${isHighContrast}`);
+      results.push(
+        `✅ Theme detection: Dark=${isDark}, Light=${isLight}, HighContrast=${isHighContrast}`,
+      );
     } catch (error) {
       results.push('❌ Theme detection: FAILED');
     }
@@ -128,7 +130,7 @@ export default function ThemeTest() {
           xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
         },
       };
-      
+
       const exportedTestTheme = JSON.stringify(testTheme);
       importTheme(exportedTestTheme);
       results.push('✅ Theme import: SUCCESS');
@@ -153,7 +155,10 @@ export default function ThemeTest() {
   };
 
   return (
-    <div className="p-6 space-y-6" style={{ backgroundColor: getColor('background'), color: getColor('text') }}>
+    <div
+      className="p-6 space-y-6"
+      style={{ backgroundColor: getColor('background'), color: getColor('text') }}
+    >
       <div className="space-y-4">
         <h1 className="text-3xl font-bold">Theme System Test Suite</h1>
         <p className="text-lg opacity-80">Current Theme: {currentTheme.name}</p>
@@ -167,7 +172,8 @@ export default function ThemeTest() {
             onClick={() => switchTheme('light')}
             className="px-4 py-2 rounded-md font-medium transition-colors"
             style={{
-              backgroundColor: currentThemeId === 'light' ? getColor('primary') : getColor('surface'),
+              backgroundColor:
+                currentThemeId === 'light' ? getColor('primary') : getColor('surface'),
               color: currentThemeId === 'light' ? 'white' : getColor('text'),
               border: `1px solid ${getColor('border')}`,
             }}
@@ -178,7 +184,8 @@ export default function ThemeTest() {
             onClick={() => switchTheme('dark')}
             className="px-4 py-2 rounded-md font-medium transition-colors"
             style={{
-              backgroundColor: currentThemeId === 'dark' ? getColor('primary') : getColor('surface'),
+              backgroundColor:
+                currentThemeId === 'dark' ? getColor('primary') : getColor('surface'),
               color: currentThemeId === 'dark' ? 'white' : getColor('text'),
               border: `1px solid ${getColor('border')}`,
             }}
@@ -189,7 +196,8 @@ export default function ThemeTest() {
             onClick={() => switchTheme('highContrast')}
             className="px-4 py-2 rounded-md font-medium transition-colors"
             style={{
-              backgroundColor: currentThemeId === 'highContrast' ? getColor('primary') : getColor('surface'),
+              backgroundColor:
+                currentThemeId === 'highContrast' ? getColor('primary') : getColor('surface'),
               color: currentThemeId === 'highContrast' ? 'white' : getColor('text'),
               border: `1px solid ${getColor('border')}`,
             }}
@@ -212,19 +220,25 @@ export default function ThemeTest() {
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Color Palette Test</h2>
         <div className="grid grid-cols-5 gap-4">
-          {(Object.keys(getColor('') ? {} : currentTheme.colors) as Array<keyof ThemeColors>).map((colorKey) => (
-            <div key={colorKey} className="text-center p-4 rounded-lg border" style={{ borderColor: getColor('border') }}>
+          {(Object.keys(getColor('') ? {} : currentTheme.colors) as Array<keyof ThemeColors>).map(
+            (colorKey) => (
               <div
-                className="w-16 h-16 rounded-full mx-auto mb-2 border-2"
-                style={{ 
-                  backgroundColor: getColor(colorKey),
-                  borderColor: getColor('border')
-                }}
-              />
-              <p className="font-medium text-sm">{colorKey}</p>
-              <p className="text-xs opacity-60 font-mono">{getColor(colorKey)}</p>
-            </div>
-          ))}
+                key={colorKey}
+                className="text-center p-4 rounded-lg border"
+                style={{ borderColor: getColor('border') }}
+              >
+                <div
+                  className="w-16 h-16 rounded-full mx-auto mb-2 border-2"
+                  style={{
+                    backgroundColor: getColor(colorKey),
+                    borderColor: getColor('border'),
+                  }}
+                />
+                <p className="font-medium text-sm">{colorKey}</p>
+                <p className="text-xs opacity-60 font-mono">{getColor(colorKey)}</p>
+              </div>
+            ),
+          )}
         </div>
       </div>
 
@@ -325,7 +339,9 @@ export default function ThemeTest() {
             <h3 className="font-semibold mb-2">Test Results:</h3>
             <ul className="space-y-1">
               {testResults.map((result, index) => (
-                <li key={index} className="text-sm font-mono">{result}</li>
+                <li key={index} className="text-sm font-mono">
+                  {result}
+                </li>
               ))}
             </ul>
           </div>
@@ -357,13 +373,9 @@ export default function ThemeTest() {
         </div>
       </div>
 
-      {showCustomEditor && (
-        <CustomTheme onClose={() => setShowCustomEditor(false)} />
-      )}
+      {showCustomEditor && <CustomTheme onClose={() => setShowCustomEditor(false)} />}
 
-      {showBrandEditor && (
-        <BrandCustomization onClose={() => setShowBrandEditor(false)} />
-      )}
+      {showBrandEditor && <BrandCustomization onClose={() => setShowBrandEditor(false)} />}
     </div>
   );
 }

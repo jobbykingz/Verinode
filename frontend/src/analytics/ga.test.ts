@@ -38,7 +38,7 @@ describe('GA analytics wrapper', () => {
         event_category: 'Test',
         event_label: 'label',
         value: 42,
-      })
+      }),
     );
     expect(document.getElementById('ga4-gtag-script')).not.toBeNull();
   });

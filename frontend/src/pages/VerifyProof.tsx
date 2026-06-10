@@ -60,7 +60,7 @@ const VerifyProof = () => {
     try {
       // Mock on-chain verification
       const response = await fetch(`/api/proofs/verify/${proofId}`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       if (response.ok) {
@@ -70,7 +70,7 @@ const VerifyProof = () => {
           label: 'verify_on_chain',
         });
         toast.success('Proof verified on-chain!');
-        setProof(prev => ({ ...prev, verified: true }));
+        setProof((prev) => ({ ...prev, verified: true }));
       } else {
         trackEvent({
           action: 'form_submit_error',
@@ -94,13 +94,11 @@ const VerifyProof = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Verify Cryptographic Proof</h1>
-      
+
       <div className="bg-white p-8 rounded-lg shadow-md mb-6">
         <form onSubmit={handleVerify} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Proof ID
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Proof ID</label>
             <input
               type="text"
               value={proofId}
@@ -135,11 +133,11 @@ const VerifyProof = () => {
             </div>
             <div className="flex justify-between">
               <span className="font-medium">Status:</span>
-              <span className={`px-2 py-1 rounded text-sm ${
-                proof.verified 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded text-sm ${
+                  proof.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
                 {proof.verified ? 'Verified' : 'Pending'}
               </span>
             </div>
@@ -149,15 +147,11 @@ const VerifyProof = () => {
             </div>
             <div>
               <span className="font-medium">Event Data:</span>
-              <p className="mt-1 p-3 bg-gray-50 rounded text-sm">
-                {proof.eventData}
-              </p>
+              <p className="mt-1 p-3 bg-gray-50 rounded text-sm">{proof.eventData}</p>
             </div>
             <div>
               <span className="font-medium">Hash:</span>
-              <p className="mt-1 p-3 bg-gray-50 rounded text-sm font-mono">
-                {proof.hash}
-              </p>
+              <p className="mt-1 p-3 bg-gray-50 rounded text-sm font-mono">{proof.hash}</p>
             </div>
           </div>
 

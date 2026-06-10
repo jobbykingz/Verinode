@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Lock,
   Unlock,
-  FileText
+  FileText,
 } from 'lucide-react';
 
 interface MediaPlayerProps {
@@ -48,7 +48,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
   watermark,
   allowDownload = false,
   onVerify,
-  onShare
+  onShare,
 }) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
     currentTime: 0,
     volume: 1,
     playbackRate: 1,
-    buffered: null
+    buffered: null,
   });
   const [verificationStatus, setVerificationStatus] = useState<{
     checking: boolean;
@@ -83,8 +83,8 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
     details: {
       hashValid: false,
       signatureValid: false,
-      watermarkValid: false
-    }
+      watermarkValid: false,
+    },
   });
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,17 +96,17 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
     if (!media) return;
 
     const updateMetadata = () => {
-      setMetadata(prev => ({
+      setMetadata((prev) => ({
         ...prev,
         duration: media.duration || 0,
-        buffered: media.buffered
+        buffered: media.buffered,
       }));
     };
 
     const updateTime = () => {
-      setMetadata(prev => ({
+      setMetadata((prev) => ({
         ...prev,
-        currentTime: media.currentTime
+        currentTime: media.currentTime,
       }));
     };
 
@@ -115,10 +115,10 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
     };
 
     const handleVolumeChange = () => {
-      setMetadata(prev => ({
+      setMetadata((prev) => ({
         ...prev,
         volume: media.volume,
-        muted: media.muted
+        muted: media.muted,
       }));
       setIsMuted(media.muted || media.volume === 0);
     };
@@ -167,23 +167,26 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
 
     const volume = parseFloat(e.target.value);
     media.volume = volume;
-    setMetadata(prev => ({ ...prev, volume }));
+    setMetadata((prev) => ({ ...prev, volume }));
     setIsMuted(volume === 0);
   }, []);
 
   // Handle seek
-  const handleSeek = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const media = mediaRef.current;
-    const progressBar = progressRef.current;
-    if (!media || !progressBar) return;
+  const handleSeek = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const media = mediaRef.current;
+      const progressBar = progressRef.current;
+      if (!media || !progressBar) return;
 
-    const rect = progressBar.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    const newTime = pos * metadata.duration;
-    
-    media.currentTime = newTime;
-    setMetadata(prev => ({ ...prev, currentTime: newTime }));
-  }, [metadata.duration]);
+      const rect = progressBar.getBoundingClientRect();
+      const pos = (e.clientX - rect.left) / rect.width;
+      const newTime = pos * metadata.duration;
+
+      media.currentTime = newTime;
+      setMetadata((prev) => ({ ...prev, currentTime: newTime }));
+    },
+    [metadata.duration],
+  );
 
   // Toggle fullscreen
   const toggleFullscreen = useCallback(() => {
@@ -200,12 +203,15 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
   }, []);
 
   // Skip forward/backward
-  const skip = useCallback((seconds: number) => {
-    const media = mediaRef.current;
-    if (!media) return;
+  const skip = useCallback(
+    (seconds: number) => {
+      const media = mediaRef.current;
+      if (!media) return;
 
-    media.currentTime = Math.max(0, Math.min(metadata.duration, media.currentTime + seconds));
-  }, [metadata.duration]);
+      media.currentTime = Math.max(0, Math.min(metadata.duration, media.currentTime + seconds));
+    },
+    [metadata.duration],
+  );
 
   // Change playback rate
   const changePlaybackRate = useCallback((rate: number) => {
@@ -213,7 +219,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
     if (!media) return;
 
     media.playbackRate = rate;
-    setMetadata(prev => ({ ...prev, playbackRate: rate }));
+    setMetadata((prev) => ({ ...prev, playbackRate: rate }));
     setShowSettings(false);
   }, []);
 
@@ -227,7 +233,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
   // Handle mouse move for controls visibility
   const handleMouseMove = useCallback(() => {
     setShowControls(true);
-    
+
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
     }
@@ -241,11 +247,11 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
 
   // Verify media authenticity
   const verifyMedia = useCallback(async () => {
-    setVerificationStatus(prev => ({ ...prev, checking: true }));
+    setVerificationStatus((prev) => ({ ...prev, checking: true }));
     setShowVerification(true);
 
     // Simulate verification process
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Mock verification result
     const mockResult = {
@@ -255,8 +261,8 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
       details: {
         hashValid: true,
         signatureValid: true,
-        watermarkValid: !!watermark
-      }
+        watermarkValid: !!watermark,
+      },
     };
 
     setVerificationStatus(mockResult);
@@ -283,13 +289,13 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
 
     const drawWatermark = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Draw semi-transparent watermark
       ctx.font = 'bold 24px Arial';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
       ctx.textAlign = 'right';
       ctx.fillText(watermark, canvas.width - 20, canvas.height - 20);
-      
+
       requestAnimationFrame(drawWatermark);
     };
 
@@ -368,7 +374,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
         <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-20">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">Media Verification</h3>
-            
+
             {verificationStatus.checking ? (
               <div className="text-center py-4">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2" />
@@ -403,9 +409,11 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
                 <div className="pt-3 border-t">
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Confidence</span>
-                    <span className={`font-bold ${
-                      verificationStatus.confidence >= 0.9 ? 'text-green-600' : 'text-yellow-600'
-                    }`}>
+                    <span
+                      className={`font-bold ${
+                        verificationStatus.confidence >= 0.9 ? 'text-green-600' : 'text-yellow-600'
+                      }`}
+                    >
                       {Math.round(verificationStatus.confidence * 100)}%
                     </span>
                   </div>
@@ -432,9 +440,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
         <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-start">
           <div className="text-white">
             <h3 className="font-semibold">{title}</h3>
-            {proofId && (
-              <p className="text-xs text-gray-300">ID: {proofId}</p>
-            )}
+            {proofId && <p className="text-xs text-gray-300">ID: {proofId}</p>}
           </div>
           <div className="flex gap-2">
             <button
@@ -487,17 +493,17 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
                 className="absolute h-full bg-white/40 rounded-full"
                 style={{
                   left: `${(metadata.buffered.start(0) / metadata.duration) * 100}%`,
-                  width: `${((metadata.buffered.end(0) - metadata.buffered.start(0)) / metadata.duration) * 100}%`
+                  width: `${((metadata.buffered.end(0) - metadata.buffered.start(0)) / metadata.duration) * 100}%`,
                 }}
               />
             )}
-            
+
             {/* Progress */}
             <div
               className="absolute h-full bg-blue-500 rounded-full"
               style={{ width: `${(metadata.currentTime / metadata.duration) * 100}%` }}
             />
-            
+
             {/* Hover Preview */}
             <div className="absolute h-full bg-white/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
@@ -564,7 +570,7 @@ const MediaPlayer: React.FC<MediaPlayerProps> = ({
                 {showSettings && (
                   <div className="absolute bottom-full right-0 mb-2 bg-gray-900 rounded-lg p-2 min-w-[120px]">
                     <p className="text-white text-xs mb-2 px-2">Speed</p>
-                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map(rate => (
+                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                       <button
                         key={rate}
                         onClick={() => changePlaybackRate(rate)}

@@ -9,12 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {
-  UploadFile,
-  UploadProgress,
-  UploadStatus,
-  UploadError,
-} from '../../types/fileUpload';
+import { UploadFile, UploadProgress, UploadStatus, UploadError } from '../../types/fileUpload';
 
 interface UploadProgressProps {
   file: UploadFile;
@@ -142,22 +137,22 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
 
   const formatSpeed = (bytesPerSecond: number): string => {
     if (bytesPerSecond === 0) return '0 B/s';
-    
+
     const units = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
     let size = bytesPerSecond;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
   const formatTime = (milliseconds: number): string => {
     const seconds = Math.floor(milliseconds / 1000);
-    
+
     if (seconds < 60) {
       return `${seconds}s`;
     } else if (seconds < 3600) {
@@ -173,16 +168,16 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 B';
-    
+
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -206,9 +201,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
             ]}
           />
         </View>
-        <Text style={styles.progressText}>
-          {Math.round(file.progress.percentage)}%
-        </Text>
+        <Text style={styles.progressText}>{Math.round(file.progress.percentage)}%</Text>
       </View>
     );
   };
@@ -218,7 +211,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       return null;
     }
 
-    const completedChunks = file.chunks.filter(chunk => chunk.uploaded).length;
+    const completedChunks = file.chunks.filter((chunk) => chunk.uploaded).length;
     const chunkProgress = (completedChunks / file.chunks.length) * 100;
 
     return (
@@ -227,12 +220,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
           Chunks: {completedChunks}/{file.chunks.length}
         </Text>
         <View style={styles.chunkProgressBar}>
-          <View
-            style={[
-              styles.chunkProgressBarFill,
-              { width: `${chunkProgress}%` },
-            ]}
-          />
+          <View style={[styles.chunkProgressBarFill, { width: `${chunkProgress}%` }]} />
         </View>
       </View>
     );
@@ -243,55 +231,45 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
 
     if (file.status.state === 'uploading' && onPause) {
       actions.push(
-        <TouchableOpacity
-          key="pause"
-          style={styles.actionButton}
-          onPress={onPause}
-        >
+        <TouchableOpacity key="pause" style={styles.actionButton} onPress={onPause}>
           <Icon name="pause" size={16} color="#FFA500" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
     if (file.status.state === 'paused' && onResume) {
       actions.push(
-        <TouchableOpacity
-          key="resume"
-          style={styles.actionButton}
-          onPress={onResume}
-        >
+        <TouchableOpacity key="resume" style={styles.actionButton} onPress={onResume}>
           <Icon name="play-arrow" size={16} color="#6BCF7F" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
-    if ((file.status.state === 'failed' || file.status.state === 'cancelled') && onRetry && file.status.canRetry) {
+    if (
+      (file.status.state === 'failed' || file.status.state === 'cancelled') &&
+      onRetry &&
+      file.status.canRetry
+    ) {
       actions.push(
-        <TouchableOpacity
-          key="retry"
-          style={styles.actionButton}
-          onPress={onRetry}
-        >
+        <TouchableOpacity key="retry" style={styles.actionButton} onPress={onRetry}>
           <Icon name="refresh" size={16} color="#3498DB" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
-    if ((file.status.state === 'uploading' || file.status.state === 'paused') && onCancel && file.status.canCancel) {
+    if (
+      (file.status.state === 'uploading' || file.status.state === 'paused') &&
+      onCancel &&
+      file.status.canCancel
+    ) {
       actions.push(
-        <TouchableOpacity
-          key="cancel"
-          style={styles.actionButton}
-          onPress={onCancel}
-        >
+        <TouchableOpacity key="cancel" style={styles.actionButton} onPress={onCancel}>
           <Icon name="close" size={16} color="#FF6B6B" />
-        </TouchableOpacity>
+        </TouchableOpacity>,
       );
     }
 
-    return actions.length > 0 ? (
-      <View style={styles.actionButtons}>{actions}</View>
-    ) : null;
+    return actions.length > 0 ? <View style={styles.actionButtons}>{actions}</View> : null;
   };
 
   const renderError = () => {
@@ -317,9 +295,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       <View style={styles.detailsContainer}>
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Status:</Text>
-          <Text style={[styles.detailValue, { color: getStatusColor() }]}>
-            {getStatusText()}
-          </Text>
+          <Text style={[styles.detailValue, { color: getStatusColor() }]}>{getStatusText()}</Text>
         </View>
 
         <View style={styles.detailRow}>
@@ -332,26 +308,20 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
         {showSpeed && file.status.state === 'uploading' && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Speed:</Text>
-            <Text style={styles.detailValue}>
-              {formatSpeed(file.progress.speed)}
-            </Text>
+            <Text style={styles.detailValue}>{formatSpeed(file.progress.speed)}</Text>
           </View>
         )}
 
         {showTimeRemaining && file.status.state === 'uploading' && file.progress.timeRemaining && (
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Time remaining:</Text>
-            <Text style={styles.detailValue}>
-              {formatTime(file.progress.timeRemaining)}
-            </Text>
+            <Text style={styles.detailValue}>{formatTime(file.progress.timeRemaining)}</Text>
           </View>
         )}
 
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Time elapsed:</Text>
-          <Text style={styles.detailValue}>
-            {formatTime(file.progress.timeElapsed)}
-          </Text>
+          <Text style={styles.detailValue}>{formatTime(file.progress.timeElapsed)}</Text>
         </View>
 
         {file.chunks && file.chunks.length > 0 && (
@@ -380,20 +350,14 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       <View style={[styles.compactContainer, style]}>
         <View style={styles.compactHeader}>
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-            <Icon
-              name={getStatusIcon()}
-              size={16}
-              color={getStatusColor()}
-            />
+            <Icon name={getStatusIcon()} size={16} color={getStatusColor()} />
           </Animated.View>
           <Text style={styles.compactStatus}>{getStatusText()}</Text>
-          <Text style={styles.compactProgress}>
-            {Math.round(file.progress.percentage)}%
-          </Text>
+          <Text style={styles.compactProgress}>{Math.round(file.progress.percentage)}%</Text>
         </View>
-        
+
         {renderProgressBar()}
-        
+
         {renderActions()}
       </View>
     );
@@ -404,11 +368,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       <View style={styles.header}>
         <View style={styles.statusContainer}>
           <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-            <Icon
-              name={getStatusIcon()}
-              size={24}
-              color={getStatusColor()}
-            />
+            <Icon name={getStatusIcon()} size={24} color={getStatusColor()} />
           </Animated.View>
           <View style={styles.statusTextContainer}>
             <Text style={styles.fileName} numberOfLines={1}>
@@ -417,11 +377,9 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
             <Text style={styles.statusText}>{getStatusText()}</Text>
           </View>
         </View>
-        
+
         <View style={styles.progressInfo}>
-          <Text style={styles.progressPercentage}>
-            {Math.round(file.progress.percentage)}%
-          </Text>
+          <Text style={styles.progressPercentage}>{Math.round(file.progress.percentage)}%</Text>
           <Text style={styles.progressSize}>
             {formatBytes(file.progress.bytesUploaded)} / {formatBytes(file.progress.totalBytes)}
           </Text>

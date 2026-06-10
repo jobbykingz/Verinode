@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { Users, Activity, Clock, TrendingUp, Eye, MousePointer } from 'lucide-react';
 
 interface BehaviorData {
@@ -26,12 +38,14 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
 
 export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
   userId,
-  timeframe = '30d'
+  timeframe = '30d',
 }) => {
   const [behaviorData, setBehaviorData] = useState<BehaviorData[]>([]);
   const [featureUsage, setFeatureUsage] = useState<FeatureUsage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedView, setSelectedView] = useState<'segments' | 'features' | 'patterns'>('segments');
+  const [selectedView, setSelectedView] = useState<'segments' | 'features' | 'patterns'>(
+    'segments',
+  );
 
   useEffect(() => {
     fetchBehaviorData();
@@ -40,7 +54,9 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
   const fetchBehaviorData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/analytics/user-behavior?userId=${userId}&timeframe=${timeframe}`);
+      const response = await fetch(
+        `/api/analytics/user-behavior?userId=${userId}&timeframe=${timeframe}`,
+      );
       const result = await response.json();
       setBehaviorData(result.segments || []);
       setFeatureUsage(result.featureUsage || []);
@@ -63,16 +79,19 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
   }
 
   const totalUsers = behaviorData.reduce((sum, segment) => sum + segment.userCount, 0);
-  const avgSessionDuration = behaviorData.reduce((sum, segment) => sum + segment.sessionDuration, 0) / behaviorData.length;
+  const avgSessionDuration =
+    behaviorData.reduce((sum, segment) => sum + segment.sessionDuration, 0) / behaviorData.length;
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">User Behavior Insights</h2>
-          <p className="text-sm text-gray-600 mt-1">Understand how users interact with your platform</p>
+          <p className="text-sm text-gray-600 mt-1">
+            Understand how users interact with your platform
+          </p>
         </div>
-        
+
         <div className="flex gap-2">
           <button
             onClick={() => setSelectedView('segments')}
@@ -112,14 +131,12 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-blue-600 font-medium">Total Users</p>
-              <p className="text-2xl font-bold text-blue-900">
-                {totalUsers.toLocaleString()}
-              </p>
+              <p className="text-2xl font-bold text-blue-900">{totalUsers.toLocaleString()}</p>
             </div>
             <Users className="w-8 h-8 text-blue-500" />
           </div>
         </div>
-        
+
         <div className="bg-green-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -131,19 +148,17 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
             <Clock className="w-8 h-8 text-green-500" />
           </div>
         </div>
-        
+
         <div className="bg-purple-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-purple-600 font-medium">Active Features</p>
-              <p className="text-2xl font-bold text-purple-900">
-                {featureUsage.length}
-              </p>
+              <p className="text-2xl font-bold text-purple-900">{featureUsage.length}</p>
             </div>
             <Activity className="w-8 h-8 text-purple-500" />
           </div>
         </div>
-        
+
         <div className="bg-orange-50 rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -184,7 +199,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
                 </ResponsiveContainer>
               </div>
             </div>
-            
+
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Segment Details</h3>
               <div className="space-y-3">
@@ -192,7 +207,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
                   <div key={segment.segmentName} className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{segment.segmentName}</h4>
-                      <div 
+                      <div
                         className="w-4 h-4 rounded-full"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       ></div>
@@ -200,19 +215,27 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-600">Users:</span>
-                        <span className="ml-2 font-medium">{segment.userCount.toLocaleString()}</span>
+                        <span className="ml-2 font-medium">
+                          {segment.userCount.toLocaleString()}
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Login Freq:</span>
-                        <span className="ml-2 font-medium">{segment.loginFrequency.toFixed(1)}/week</span>
+                        <span className="ml-2 font-medium">
+                          {segment.loginFrequency.toFixed(1)}/week
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Session:</span>
-                        <span className="ml-2 font-medium">{Math.round(segment.sessionDuration / 60)}m</span>
+                        <span className="ml-2 font-medium">
+                          {Math.round(segment.sessionDuration / 60)}m
+                        </span>
                       </div>
                       <div>
                         <span className="text-gray-600">Features:</span>
-                        <span className="ml-2 font-medium">{Object.keys(segment.featureUsage).length}</span>
+                        <span className="ml-2 font-medium">
+                          {Object.keys(segment.featureUsage).length}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -231,18 +254,22 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={featureUsage}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="featureName" 
+                  <XAxis
+                    dataKey="featureName"
                     tick={{ fontSize: 12 }}
                     angle={-45}
                     textAnchor="end"
                     height={80}
                   />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: any, name: string) => [
                       typeof value === 'number' ? value.toLocaleString() : value,
-                      name === 'usageCount' ? 'Usage Count' : name === 'uniqueUsers' ? 'Unique Users' : 'Adoption Rate'
+                      name === 'usageCount'
+                        ? 'Usage Count'
+                        : name === 'uniqueUsers'
+                          ? 'Unique Users'
+                          : 'Adoption Rate',
                     ]}
                   />
                   <Legend />
@@ -252,7 +279,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
               </ResponsiveContainer>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {featureUsage.map((feature) => (
               <div key={feature.featureName} className="border border-gray-200 rounded-lg p-4">
@@ -276,7 +303,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
                 </div>
                 <div className="mt-3">
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-blue-600 h-2 rounded-full"
                       style={{ width: `${feature.adoptionRate}%` }}
                     ></div>
@@ -313,7 +340,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               <div className="border border-gray-200 rounded-lg p-4">
                 <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                   <MousePointer className="w-5 h-5 text-green-500" />
@@ -336,7 +363,7 @@ export const BehaviorInsights: React.FC<BehaviorInsightsProps> = ({
               </div>
             </div>
           </div>
-          
+
           <div className="border border-gray-200 rounded-lg p-4">
             <h4 className="font-medium text-gray-900 mb-3">Key Insights</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

@@ -12,7 +12,9 @@ jest.mock('recharts', () => ({
   CartesianGrid: () => <div data-testid="cartesian-grid"></div>,
   Tooltip: () => <div data-testid="tooltip"></div>,
   Legend: () => <div data-testid="legend"></div>,
-  ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
+  ResponsiveContainer: ({ children }: any) => (
+    <div data-testid="responsive-container">{children}</div>
+  ),
 }));
 
 // Mock fetch
@@ -25,47 +27,47 @@ describe('TrendAnalysis Component', () => {
 
   it('renders trend analysis component', () => {
     render(<TrendAnalysis />);
-    
+
     expect(screen.getByText('Usage Trends')).toBeInTheDocument();
     expect(screen.getByText('Track usage patterns and growth over time')).toBeInTheDocument();
   });
 
   it('displays loading state initially', () => {
     render(<TrendAnalysis />);
-    
+
     // Check for loading skeleton
     expect(screen.getByText('Usage Trends')).toBeInTheDocument();
   });
 
   it('renders timeframe selector', () => {
     render(<TrendAnalysis />);
-    
+
     const timeframeSelect = screen.getByDisplayValue('Last 30 Days');
     expect(timeframeSelect).toBeInTheDocument();
   });
 
   it('renders granularity selector', () => {
     render(<TrendAnalysis />);
-    
+
     const granularitySelect = screen.getByDisplayValue('Daily');
     expect(granularitySelect).toBeInTheDocument();
   });
 
   it('changes timeframe when selected', async () => {
     render(<TrendAnalysis />);
-    
+
     const timeframeSelect = screen.getByDisplayValue('Last 30 Days');
     fireEvent.change(timeframeSelect, { target: { value: '7d' } });
-    
+
     expect(timeframeSelect).toHaveValue('7d');
   });
 
   it('changes granularity when selected', async () => {
     render(<TrendAnalysis />);
-    
+
     const granularitySelect = screen.getByDisplayValue('Daily');
     fireEvent.change(granularitySelect, { target: { value: 'weekly' } });
-    
+
     expect(granularitySelect).toHaveValue('weekly');
   });
 
@@ -79,16 +81,16 @@ describe('TrendAnalysis Component', () => {
           value: 100,
           change: 10,
           changePercent: 10,
-          forecast: 105
-        }
-      ]
+          forecast: 105,
+        },
+      ],
     });
 
     render(<TrendAnalysis />);
-    
+
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
-        '/api/analytics/usage-trends?timeframe=30d&granularity=daily'
+        '/api/analytics/usage-trends?timeframe=30d&granularity=daily',
       );
     });
   });
@@ -103,13 +105,13 @@ describe('TrendAnalysis Component', () => {
           value: 100,
           change: 10,
           changePercent: 10,
-          forecast: 105
-        }
-      ]
+          forecast: 105,
+        },
+      ],
     });
 
     render(<TrendAnalysis />);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Key Insights')).toBeInTheDocument();
     });
@@ -120,7 +122,7 @@ describe('TrendAnalysis Component', () => {
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
     render(<TrendAnalysis />);
-    
+
     // Should not crash and should still render the component
     expect(screen.getByText('Usage Trends')).toBeInTheDocument();
   });

@@ -13,16 +13,16 @@ describe('Compliance Components', () => {
           resource: { name: 'Employment Proof', id: 'proof-456' },
           action: 'Issued cryptographic proof',
           status: 'SUCCESS',
-          compliance: { classification: 'CONFIDENTIAL', gdprRelevant: true }
-        }
+          compliance: { classification: 'CONFIDENTIAL', gdprRelevant: true },
+        },
       ];
 
       // Test event formatting
-      const formattedEvents = auditEvents.map(event => ({
+      const formattedEvents = auditEvents.map((event) => ({
         ...event,
         formattedTimestamp: new Date(event.timestamp).toLocaleString(),
         displayName: event.eventType.replace(/_/g, ' '),
-        severity: event.status === 'SUCCESS' ? 'low' : 'high'
+        severity: event.status === 'SUCCESS' ? 'low' : 'high',
       }));
 
       expect(formattedEvents[0].formattedTimestamp).toBeDefined();
@@ -34,13 +34,13 @@ describe('Compliance Components', () => {
       const events = [
         { timestamp: '2024-01-01T10:00:00Z', eventType: 'PROOF_ISSUED' },
         { timestamp: '2024-01-15T10:00:00Z', eventType: 'PROOF_VERIFIED' },
-        { timestamp: '2024-02-01T10:00:00Z', eventType: 'PROOF_SHARED' }
+        { timestamp: '2024-02-01T10:00:00Z', eventType: 'PROOF_SHARED' },
       ];
 
       const startDate = new Date('2024-01-10');
       const endDate = new Date('2024-01-20');
 
-      const filteredEvents = events.filter(event => {
+      const filteredEvents = events.filter((event) => {
         const eventDate = new Date(event.timestamp);
         return eventDate >= startDate && eventDate <= endDate;
       });
@@ -54,7 +54,7 @@ describe('Compliance Components', () => {
         { compliance: { classification: 'PUBLIC' } },
         { compliance: { classification: 'INTERNAL' } },
         { compliance: { classification: 'CONFIDENTIAL' } },
-        { compliance: { classification: 'RESTRICTED' } }
+        { compliance: { classification: 'RESTRICTED' } },
       ];
 
       const classificationCounts = events.reduce((acc, event) => {
@@ -76,7 +76,7 @@ describe('Compliance Components', () => {
         title: 'GDPR Compliance Report',
         period: { start: '2024-01-01', end: '2024-12-31' },
         regulations: ['gdpr', 'hipaa'],
-        scope: 'All proof operations and user access'
+        scope: 'All proof operations and user access',
       };
 
       const reportMetadata = {
@@ -84,7 +84,7 @@ describe('Compliance Components', () => {
         generatedAt: new Date().toISOString(),
         reportId: 'rep-' + Date.now(),
         status: 'draft',
-        version: '1.0'
+        version: '1.0',
       };
 
       expect(reportMetadata.title).toBe('GDPR Compliance Report');
@@ -97,31 +97,31 @@ describe('Compliance Components', () => {
       const validReport = {
         title: 'Test Report',
         period: { start: '2024-01-01', end: '2024-12-31' },
-        format: 'PDF'
+        format: 'PDF',
       };
 
       const invalidReport = {
         title: '', // Empty title
         period: { start: '2024-12-31', end: '2024-01-01' }, // Invalid date range
-        format: 'INVALID' // Invalid format
+        format: 'INVALID', // Invalid format
       };
 
       const validateReport = (report) => {
         const errors = [];
-        
+
         if (!report.title || report.title.length < 3) {
           errors.push('Title must be at least 3 characters');
         }
-        
+
         if (new Date(report.period.start) > new Date(report.period.end)) {
           errors.push('Start date must be before end date');
         }
-        
+
         const validFormats = ['PDF', 'HTML', 'JSON', 'CSV'];
         if (!validFormats.includes(report.format)) {
           errors.push('Invalid report format');
         }
-        
+
         return { valid: errors.length === 0, errors };
       };
 
@@ -137,19 +137,20 @@ describe('Compliance Components', () => {
         { status: 'SUCCESS', compliance: { classification: 'CONFIDENTIAL' } },
         { status: 'SUCCESS', compliance: { classification: 'INTERNAL' } },
         { status: 'FAILURE', compliance: { classification: 'RESTRICTED' } },
-        { status: 'SUCCESS', compliance: { classification: 'PUBLIC' } }
+        { status: 'SUCCESS', compliance: { classification: 'PUBLIC' } },
       ];
 
       const metrics = {
         totalEvents: auditEvents.length,
-        successfulEvents: auditEvents.filter(e => e.status === 'SUCCESS').length,
-        failedEvents: auditEvents.filter(e => e.status === 'FAILURE').length,
-        complianceScore: (auditEvents.filter(e => e.status === 'SUCCESS').length / auditEvents.length) * 100,
+        successfulEvents: auditEvents.filter((e) => e.status === 'SUCCESS').length,
+        failedEvents: auditEvents.filter((e) => e.status === 'FAILURE').length,
+        complianceScore:
+          (auditEvents.filter((e) => e.status === 'SUCCESS').length / auditEvents.length) * 100,
         classificationDistribution: auditEvents.reduce((acc, event) => {
           const level = event.compliance.classification;
           acc[level] = (acc[level] || 0) + 1;
           return acc;
-        }, {})
+        }, {}),
       };
 
       expect(metrics.totalEvents).toBe(4);
@@ -163,15 +164,21 @@ describe('Compliance Components', () => {
       const alerts = [
         { type: 'HIGH_ACCESS_FAILURE_RATE', severity: 'HIGH', count: 15 },
         { type: 'EXPIRED_CONSENT', severity: 'MEDIUM', count: 3 },
-        { type: 'KEY_COMPROMISED', severity: 'CRITICAL', count: 1 }
+        { type: 'KEY_COMPROMISED', severity: 'CRITICAL', count: 1 },
       ];
 
       const alertSummary = {
         totalAlerts: alerts.reduce((sum, alert) => sum + alert.count, 0),
-        criticalAlerts: alerts.filter(a => a.severity === 'CRITICAL').reduce((sum, a) => sum + a.count, 0),
-        highAlerts: alerts.filter(a => a.severity === 'HIGH').reduce((sum, a) => sum + a.count, 0),
-        mediumAlerts: alerts.filter(a => a.severity === 'MEDIUM').reduce((sum, a) => sum + a.count, 0),
-        alertTypes: alerts.map(alert => alert.type)
+        criticalAlerts: alerts
+          .filter((a) => a.severity === 'CRITICAL')
+          .reduce((sum, a) => sum + a.count, 0),
+        highAlerts: alerts
+          .filter((a) => a.severity === 'HIGH')
+          .reduce((sum, a) => sum + a.count, 0),
+        mediumAlerts: alerts
+          .filter((a) => a.severity === 'MEDIUM')
+          .reduce((sum, a) => sum + a.count, 0),
+        alertTypes: alerts.map((alert) => alert.type),
       };
 
       expect(alertSummary.totalAlerts).toBe(19);
@@ -190,22 +197,22 @@ describe('Compliance Components', () => {
           eventType: 'PROOF_ISSUED',
           actor: { name: 'John Doe' },
           resource: { name: 'Employment Proof' },
-          status: 'SUCCESS'
-        }
+          status: 'SUCCESS',
+        },
       ];
 
       const headers = ['Timestamp', 'Event Type', 'Actor', 'Resource', 'Status'];
-      const rows = events.map(event => [
+      const rows = events.map((event) => [
         event.timestamp,
         event.eventType,
         event.actor.name,
         event.resource.name,
-        event.status
+        event.status,
       ]);
 
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(field => `"${field}"`).join(','))
+        ...rows.map((row) => row.map((field) => `"${field}"`).join(',')),
       ].join('\n');
 
       expect(csvContent).toContain('Timestamp,Event Type,Actor,Resource,Status');
@@ -217,7 +224,7 @@ describe('Compliance Components', () => {
       const reportData = {
         title: 'Compliance Report',
         generatedAt: new Date().toISOString(),
-        metrics: { totalEvents: 100, complianceScore: 95 }
+        metrics: { totalEvents: 100, complianceScore: 95 },
       };
 
       const htmlTemplate = `

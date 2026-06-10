@@ -57,7 +57,8 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
       setProof(proofData);
 
       // Calculate access progress
-      const progress = (proofData.accessControl.accessCount / proofData.accessControl.maxAccessCount) * 100;
+      const progress =
+        (proofData.accessControl.accessCount / proofData.accessControl.maxAccessCount) * 100;
       setAccessProgress(progress);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load proof');
@@ -128,7 +129,8 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
   };
 
   const isOwner = proof && user?.address === proof.owner;
-  const hasAccess = proof && (isOwner || proof.accessControl.authorizedAddresses.includes(user?.address || ''));
+  const hasAccess =
+    proof && (isOwner || proof.accessControl.authorizedAddresses.includes(user?.address || ''));
   const canCompute = proof && proof.accessControl.permissions.includes('compute');
 
   if (isLoading) {
@@ -203,7 +205,9 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Access Count</span>
-              <span>{proof.accessControl.accessCount} / {proof.accessControl.maxAccessCount}</span>
+              <span>
+                {proof.accessControl.accessCount} / {proof.accessControl.maxAccessCount}
+              </span>
             </div>
             <Progress value={accessProgress} className="h-2" />
           </div>
@@ -220,7 +224,9 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
           <label className="text-sm font-medium text-gray-500">Permissions</label>
           <div className="flex flex-wrap gap-1 mt-1">
             {proof.accessControl.permissions.map((permission, index) => (
-              <Badge key={index} variant="outline">{permission}</Badge>
+              <Badge key={index} variant="outline">
+                {permission}
+              </Badge>
             ))}
           </div>
         </div>
@@ -263,12 +269,7 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
         {/* Actions */}
         <div className="flex flex-wrap gap-2">
           {hasAccess && !showDecrypted && (
-            <Button
-              onClick={handleDecrypt}
-              disabled={isDecrypting}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleDecrypt} disabled={isDecrypting} variant="outline" size="sm">
               {isDecrypting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 mr-2"></div>
@@ -284,11 +285,7 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
           )}
 
           {canCompute && (
-            <Button
-              onClick={handleVerify}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleVerify} variant="outline" size="sm">
               <Shield className="h-4 w-4 mr-2" />
               Verify
             </Button>
@@ -297,7 +294,9 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
           {isOwner && (
             <>
               <Button
-                onClick={() => {/* Open grant access modal */}}
+                onClick={() => {
+                  /* Open grant access modal */
+                }}
                 variant="outline"
                 size="sm"
               >
@@ -305,7 +304,9 @@ export const SecureProof: React.FC<SecureProofProps> = ({ proofId, onProofAction
                 Grant Access
               </Button>
               <Button
-                onClick={() => {/* Open revoke access modal */}}
+                onClick={() => {
+                  /* Open revoke access modal */
+                }}
                 variant="outline"
                 size="sm"
               >

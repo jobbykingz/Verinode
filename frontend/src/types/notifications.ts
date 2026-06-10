@@ -46,7 +46,7 @@ export enum NotificationType {
   ANALYTICS = 'analytics',
   MAINTENANCE = 'maintenance',
   FEATURE = 'feature',
-  ANNOUNCEMENT = 'announcement'
+  ANNOUNCEMENT = 'announcement',
 }
 
 export enum NotificationCategory {
@@ -61,7 +61,7 @@ export enum NotificationCategory {
   ANALYTICS = 'analytics',
   MAINTENANCE = 'maintenance',
   FEATURES = 'features',
-  ANNOUNCEMENTS = 'announcements'
+  ANNOUNCEMENTS = 'announcements',
 }
 
 export enum NotificationChannel {
@@ -71,7 +71,7 @@ export enum NotificationChannel {
   SMS = 'sms',
   WEBHOOK = 'webhook',
   SLACK = 'slack',
-  DISCORD = 'discord'
+  DISCORD = 'discord',
 }
 
 export enum NotificationPriority {
@@ -79,7 +79,7 @@ export enum NotificationPriority {
   MEDIUM = 'medium',
   HIGH = 'high',
   URGENT = 'urgent',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum NotificationStatus {
@@ -89,7 +89,7 @@ export enum NotificationStatus {
   READ = 'read',
   FAILED = 'failed',
   EXPIRED = 'expired',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'cancelled',
 }
 
 export interface NotificationPreferences {
@@ -165,7 +165,7 @@ export interface DoNotDisturbSettings {
   allowCritical: boolean;
   schedule?: {
     start: string; // HH:mm format
-    end: string;   // HH:mm format
+    end: string; // HH:mm format
     days: number[]; // 0-6 (Sunday-Saturday)
   };
 }
@@ -173,7 +173,7 @@ export interface DoNotDisturbSettings {
 export interface QuietHoursSettings {
   enabled: boolean;
   start: string; // HH:mm format
-  end: string;   // HH:mm format
+  end: string; // HH:mm format
   timezone: string;
   allowUrgent: boolean;
   allowCritical: boolean;
@@ -243,7 +243,7 @@ export enum AnalyticsEvent {
   FAILED = 'failed',
   RETRIED = 'retried',
   BOUNCED = 'bounced',
-  UNSUBSCRIBED = 'unsubscribed'
+  UNSUBSCRIBED = 'unsubscribed',
 }
 
 export interface NotificationTemplate {

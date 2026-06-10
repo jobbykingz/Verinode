@@ -23,16 +23,16 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
     isInstalled: false,
     isActivated: false,
     registration: null,
-    error: null
+    error: null,
   });
 
   // Check if service worker is supported
   useEffect(() => {
     const isSupported = 'serviceWorker' in navigator;
-    
-    setState(prev => ({
+
+    setState((prev) => ({
       ...prev,
-      isSupported
+      isSupported,
     }));
 
     if (isSupported) {
@@ -43,7 +43,7 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
   const registerServiceWorker = async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
       });
 
       console.log('Service Worker registered:', registration);
@@ -51,11 +51,11 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
       // Check if there's an active service worker
       const isActivated = !!registration.active;
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         registration,
         isInstalled: true,
-        isActivated
+        isActivated,
       }));
 
       // Listen for updates
@@ -76,12 +76,11 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
         console.log('Service worker controller changed');
         window.location.reload();
       });
-
     } catch (error) {
       console.error('Service Worker registration failed:', error);
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
-        error: error.message
+        error: error.message,
       }));
     }
   };
@@ -118,12 +117,12 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
     try {
       const unregistered = await state.registration.unregister();
       console.log('Service worker unregistered:', unregistered);
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         registration: null,
         isInstalled: false,
-        isActivated: false
+        isActivated: false,
       }));
 
       return unregistered;
@@ -147,34 +146,37 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
     }
   }, [state.registration]);
 
-  const subscribeToPush = useCallback(async (publicKey: string): Promise<PushSubscription | null> => {
-    if (!state.registration) {
-      throw new Error('Service worker not registered');
-    }
-
-    if (!('PushManager' in window)) {
-      throw new Error('Push notifications not supported');
-    }
-
-    try {
-      // Request notification permission first
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        throw new Error('Notification permission denied');
+  const subscribeToPush = useCallback(
+    async (publicKey: string): Promise<PushSubscription | null> => {
+      if (!state.registration) {
+        throw new Error('Service worker not registered');
       }
 
-      const subscription = await state.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
-      });
+      if (!('PushManager' in window)) {
+        throw new Error('Push notifications not supported');
+      }
 
-      console.log('Push subscription successful:', subscription);
-      return subscription;
-    } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
-      throw error;
-    }
-  }, [state.registration]);
+      try {
+        // Request notification permission first
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          throw new Error('Notification permission denied');
+        }
+
+        const subscription = await state.registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+
+        console.log('Push subscription successful:', subscription);
+        return subscription;
+      } catch (error) {
+        console.error('Failed to subscribe to push notifications:', error);
+        throw error;
+      }
+    },
+    [state.registration],
+  );
 
   const unsubscribeFromPush = useCallback(async (): Promise<boolean> => {
     if (!state.registration) {
@@ -202,16 +204,14 @@ const useServiceWorker = (): UseServiceWorkerReturn => {
     unregister,
     getNotifications,
     subscribeToPush,
-    unsubscribeFromPush
+    unsubscribeFromPush,
   };
 };
 
 // Helper function to convert base64 string to Uint8Array for VAPID keys
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);

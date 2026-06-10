@@ -1,6 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ScatterChart, Scatter } from 'recharts';
-import { BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, Activity, Settings, Download, RefreshCw, Maximize2, LayoutGrid } from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  ScatterChart,
+  Scatter,
+} from 'recharts';
+import {
+  BarChart3,
+  LineChart as LineChartIcon,
+  PieChart as PieChartIcon,
+  Activity,
+  Settings,
+  Download,
+  RefreshCw,
+  Maximize2,
+  LayoutGrid,
+} from 'lucide-react';
 
 interface DataPoint {
   name: string;
@@ -26,7 +54,16 @@ interface DataVisualizationProps {
   height?: number;
 }
 
-const DEFAULT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
+const DEFAULT_COLORS = [
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#06b6d4',
+  '#ec4899',
+  '#14b8a6',
+];
 
 const SAMPLE_DATA = [
   { name: 'Jan', value: 400, category: 'A' },
@@ -47,7 +84,7 @@ const PIE_SAMPLE_DATA = [
 export const DataVisualization: React.FC<DataVisualizationProps> = ({
   config,
   data = SAMPLE_DATA,
-  height = 400
+  height = 400,
 }) => {
   const [visualizationConfig, setVisualizationConfig] = useState<VisualizationConfig>(
     config || {
@@ -56,8 +93,8 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
       dataSource: 'analytics',
       colorScheme: DEFAULT_COLORS,
       interactive: true,
-      realTime: false
-    }
+      realTime: false,
+    },
   );
   const [chartData, setChartData] = useState(data);
   const [loading, setLoading] = useState(false);
@@ -82,9 +119,9 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
     setLoading(true);
     try {
       // Mock real-time data update
-      const newData = chartData.map(item => ({
+      const newData = chartData.map((item) => ({
         ...item,
-        value: item.value + Math.floor(Math.random() * 20) - 10
+        value: item.value + Math.floor(Math.random() * 20) - 10,
       }));
       setChartData(newData);
     } catch (error) {
@@ -126,10 +163,10 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke={colorScheme[0]} 
+              <Line
+                type="monotone"
+                dataKey="value"
+                stroke={colorScheme[0]}
                 strokeWidth={2}
                 dot={{ r: 4 }}
                 activeDot={{ r: 6 }}
@@ -167,7 +204,10 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
                 dataKey="value"
               >
                 {PIE_SAMPLE_DATA.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color || colorScheme[index % colorScheme.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color || colorScheme[index % colorScheme.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip />
@@ -184,10 +224,10 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
               <YAxis />
               <Tooltip />
               <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="value" 
-                stroke={colorScheme[0]} 
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={colorScheme[0]}
                 fill={colorScheme[0]}
                 fillOpacity={0.6}
               />
@@ -218,15 +258,19 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow ${isFullscreen ? 'fixed inset-0 z-50 m-0' : 'p-6'}`}>
+    <div
+      className={`bg-white rounded-lg shadow ${isFullscreen ? 'fixed inset-0 z-50 m-0' : 'p-6'}`}
+    >
       <div className="flex justify-between items-center mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">{visualizationConfig.title}</h3>
           <p className="text-sm text-gray-600">
-            {visualizationConfig.realTime ? 'Real-time data' : 'Last updated: ' + new Date().toLocaleTimeString()}
+            {visualizationConfig.realTime
+              ? 'Real-time data'
+              : 'Last updated: ' + new Date().toLocaleTimeString()}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {visualizationConfig.realTime && (
             <div className="flex items-center gap-1 text-green-600">
@@ -234,7 +278,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
               <span className="text-xs">Live</span>
             </div>
           )}
-          
+
           <button
             onClick={refreshData}
             disabled={loading}
@@ -243,7 +287,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
-          
+
           <button
             onClick={() => exportChart('png')}
             className="p-2 text-gray-500 hover:text-gray-700"
@@ -251,7 +295,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
           >
             <Download className="w-4 h-4" />
           </button>
-          
+
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="p-2 text-gray-500 hover:text-gray-700"
@@ -259,11 +303,8 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
           >
             <Maximize2 className="w-4 h-4" />
           </button>
-          
-          <button
-            className="p-2 text-gray-500 hover:text-gray-700"
-            title="Chart settings"
-          >
+
+          <button className="p-2 text-gray-500 hover:text-gray-700" title="Chart settings">
             <Settings className="w-4 h-4" />
           </button>
         </div>
@@ -275,7 +316,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         )}
-        
+
         {renderChart()}
       </div>
 
@@ -284,49 +325,47 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <button
-                onClick={() => setVisualizationConfig({...visualizationConfig, type: 'line'})}
+                onClick={() => setVisualizationConfig({ ...visualizationConfig, type: 'line' })}
                 className={`p-2 rounded ${visualizationConfig.type === 'line' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Line chart"
               >
                 <LineChartIcon className="w-4 h-4" />
               </button>
-              
+
               <button
-                onClick={() => setVisualizationConfig({...visualizationConfig, type: 'bar'})}
+                onClick={() => setVisualizationConfig({ ...visualizationConfig, type: 'bar' })}
                 className={`p-2 rounded ${visualizationConfig.type === 'bar' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Bar chart"
               >
                 <BarChart3 className="w-4 h-4" />
               </button>
-              
+
               <button
-                onClick={() => setVisualizationConfig({...visualizationConfig, type: 'pie'})}
+                onClick={() => setVisualizationConfig({ ...visualizationConfig, type: 'pie' })}
                 className={`p-2 rounded ${visualizationConfig.type === 'pie' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Pie chart"
               >
                 <PieChartIcon className="w-4 h-4" />
               </button>
-              
+
               <button
-                onClick={() => setVisualizationConfig({...visualizationConfig, type: 'area'})}
+                onClick={() => setVisualizationConfig({ ...visualizationConfig, type: 'area' })}
                 className={`p-2 rounded ${visualizationConfig.type === 'area' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Area chart"
               >
                 <Activity className="w-4 h-4" />
               </button>
-              
+
               <button
-                onClick={() => setVisualizationConfig({...visualizationConfig, type: 'scatter'})}
+                onClick={() => setVisualizationConfig({ ...visualizationConfig, type: 'scatter' })}
                 className={`p-2 rounded ${visualizationConfig.type === 'scatter' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Scatter plot"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
-            
-            <div className="text-sm text-gray-600">
-              {chartData.length} data points
-            </div>
+
+            <div className="text-sm text-gray-600">{chartData.length} data points</div>
           </div>
         </div>
       )}
@@ -343,7 +382,7 @@ export const AnalyticsDashboard: React.FC = () => {
       dataSource: 'users',
       colorScheme: DEFAULT_COLORS,
       interactive: true,
-      realTime: true
+      realTime: true,
     },
     {
       type: 'bar',
@@ -351,7 +390,7 @@ export const AnalyticsDashboard: React.FC = () => {
       dataSource: 'features',
       colorScheme: DEFAULT_COLORS,
       interactive: true,
-      realTime: false
+      realTime: false,
     },
     {
       type: 'pie',
@@ -359,7 +398,7 @@ export const AnalyticsDashboard: React.FC = () => {
       dataSource: 'devices',
       colorScheme: DEFAULT_COLORS,
       interactive: true,
-      realTime: false
+      realTime: false,
     },
     {
       type: 'area',
@@ -367,8 +406,8 @@ export const AnalyticsDashboard: React.FC = () => {
       dataSource: 'revenue',
       colorScheme: DEFAULT_COLORS,
       interactive: true,
-      realTime: false
-    }
+      realTime: false,
+    },
   ]);
 
   return (
@@ -382,11 +421,7 @@ export const AnalyticsDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {visualizations.map((viz, index) => (
-          <DataVisualization
-            key={index}
-            config={viz}
-            height={300}
-          />
+          <DataVisualization key={index} config={viz} height={300} />
         ))}
       </div>
     </div>

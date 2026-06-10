@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  BarChart, 
+import {
+  BarChart,
   AlertTriangle,
   CheckCircle,
   Clock,
   Users,
   Shield,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -61,9 +61,7 @@ const ComplianceDashboard: React.FC = () => {
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className={`text-2xl font-bold ${color}`}>{value}</p>
         </div>
-        <div className="p-3 rounded-full bg-gray-100">
-          {icon}
-        </div>
+        <div className="p-3 rounded-full bg-gray-100">{icon}</div>
       </div>
       {trend && (
         <div className="mt-2 flex items-center">
@@ -134,21 +132,21 @@ const ComplianceDashboard: React.FC = () => {
           trend={metrics?.additionalMetrics?.trendingUp ? 'up' : 'down'}
           color="text-blue-600"
         />
-        
+
         <MetricCard
           title="Security Events"
           value={metrics?.securityEvents || 0}
           icon={<Shield className="h-6 w-6 text-red-600" />}
           color="text-red-600"
         />
-        
+
         <MetricCard
           title="Compliance Events"
           value={metrics?.complianceEvents || 0}
           icon={<CheckCircle className="h-6 w-6 text-green-600" />}
           color="text-green-600"
         />
-        
+
         <MetricCard
           title="Compliance Rate"
           value={`${metrics?.complianceRate || 0}%`}
@@ -165,15 +163,21 @@ const ComplianceDashboard: React.FC = () => {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Weekly Activity</span>
-              <span className="font-medium">{metrics?.additionalMetrics?.weeklyActivity?.totalEvents || 0} events</span>
+              <span className="font-medium">
+                {metrics?.additionalMetrics?.weeklyActivity?.totalEvents || 0} events
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Monthly Activity</span>
-              <span className="font-medium">{metrics?.additionalMetrics?.monthlyActivity?.totalEvents || 0} events</span>
+              <span className="font-medium">
+                {metrics?.additionalMetrics?.monthlyActivity?.totalEvents || 0} events
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Security Incidents</span>
-              <span className="font-medium text-red-600">{metrics?.additionalMetrics?.weeklyActivity?.securityEvents || 0}</span>
+              <span className="font-medium text-red-600">
+                {metrics?.additionalMetrics?.weeklyActivity?.securityEvents || 0}
+              </span>
             </div>
           </div>
         </div>
@@ -188,10 +192,13 @@ const ComplianceDashboard: React.FC = () => {
                 <span className="text-sm text-gray-600">Compliant</span>
               </div>
               <span className="text-sm font-medium text-green-600">
-                {Math.round((100 - (metrics?.complianceRate || 0)) * (metrics?.totalEvents || 1) / 100)} items
+                {Math.round(
+                  ((100 - (metrics?.complianceRate || 0)) * (metrics?.totalEvents || 1)) / 100,
+                )}{' '}
+                items
               </span>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
@@ -201,22 +208,30 @@ const ComplianceDashboard: React.FC = () => {
                 {metrics?.openFindings || 0} items
               </span>
             </div>
-            
+
             <div className="pt-4 border-t border-gray-200">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-700">Overall Compliance</span>
-                <span className={`text-sm font-bold ${
-                  (metrics?.complianceRate || 0) >= 90 ? 'text-green-600' : 
-                  (metrics?.complianceRate || 0) >= 70 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
+                <span
+                  className={`text-sm font-bold ${
+                    (metrics?.complianceRate || 0) >= 90
+                      ? 'text-green-600'
+                      : (metrics?.complianceRate || 0) >= 70
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                  }`}
+                >
                   {metrics?.complianceRate || 0}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className={`h-2 rounded-full ${
-                    (metrics?.complianceRate || 0) >= 90 ? 'bg-green-500' : 
-                    (metrics?.complianceRate || 0) >= 70 ? 'bg-yellow-500' : 'bg-red-500'
+                    (metrics?.complianceRate || 0) >= 90
+                      ? 'bg-green-500'
+                      : (metrics?.complianceRate || 0) >= 70
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                   }`}
                   style={{ width: `${metrics?.complianceRate || 0}%` }}
                 ></div>
@@ -240,9 +255,11 @@ const ComplianceDashboard: React.FC = () => {
                 <p className="text-xs text-gray-500">2 hours ago</p>
               </div>
             </div>
-            <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Completed</span>
+            <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+              Completed
+            </span>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-full mr-3">
@@ -253,9 +270,11 @@ const ComplianceDashboard: React.FC = () => {
                 <p className="text-xs text-gray-500">1 day ago</p>
               </div>
             </div>
-            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">Pending</span>
+            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
+              Pending
+            </span>
           </div>
-          
+
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-full mr-3">
@@ -266,7 +285,9 @@ const ComplianceDashboard: React.FC = () => {
                 <p className="text-xs text-gray-500">3 days ago</p>
               </div>
             </div>
-            <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Updated</span>
+            <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+              Updated
+            </span>
           </div>
         </div>
       </div>
@@ -279,12 +300,12 @@ const ComplianceDashboard: React.FC = () => {
             <BarChart className="h-5 w-5 text-blue-600 mr-2" />
             <span className="text-sm font-medium text-gray-700">Generate Report</span>
           </button>
-          
+
           <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <Shield className="h-5 w-5 text-green-600 mr-2" />
             <span className="text-sm font-medium text-gray-700">Run Compliance Check</span>
           </button>
-          
+
           <button className="flex items-center justify-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <Users className="h-5 w-5 text-purple-600 mr-2" />
             <span className="text-sm font-medium text-gray-700">View Audit Trail</span>

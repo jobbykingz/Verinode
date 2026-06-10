@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FileText, 
-  Download, 
-  Calendar, 
+import {
+  FileText,
+  Download,
+  Calendar,
   CheckCircle,
   AlertTriangle,
   Clock,
   BarChart3,
-  Filter
+  Filter,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -39,7 +39,7 @@ const ComplianceReports: React.FC = () => {
     startDate: '',
     endDate: '',
     standards: ['GDPR'],
-    format: 'PDF'
+    format: 'PDF',
   });
 
   useEffect(() => {
@@ -62,13 +62,17 @@ const ComplianceReports: React.FC = () => {
 
   const generateReport = async () => {
     try {
-      const response = await axios.post('/api/compliance/reports/generate', {
-        ...generateForm,
-        userId: 'current-user-id', // Would come from auth context
-        userName: 'Current User'   // Would come from auth context
-      }, {
-        responseType: 'blob'
-      });
+      const response = await axios.post(
+        '/api/compliance/reports/generate',
+        {
+          ...generateForm,
+          userId: 'current-user-id', // Would come from auth context
+          userName: 'Current User', // Would come from auth context
+        },
+        {
+          responseType: 'blob',
+        },
+      );
 
       // Handle PDF download
       if (generateForm.format === 'PDF') {
@@ -90,10 +94,14 @@ const ComplianceReports: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'COMPLIANT': return 'bg-green-100 text-green-800';
-      case 'PARTIALLY_COMPLIANT': return 'bg-yellow-100 text-yellow-800';
-      case 'NON_COMPLIANT': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'COMPLIANT':
+        return 'bg-green-100 text-green-800';
+      case 'PARTIALLY_COMPLIANT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'NON_COMPLIANT':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -137,13 +145,13 @@ const ComplianceReports: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
             <h3 className="text-xl font-bold mb-4">Generate Compliance Report</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
                 <select
                   value={generateForm.reportType}
-                  onChange={(e) => setGenerateForm({...generateForm, reportType: e.target.value})}
+                  onChange={(e) => setGenerateForm({ ...generateForm, reportType: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="GDPR_COMPLIANCE">GDPR Compliance</option>
@@ -159,7 +167,7 @@ const ComplianceReports: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
                 <select
                   value={generateForm.format}
-                  onChange={(e) => setGenerateForm({...generateForm, format: e.target.value})}
+                  onChange={(e) => setGenerateForm({ ...generateForm, format: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="PDF">PDF</option>
@@ -174,7 +182,7 @@ const ComplianceReports: React.FC = () => {
                 <input
                   type="date"
                   value={generateForm.startDate}
-                  onChange={(e) => setGenerateForm({...generateForm, startDate: e.target.value})}
+                  onChange={(e) => setGenerateForm({ ...generateForm, startDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -184,7 +192,7 @@ const ComplianceReports: React.FC = () => {
                 <input
                   type="date"
                   value={generateForm.endDate}
-                  onChange={(e) => setGenerateForm({...generateForm, endDate: e.target.value})}
+                  onChange={(e) => setGenerateForm({ ...generateForm, endDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -201,8 +209,8 @@ const ComplianceReports: React.FC = () => {
                       onChange={(e) => {
                         const newStandards = e.target.checked
                           ? [...generateForm.standards, standard]
-                          : generateForm.standards.filter(s => s !== standard);
-                        setGenerateForm({...generateForm, standards: newStandards});
+                          : generateForm.standards.filter((s) => s !== standard);
+                        setGenerateForm({ ...generateForm, standards: newStandards });
                       }}
                       className="mr-2 rounded"
                     />
@@ -234,22 +242,31 @@ const ComplianceReports: React.FC = () => {
       <div className="space-y-4">
         {reports.length > 0 ? (
           reports.map((report) => (
-            <div key={report.reportId} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div
+              key={report.reportId}
+              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
               <div className="flex justify-between items-start">
                 <div className="flex items-start gap-3">
                   <div className="text-2xl">{getReportIcon(report.reportType)}</div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{report.reportType.replace(/_/g, ' ')}</h3>
+                    <h3 className="text-lg font-medium text-gray-900">
+                      {report.reportType.replace(/_/g, ' ')}
+                    </h3>
                     <p className="text-sm text-gray-500">
-                      Period: {new Date(report.period.startDate).toLocaleDateString()} - {new Date(report.period.endDate).toLocaleDateString()}
+                      Period: {new Date(report.period.startDate).toLocaleDateString()} -{' '}
+                      {new Date(report.period.endDate).toLocaleDateString()}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Generated by {report.generatedBy.userName} on {new Date(report.generatedBy.timestamp).toLocaleDateString()}
+                      Generated by {report.generatedBy.userName} on{' '}
+                      {new Date(report.generatedBy.timestamp).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status.overall)}`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(report.status.overall)}`}
+                  >
                     {report.status.overall.replace(/_/g, ' ')}
                   </span>
                   <button className="text-blue-600 hover:text-blue-800">
@@ -264,18 +281,24 @@ const ComplianceReports: React.FC = () => {
                   <div className="space-y-1">
                     {report.status.findings.slice(0, 3).map((finding, index) => (
                       <div key={index} className="text-sm text-gray-600">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-2 ${
-                          finding.severity === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                          finding.severity === 'HIGH' ? 'bg-orange-100 text-orange-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-2 ${
+                            finding.severity === 'CRITICAL'
+                              ? 'bg-red-100 text-red-800'
+                              : finding.severity === 'HIGH'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
                           {finding.severity}
                         </span>
                         {finding.description}
                       </div>
                     ))}
                     {report.status.findings.length > 3 && (
-                      <p className="text-sm text-blue-600">+{report.status.findings.length - 3} more findings</p>
+                      <p className="text-sm text-blue-600">
+                        +{report.status.findings.length - 3} more findings
+                      </p>
                     )}
                   </div>
                 </div>
@@ -286,7 +309,9 @@ const ComplianceReports: React.FC = () => {
           <div className="text-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No compliance reports</h3>
-            <p className="text-gray-500 mb-4">Generate your first compliance report to get started.</p>
+            <p className="text-gray-500 mb-4">
+              Generate your first compliance report to get started.
+            </p>
             <button
               onClick={() => setShowGenerateForm(true)}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"

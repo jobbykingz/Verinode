@@ -73,10 +73,10 @@ export class CacheStrategy {
   // Stale While Revalidate Strategy - serves from cache, updates in background
   async staleWhileRevalidate(request: Request): Promise<Response> {
     const cachedResponse = await this.getCachedResponse(request);
-    
+
     // Always try to update in background
     const updatePromise = this.updateCache(request);
-    
+
     if (cachedResponse && !this.isExpired(cachedResponse)) {
       return cachedResponse.response;
     }
@@ -115,7 +115,7 @@ export class CacheStrategy {
     try {
       const cache = await caches.open(this.cacheName);
       const response = await cache.match(request);
-      
+
       if (response) {
         const timestamp = parseInt(response.headers.get('x-cache-timestamp') || '0');
         return { response, timestamp };
@@ -130,15 +130,15 @@ export class CacheStrategy {
   private async cacheResponse(request: Request, response: Response): Promise<void> {
     try {
       const cache = await caches.open(this.cacheName);
-      
+
       // Add timestamp header for expiration tracking
       const responseToCache = new Response(response.body, {
         status: response.status,
         statusText: response.statusText,
         headers: {
           ...response.headers,
-          'x-cache-timestamp': Date.now().toString()
-        }
+          'x-cache-timestamp': Date.now().toString(),
+        },
       });
 
       await cache.put(request, responseToCache);
@@ -165,7 +165,7 @@ export class CacheStrategy {
 
     try {
       const response = await fetch(request, {
-        signal: controller.signal
+        signal: controller.signal,
       });
       clearTimeout(timeoutId);
       return response;
@@ -183,7 +183,7 @@ export class CacheStrategy {
     try {
       const cache = await caches.open(this.cacheName);
       const requests = await cache.keys();
-      
+
       // Remove expired entries
       for (const request of requests) {
         const response = await cache.match(request);
@@ -246,7 +246,7 @@ export const cacheStrategies = {
   staticAssets: new CacheStrategy({
     cacheName: 'verinode-static-v1',
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    maxEntries: 50
+    maxEntries: 50,
   }),
 
   // API responses - Network First with short cache
@@ -254,44 +254,46 @@ export const cacheStrategies = {
     cacheName: 'verinode-api-v1',
     maxAge: 5 * 60 * 1000, // 5 minutes
     maxEntries: 100,
-    networkTimeout: 5000
+    networkTimeout: 5000,
   }),
 
   // Proof data - Stale While Revalidate
   proofData: new CacheStrategy({
     cacheName: 'verinode-proofs-v1',
     maxAge: 30 * 60 * 1000, // 30 minutes
-    maxEntries: 200
+    maxEntries: 200,
   }),
 
   // User data - Network First
   userData: new CacheStrategy({
     cacheName: 'verinode-user-v1',
     maxAge: 15 * 60 * 1000, // 15 minutes
-    maxEntries: 50
+    maxEntries: 50,
   }),
 
   // Images - Cache First with long expiration
   images: new CacheStrategy({
     cacheName: 'verinode-images-v1',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    maxEntries: 100
-  })
+    maxEntries: 100,
+  }),
 };
 
 // Helper function to determine cache strategy based on request
 export function getCacheStrategy(request: Request): CacheStrategy {
   const url = new URL(request.url);
-  
+
   // Static assets
-  if (url.pathname.includes('/static/') || 
-      url.pathname.endsWith('.css') ||
-      url.pathname.endsWith('.js') ||
-      url.pathname.endsWith('.png') ||
-      url.pathname.endsWith('.jpg') ||
-      url.pathname.endsWith('.svg') ||
-      url.pathname.endsWith('.woff') ||
-      url.pathname.endsWith('.woff2')) {
+  if (
+    url.pathname.includes('/static/') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.woff') ||
+    url.pathname.endsWith('.woff2')
+  ) {
     return cacheStrategies.staticAssets;
   }
 
@@ -307,8 +309,7 @@ export function getCacheStrategy(request: Request): CacheStrategy {
   }
 
   // Images
-  if (url.pathname.includes('/images/') || 
-      url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+  if (url.pathname.includes('/images/') || url.pathname.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
     return cacheStrategies.images;
   }
 
@@ -320,7 +321,7 @@ export function getCacheStrategy(request: Request): CacheStrategy {
 export async function clearAllCaches(): Promise<void> {
   try {
     const cacheNames = await caches.keys();
-    await Promise.all(cacheNames.map(name => caches.delete(name)));
+    await Promise.all(cacheNames.map((name) => caches.delete(name)));
   } catch (error) {
     console.error('Failed to clear all caches:', error);
   }
@@ -331,7 +332,7 @@ export async function getCacheUsage(): Promise<{ size: number; entries: number }
   try {
     const cacheNames = await caches.keys();
     let totalEntries = 0;
-    
+
     for (const name of cacheNames) {
       const cache = await caches.open(name);
       const requests = await cache.keys();

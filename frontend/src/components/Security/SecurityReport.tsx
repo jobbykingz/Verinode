@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,13 +18,13 @@ import {
   TrendingDown,
   Minus,
 } from 'lucide-react';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -115,11 +109,7 @@ interface SecurityReportData {
   };
 }
 
-const SecurityReport: React.FC<SecurityReportProps> = ({
-  scanId,
-  contractAddress,
-  onRefresh,
-}) => {
+const SecurityReport: React.FC<SecurityReportProps> = ({ scanId, contractAddress, onRefresh }) => {
   const [reportData, setReportData] = useState<SecurityReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -175,44 +165,72 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
 
   const getRiskLevelColor = (level: string): string => {
     switch (level) {
-      case 'Low': return 'text-green-600';
-      case 'Medium': return 'text-yellow-600';
-      case 'High': return 'text-orange-600';
-      case 'Critical': return 'text-red-600';
-      default: return 'text-gray-600';
+      case 'Low':
+        return 'text-green-600';
+      case 'Medium':
+        return 'text-yellow-600';
+      case 'High':
+        return 'text-orange-600';
+      case 'Critical':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
     }
   };
 
   const getPriorityColor = (priority: string): string => {
     switch (priority) {
-      case 'Critical': return 'bg-red-100 text-red-800 border-red-200';
-      case 'High': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Low': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Critical':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'High':
+        return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'Medium':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Low':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
-  const vulnerabilityChartData = reportData ? [
-    { name: 'Critical', value: reportData.vulnerabilitySummary.critical, color: '#dc2626' },
-    { name: 'High', value: reportData.vulnerabilitySummary.high, color: '#ea580c' },
-    { name: 'Medium', value: reportData.vulnerabilitySummary.medium, color: '#ca8a04' },
-    { name: 'Low', value: reportData.vulnerabilitySummary.low, color: '#2563eb' },
-    { name: 'Info', value: reportData.vulnerabilitySummary.info, color: '#6b7280' },
-  ] : [];
+  const vulnerabilityChartData = reportData
+    ? [
+        { name: 'Critical', value: reportData.vulnerabilitySummary.critical, color: '#dc2626' },
+        { name: 'High', value: reportData.vulnerabilitySummary.high, color: '#ea580c' },
+        { name: 'Medium', value: reportData.vulnerabilitySummary.medium, color: '#ca8a04' },
+        { name: 'Low', value: reportData.vulnerabilitySummary.low, color: '#2563eb' },
+        { name: 'Info', value: reportData.vulnerabilitySummary.info, color: '#6b7280' },
+      ]
+    : [];
 
-  const patternChartData = reportData ? [
-    { name: 'Anti-Patterns', value: reportData.patternSummary.antiPatterns, color: '#dc2626' },
-    { name: 'Best Practice', value: reportData.patternSummary.bestPracticeViolations, color: '#ea580c' },
-    { name: 'Gas Issues', value: reportData.patternSummary.gasInefficiencies, color: '#ca8a04' },
-    { name: 'Security Risks', value: reportData.patternSummary.securityRisks, color: '#2563eb' },
-  ] : [];
+  const patternChartData = reportData
+    ? [
+        { name: 'Anti-Patterns', value: reportData.patternSummary.antiPatterns, color: '#dc2626' },
+        {
+          name: 'Best Practice',
+          value: reportData.patternSummary.bestPracticeViolations,
+          color: '#ea580c',
+        },
+        {
+          name: 'Gas Issues',
+          value: reportData.patternSummary.gasInefficiencies,
+          color: '#ca8a04',
+        },
+        {
+          name: 'Security Risks',
+          value: reportData.patternSummary.securityRisks,
+          color: '#2563eb',
+        },
+      ]
+    : [];
 
-  const riskScoreData = reportData ? [
-    { name: 'Security', score: reportData.riskAssessment.securityRiskScore },
-    { name: 'Gas', score: reportData.riskAssessment.gasRiskScore },
-    { name: 'Operational', score: reportData.riskAssessment.operationalRiskScore },
-  ] : [];
+  const riskScoreData = reportData
+    ? [
+        { name: 'Security', score: reportData.riskAssessment.securityRiskScore },
+        { name: 'Gas', score: reportData.riskAssessment.gasRiskScore },
+        { name: 'Operational', score: reportData.riskAssessment.operationalRiskScore },
+      ]
+    : [];
 
   if (loading) {
     return (
@@ -303,7 +321,9 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
             <CardTitle className="text-sm font-medium">Risk Level</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getRiskLevelColor(reportData.riskAssessment.overallRiskLevel)}`}>
+            <div
+              className={`text-2xl font-bold ${getRiskLevelColor(reportData.riskAssessment.overallRiskLevel)}`}
+            >
               {reportData.riskAssessment.overallRiskLevel}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -364,7 +384,7 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
+                      label={({ name, value }) => (value > 0 ? `${name}: ${value}` : '')}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -395,7 +415,7 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value }) => value > 0 ? `${name}: ${value}` : ''}
+                      label={({ name, value }) => (value > 0 ? `${name}: ${value}` : '')}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -448,7 +468,11 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Total Vulnerabilities</span>
-                  <Badge variant={reportData.vulnerabilitySummary.total > 0 ? 'destructive' : 'secondary'}>
+                  <Badge
+                    variant={
+                      reportData.vulnerabilitySummary.total > 0 ? 'destructive' : 'secondary'
+                    }
+                  >
                     {reportData.vulnerabilitySummary.total}
                   </Badge>
                 </div>
@@ -478,7 +502,9 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                   <AlertTriangle className="h-5 w-5 mr-2" />
                   Vulnerabilities ({reportData.detailedFindings.vulnerabilities.length})
                 </span>
-                <Badge variant={reportData.vulnerabilitySummary.total > 0 ? 'destructive' : 'secondary'}>
+                <Badge
+                  variant={reportData.vulnerabilitySummary.total > 0 ? 'destructive' : 'secondary'}
+                >
                   {reportData.vulnerabilitySummary.total} Found
                 </Badge>
               </CardTitle>
@@ -499,14 +525,10 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                           Severity: {vulnerability.severity}/10
                         </Badge>
                         {vulnerability.lineNumber && (
-                          <Badge variant="outline">
-                            Line: {vulnerability.lineNumber}
-                          </Badge>
+                          <Badge variant="outline">Line: {vulnerability.lineNumber}</Badge>
                         )}
                         {vulnerability.cweId && (
-                          <Badge variant="outline">
-                            {vulnerability.cweId}
-                          </Badge>
+                          <Badge variant="outline">{vulnerability.cweId}</Badge>
                         )}
                       </div>
                     </div>
@@ -548,17 +570,13 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <h3 className="font-semibold">{pattern.name}</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {pattern.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">{pattern.description}</p>
                       </div>
                       <div className="flex flex-col items-end space-y-2 ml-4">
                         <Badge variant={getSeverityColor(pattern.severity)}>
                           Severity: {pattern.severity}/10
                         </Badge>
-                        <Badge variant="outline">
-                          {pattern.patternType}
-                        </Badge>
+                        <Badge variant="outline">{pattern.patternType}</Badge>
                       </div>
                     </div>
                     <div className="mt-3 p-3 bg-muted rounded-md">
@@ -597,19 +615,31 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">High Cost Operations</span>
-                  <Badge variant={reportData.gasAnalysis.highCostOperations > 0 ? 'destructive' : 'secondary'}>
+                  <Badge
+                    variant={
+                      reportData.gasAnalysis.highCostOperations > 0 ? 'destructive' : 'secondary'
+                    }
+                  >
                     {reportData.gasAnalysis.highCostOperations}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Unoptimized Loops</span>
-                  <Badge variant={reportData.gasAnalysis.unoptimizedLoops > 0 ? 'destructive' : 'secondary'}>
+                  <Badge
+                    variant={
+                      reportData.gasAnalysis.unoptimizedLoops > 0 ? 'destructive' : 'secondary'
+                    }
+                  >
                     {reportData.gasAnalysis.unoptimizedLoops}
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Storage Operations</span>
-                  <Badge variant={reportData.gasAnalysis.storageOperations > 50 ? 'destructive' : 'secondary'}>
+                  <Badge
+                    variant={
+                      reportData.gasAnalysis.storageOperations > 50 ? 'destructive' : 'secondary'
+                    }
+                  >
                     {reportData.gasAnalysis.storageOperations}
                   </Badge>
                 </div>
@@ -668,9 +698,7 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                         <Badge className={getPriorityColor(recommendation.priority)}>
                           {recommendation.priority}
                         </Badge>
-                        <Badge variant="outline">
-                          {recommendation.category}
-                        </Badge>
+                        <Badge variant="outline">{recommendation.category}</Badge>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4 mt-3 text-sm text-muted-foreground">
@@ -700,7 +728,11 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                     <Shield className="h-5 w-5 mr-2" />
                     Overall Compliance
                   </span>
-                  <Badge variant={reportData.complianceStatus.overallCompliant ? 'secondary' : 'destructive'}>
+                  <Badge
+                    variant={
+                      reportData.complianceStatus.overallCompliant ? 'secondary' : 'destructive'
+                    }
+                  >
                     {reportData.complianceStatus.overallCompliant ? 'Compliant' : 'Non-Compliant'}
                   </Badge>
                 </CardTitle>
@@ -710,7 +742,9 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
                   <div>
                     <div className="flex justify-between mb-2">
                       <span className="text-sm font-medium">Compliance Score</span>
-                      <span className="text-sm font-bold">{reportData.complianceStatus.complianceScore}%</span>
+                      <span className="text-sm font-bold">
+                        {reportData.complianceStatus.complianceScore}%
+                      </span>
                     </div>
                     <Progress value={reportData.complianceStatus.complianceScore} />
                   </div>
@@ -724,16 +758,18 @@ const SecurityReport: React.FC<SecurityReportProps> = ({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(reportData.complianceStatus.frameworkCompliance).map(([framework, compliant]) => (
-                    <div key={framework} className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{framework}</span>
-                      {compliant ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-red-600" />
-                      )}
-                    </div>
-                  ))}
+                  {Object.entries(reportData.complianceStatus.frameworkCompliance).map(
+                    ([framework, compliant]) => (
+                      <div key={framework} className="flex items-center justify-between">
+                        <span className="text-sm font-medium">{framework}</span>
+                        {compliant ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        )}
+                      </div>
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>

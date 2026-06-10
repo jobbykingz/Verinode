@@ -41,24 +41,34 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
   template,
   onTemplateChange,
   selectedField,
-  onFieldSelect
+  onFieldSelect,
 }) => {
   const getFieldById = (fieldId: string) => {
-    return template.fields.find(field => field.id === fieldId);
+    return template.fields.find((field) => field.id === fieldId);
   };
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case 'text': return 'T';
-      case 'number': return '123';
-      case 'date': return '📅';
-      case 'boolean': return '☑';
-      case 'email': return '✉';
-      case 'url': return '🔗';
-      case 'phone': return '📞';
-      case 'select': return '⌄';
-      case 'file': return '📁';
-      default: return '📝';
+      case 'text':
+        return 'T';
+      case 'number':
+        return '123';
+      case 'date':
+        return '📅';
+      case 'boolean':
+        return '☑';
+      case 'email':
+        return '✉';
+      case 'url':
+        return '🔗';
+      case 'phone':
+        return '📞';
+      case 'select':
+        return '⌄';
+      case 'file':
+        return '📁';
+      default:
+        return '📝';
     }
   };
 
@@ -72,15 +82,13 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Template Layout</h2>
-        
+
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-gray-900">Available Fields</h3>
-            <div className="text-sm text-gray-500">
-              {template.fields.length} fields
-            </div>
+            <div className="text-sm text-gray-500">{template.fields.length} fields</div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {template.fields.map((field) => (
               <div
@@ -101,9 +109,7 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                     {getFieldIcon(field.type)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 truncate">
-                      {field.label}
-                    </div>
+                    <div className="font-medium text-gray-900 truncate">{field.label}</div>
                     <div className="text-xs text-gray-500 truncate">
                       {field.name} • {field.type}
                     </div>
@@ -116,7 +122,7 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                 </div>
               </div>
             ))}
-            
+
             {template.fields.length === 0 && (
               <div className="col-span-full text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
                 <p>No fields defined yet</p>
@@ -129,11 +135,9 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
         <div>
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-medium text-gray-900">Layout Sections</h3>
-            <button className="text-sm text-blue-600 hover:text-blue-800">
-              Add Section
-            </button>
+            <button className="text-sm text-blue-600 hover:text-blue-800">Add Section</button>
           </div>
-          
+
           <div className="space-y-4">
             {template.layout.sections
               .sort((a, b) => a.order - b.order)
@@ -157,9 +161,7 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                           {section.title || 'Untitled Section'}
                         </h4>
                         {section.description && (
-                          <p className="text-sm text-gray-500 mt-1">
-                            {section.description}
-                          </p>
+                          <p className="text-sm text-gray-500 mt-1">{section.description}</p>
                         )}
                       </div>
                       <div className="flex items-center space-x-2">
@@ -167,21 +169,31 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                           {section.fields.length} fields
                         </span>
                         <button className="text-gray-400 hover:text-gray-600">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                            />
                           </svg>
                         </button>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="p-4">
                     {section.fields.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {section.fields.map((sectionField, index) => {
                           const field = getFieldById(sectionField.fieldId);
                           if (!field) return null;
-                          
+
                           return (
                             <div
                               key={sectionField.fieldId}
@@ -201,33 +213,31 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                                     <div className="font-medium text-gray-900 text-sm">
                                       {field.label}
                                     </div>
-                                    <div className="text-xs text-gray-500">
-                                      {field.name}
-                                    </div>
+                                    <div className="text-xs text-gray-500">{field.name}</div>
                                   </div>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <select
                                     value={sectionField.width}
                                     onChange={(e) => {
-                                      const newSections = template.layout.sections.map(s => 
+                                      const newSections = template.layout.sections.map((s) =>
                                         s.id === section.id
                                           ? {
                                               ...s,
-                                              fields: s.fields.map(f => 
+                                              fields: s.fields.map((f) =>
                                                 f.fieldId === sectionField.fieldId
                                                   ? { ...f, width: e.target.value }
-                                                  : f
-                                              )
+                                                  : f,
+                                              ),
                                             }
-                                          : s
+                                          : s,
                                       );
                                       onTemplateChange({
                                         ...template,
                                         layout: {
                                           ...template.layout,
-                                          sections: newSections
-                                        }
+                                          sections: newSections,
+                                        },
                                       });
                                     }}
                                     className="text-xs border border-gray-300 rounded px-2 py-1"
@@ -240,26 +250,38 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      const newSections = template.layout.sections.map(s => 
+                                      const newSections = template.layout.sections.map((s) =>
                                         s.id === section.id
                                           ? {
                                               ...s,
-                                              fields: s.fields.filter(f => f.fieldId !== sectionField.fieldId)
+                                              fields: s.fields.filter(
+                                                (f) => f.fieldId !== sectionField.fieldId,
+                                              ),
                                             }
-                                          : s
+                                          : s,
                                       );
                                       onTemplateChange({
                                         ...template,
                                         layout: {
                                           ...template.layout,
-                                          sections: newSections
-                                        }
+                                          sections: newSections,
+                                        },
                                       });
                                     }}
                                     className="text-gray-400 hover:text-red-500"
                                   >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg
+                                      className="w-4 h-4"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
                                     </svg>
                                   </button>
                                 </div>
@@ -269,7 +291,7 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                         })}
                       </div>
                     ) : (
-                      <div 
+                      <div
                         className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg"
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => {
@@ -277,35 +299,44 @@ const DragDropInterface: React.FC<DragDropInterfaceProps> = ({
                           const fieldId = e.dataTransfer.getData('fieldId');
                           if (fieldId) {
                             // Add field to this section
-                            const newSections = template.layout.sections.map(s => 
+                            const newSections = template.layout.sections.map((s) =>
                               s.id === section.id
                                 ? {
                                     ...s,
-                                    fields: [...s.fields, { fieldId, width: 'full' }]
+                                    fields: [...s.fields, { fieldId, width: 'full' }],
                                   }
-                                : s
+                                : s,
                             );
                             onTemplateChange({
                               ...template,
                               layout: {
                                 ...template.layout,
-                                sections: newSections
-                              }
+                                sections: newSections,
+                              },
                             });
                           }
                         }}
                       >
-                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        <svg
+                          className="mx-auto h-12 w-12 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
                         </svg>
                         <p className="mt-2">Drag fields here to add them to this section</p>
                       </div>
                     )}
                   </div>
                 </div>
-              ))
-            }
-            
+              ))}
+
             {template.layout.sections.length === 0 && (
               <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
                 <p>No sections created yet</p>

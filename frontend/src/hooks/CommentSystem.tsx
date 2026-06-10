@@ -13,7 +13,7 @@ export const CommentSystem: React.FC<CommentProps> = ({ proofId, currentUser }) 
   useEffect(() => {
     // In a real app, fetch initial comments from REST API here
     collabService.onCommentAdded((comment) => {
-      setComments(prev => [...prev, comment]);
+      setComments((prev) => [...prev, comment]);
     });
   }, []);
 
@@ -23,10 +23,10 @@ export const CommentSystem: React.FC<CommentProps> = ({ proofId, currentUser }) 
       authorId: currentUser.id,
       authorName: currentUser.name,
       content: newText,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     collabService.broadcastComment(proofId, payload);
-    setComments(prev => [...prev, payload]);
+    setComments((prev) => [...prev, payload]);
     setNewText('');
   };
 
@@ -42,8 +42,19 @@ export const CommentSystem: React.FC<CommentProps> = ({ proofId, currentUser }) 
         ))}
       </div>
       <div className="mt-auto">
-        <textarea value={newText} onChange={e => setNewText(e.target.value)} className="w-full text-sm border-gray-300 rounded-md p-2" placeholder="Add a comment..." rows={3} />
-        <button onClick={submitComment} className="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Post Comment</button>
+        <textarea
+          value={newText}
+          onChange={(e) => setNewText(e.target.value)}
+          className="w-full text-sm border-gray-300 rounded-md p-2"
+          placeholder="Add a comment..."
+          rows={3}
+        />
+        <button
+          onClick={submitComment}
+          className="mt-2 w-full bg-indigo-600 text-white py-2 rounded-md text-sm font-medium hover:bg-indigo-700"
+        >
+          Post Comment
+        </button>
       </div>
     </div>
   );

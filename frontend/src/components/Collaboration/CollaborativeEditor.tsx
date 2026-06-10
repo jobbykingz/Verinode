@@ -1,5 +1,28 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Edit3, Users, Save, Download, Upload, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Image, Code, Eye, EyeOff, MessageSquare, History, Palette, Type } from 'lucide-react';
+import {
+  Edit3,
+  Users,
+  Save,
+  Download,
+  Upload,
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  List,
+  ListOrdered,
+  Link,
+  Image,
+  Code,
+  Eye,
+  EyeOff,
+  MessageSquare,
+  History,
+  Palette,
+  Type,
+} from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
@@ -67,7 +90,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   onContentChange,
   onUserJoined,
   onUserLeft,
-  className = ''
+  className = '',
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -86,7 +109,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     bold: false,
     italic: false,
     underline: false,
-    code: false
+    code: false,
   });
 
   const editorRef = useRef<HTMLTextAreaElement>(null);
@@ -95,8 +118,16 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
   // User colors for collaboration
   const userColors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-    '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#96CEB4',
+    '#FFEAA7',
+    '#DDA0DD',
+    '#98D8C8',
+    '#F7DC6F',
+    '#BB8FCE',
+    '#85C1E2',
   ];
 
   // Initialize socket connection
@@ -107,14 +138,17 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       return;
     }
 
-    const newSocket = io(process.env.REACT_APP_COLLABORATION_SERVICE_URL || 'http://localhost:3003', {
-      auth: { token }
-    });
+    const newSocket = io(
+      process.env.REACT_APP_COLLABORATION_SERVICE_URL || 'http://localhost:3003',
+      {
+        auth: { token },
+      },
+    );
 
     newSocket.on('connect', () => {
       setIsConnected(true);
       console.log('Connected to collaborative editor service');
-      
+
       // Join document session
       newSocket.emit('join-document', { documentId });
     });
@@ -124,21 +158,24 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       console.log('Disconnected from collaborative editor service');
     });
 
-    newSocket.on('document-joined', (data: { content: string, version: number, users: CollaborativeUser[] }) => {
-      setContent(data.content);
-      setVersion(data.version);
-      setUsers(data.users);
-      onUserJoined?.(data.users[0]); // Current user
-    });
+    newSocket.on(
+      'document-joined',
+      (data: { content: string; version: number; users: CollaborativeUser[] }) => {
+        setContent(data.content);
+        setVersion(data.version);
+        setUsers(data.users);
+        onUserJoined?.(data.users[0]); // Current user
+      },
+    );
 
     newSocket.on('user-joined', (user: CollaborativeUser) => {
-      setUsers(prev => [...prev, user]);
+      setUsers((prev) => [...prev, user]);
       onUserJoined?.(user);
       toast(`${user.displayName} joined the document`);
     });
 
     newSocket.on('user-left', (data: { userId: string }) => {
-      setUsers(prev => prev.filter(u => u.userId !== data.userId));
+      setUsers((prev) => prev.filter((u) => u.userId !== data.userId));
       onUserLeft?.(data.userId);
       toast('A user left the document');
     });
@@ -147,34 +184,40 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       applyOperation(operation);
     });
 
-    newSocket.on('cursor-update', (data: { userId: string, cursor: { line: number; column: number; visible: boolean } }) => {
-      setUsers(prev => prev.map(u => 
-        u.userId === data.userId ? { ...u, cursor: data.cursor } : u
-      ));
-    });
+    newSocket.on(
+      'cursor-update',
+      (data: { userId: string; cursor: { line: number; column: number; visible: boolean } }) => {
+        setUsers((prev) =>
+          prev.map((u) => (u.userId === data.userId ? { ...u, cursor: data.cursor } : u)),
+        );
+      },
+    );
 
-    newSocket.on('selection-update', (data: { userId: string, selection: { start: number; end: number; text: string } }) => {
-      setUsers(prev => prev.map(u => 
-        u.userId === data.userId ? { ...u, selection: data.selection } : u
-      ));
-    });
+    newSocket.on(
+      'selection-update',
+      (data: { userId: string; selection: { start: number; end: number; text: string } }) => {
+        setUsers((prev) =>
+          prev.map((u) => (u.userId === data.userId ? { ...u, selection: data.selection } : u)),
+        );
+      },
+    );
 
-    newSocket.on('typing', (data: { userId: string, isTyping: boolean }) => {
-      setUsers(prev => prev.map(u => 
-        u.userId === data.userId ? { ...u, isTyping: data.isTyping } : u
-      ));
+    newSocket.on('typing', (data: { userId: string; isTyping: boolean }) => {
+      setUsers((prev) =>
+        prev.map((u) => (u.userId === data.userId ? { ...u, isTyping: data.isTyping } : u)),
+      );
     });
 
     newSocket.on('comment-added', (comment: Comment) => {
-      setComments(prev => [...prev, comment]);
+      setComments((prev) => [...prev, comment]);
     });
 
     newSocket.on('comment-updated', (comment: Comment) => {
-      setComments(prev => prev.map(c => c.id === comment.id ? comment : c));
+      setComments((prev) => prev.map((c) => (c.id === comment.id ? comment : c)));
     });
 
     newSocket.on('comment-deleted', (commentId: string) => {
-      setComments(prev => prev.filter(c => c.id !== commentId));
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
     });
 
     newSocket.on('error', (error: { message: string }) => {
@@ -189,43 +232,48 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   }, [documentId]);
 
   // Apply operation to document
-  const applyOperation = useCallback((operation: DocumentOperation) => {
-    setContent(prevContent => {
-      let newContent = prevContent;
-      
-      switch (operation.type) {
-        case 'insert':
-          newContent = prevContent.slice(0, operation.position) + 
-                     operation.content + 
-                     prevContent.slice(operation.position);
-          break;
-        case 'delete':
-          newContent = prevContent.slice(0, operation.position) + 
-                     prevContent.slice(operation.position + operation.length!);
-          break;
-        case 'retain':
-          // No content change, just position tracking
-          break;
-        case 'format':
-          // Apply formatting (simplified - in real implementation would use rich text)
-          break;
-      }
-      
-      return newContent;
-    });
-    
-    setVersion(prev => prev + 1);
-    onContentChange?.(content);
-  }, [content, onContentChange]);
+  const applyOperation = useCallback(
+    (operation: DocumentOperation) => {
+      setContent((prevContent) => {
+        let newContent = prevContent;
+
+        switch (operation.type) {
+          case 'insert':
+            newContent =
+              prevContent.slice(0, operation.position) +
+              operation.content +
+              prevContent.slice(operation.position);
+            break;
+          case 'delete':
+            newContent =
+              prevContent.slice(0, operation.position) +
+              prevContent.slice(operation.position + operation.length!);
+            break;
+          case 'retain':
+            // No content change, just position tracking
+            break;
+          case 'format':
+            // Apply formatting (simplified - in real implementation would use rich text)
+            break;
+        }
+
+        return newContent;
+      });
+
+      setVersion((prev) => prev + 1);
+      onContentChange?.(content);
+    },
+    [content, onContentChange],
+  );
 
   // Handle content changes
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newContent = e.target.value;
     const cursorPosition = e.target.selectionStart;
-    
+
     // Calculate operation
     let operation: DocumentOperation | null = null;
-    
+
     if (newContent.length > content.length) {
       // Insert operation
       const insertedContent = newContent.slice(content.length);
@@ -235,7 +283,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         content: insertedContent,
         userId: socket?.userId || '',
         timestamp: Date.now(),
-        version: version + 1
+        version: version + 1,
       };
     } else if (newContent.length < content.length) {
       // Delete operation
@@ -246,18 +294,18 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         length: deletedLength,
         userId: socket?.userId || '',
         timestamp: Date.now(),
-        version: version + 1
+        version: version + 1,
       };
     }
-    
+
     setContent(newContent);
     onContentChange?.(newContent);
-    
+
     // Send operation to server
     if (operation && socket) {
       socket.emit('operation', { documentId, operation });
     }
-    
+
     // Handle typing indicator
     setIsTyping(true);
     if (typingTimeoutRef.current) {
@@ -269,7 +317,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         socket.emit('typing', { documentId, isTyping: false });
       }
     }, 1000);
-    
+
     if (socket) {
       socket.emit('typing', { documentId, isTyping: true });
     }
@@ -278,48 +326,48 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   // Handle cursor position changes
   const handleCursorChange = () => {
     if (!editorRef.current || !socket) return;
-    
+
     const textarea = editorRef.current;
     const cursorPosition = textarea.selectionStart;
     const textBeforeCursor = textarea.value.substring(0, cursorPosition);
     const lines = textBeforeCursor.split('\n');
     const line = lines.length;
     const column = lines[lines.length - 1].length + 1;
-    
+
     socket.emit('cursor-update', {
       documentId,
-      cursor: { line, column, visible: true }
+      cursor: { line, column, visible: true },
     });
   };
 
   // Handle selection changes
   const handleSelectionChange = () => {
     if (!editorRef.current || !socket) return;
-    
+
     const textarea = editorRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    
+
     if (start !== end) {
       const selectedText = textarea.value.substring(start, end);
       socket.emit('selection-update', {
         documentId,
-        selection: { start, end, text: selectedText }
+        selection: { start, end, text: selectedText },
       });
     }
-    
+
     setSelection(start !== end ? { start, end } : null);
   };
 
   // Format text
   const formatText = (format: string) => {
     if (!editorRef.current || readOnly) return;
-    
+
     const textarea = editorRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = textarea.value.substring(start, end);
-    
+
     let formattedText = selectedText;
     switch (format) {
       case 'bold':
@@ -335,10 +383,11 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         formattedText = `\`${selectedText}\``;
         break;
     }
-    
-    const newContent = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+
+    const newContent =
+      textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
     setContent(newContent);
-    
+
     // Send operation
     if (socket) {
       const operation: DocumentOperation = {
@@ -347,7 +396,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         content: formattedText,
         userId: socket.userId || '',
         timestamp: Date.now(),
-        version: version + 1
+        version: version + 1,
       };
       socket.emit('operation', { documentId, operation });
     }
@@ -356,7 +405,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   // Add comment
   const addComment = (content: string) => {
     if (!selection || !socket) return;
-    
+
     const comment: Comment = {
       id: Date.now().toString(),
       userId: socket.userId || '',
@@ -365,9 +414,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       range: selection,
       createdAt: new Date(),
       resolved: false,
-      replies: []
+      replies: [],
     };
-    
+
     socket.emit('add-comment', { documentId, comment });
   };
 
@@ -383,7 +432,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   const exportDocument = (format: 'markdown' | 'html' | 'txt') => {
     let exportContent = content;
     let filename = `document.${format}`;
-    
+
     if (format === 'html') {
       // Simple markdown to HTML conversion
       exportContent = content
@@ -394,7 +443,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         .replace(/\n/g, '<br>');
       filename = 'document.html';
     }
-    
+
     const blob = new Blob([exportContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -402,21 +451,21 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
-    
+
     toast(`Document exported as ${format.toUpperCase()}`);
   };
 
   // Render preview
   const renderPreview = () => {
     if (!previewRef.current) return;
-    
+
     let htmlContent = content
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/__(.*?)__/g, '<u>$1</u>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
       .replace(/\n/g, '<br>');
-    
+
     previewRef.current.innerHTML = htmlContent;
   };
 
@@ -451,42 +500,42 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
               )}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            {users.some(u => u.isTyping) && (
-              <span className="text-sm text-gray-500 italic">
-                Someone is typing...
-              </span>
+            {users.some((u) => u.isTyping) && (
+              <span className="text-sm text-gray-500 italic">Someone is typing...</span>
             )}
-            
+
             <button
               onClick={() => setShowUsers(!showUsers)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
             >
               <Users className="w-5 h-5" />
             </button>
-            
+
             <button
               onClick={() => setShowComments(!showComments)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg relative"
             >
               <MessageSquare className="w-5 h-5" />
-              {comments.filter(c => !c.resolved).length > 0 && (
+              {comments.filter((c) => !c.resolved).length > 0 && (
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
               )}
             </button>
-            
+
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
             >
               <History className="w-5 h-5" />
             </button>
-            
+
             <button
               onClick={() => setShowPreview(!showPreview)}
               className={`p-2 rounded-lg ${
-                showPreview ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                showPreview
+                  ? 'bg-blue-100 text-blue-600'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
               }`}
             >
               {showPreview ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
@@ -532,72 +581,44 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
               <Code className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Align Left"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Align Left">
               <AlignLeft className="w-4 h-4" />
             </button>
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Align Center"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Align Center">
               <AlignCenter className="w-4 h-4" />
             </button>
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Align Right"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Align Right">
               <AlignRight className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Bullet List"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Bullet List">
               <List className="w-4 h-4" />
             </button>
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Numbered List"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Numbered List">
               <ListOrdered className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-1 border-r border-gray-200 pr-2">
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Insert Link"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Insert Link">
               <Link className="w-4 h-4" />
             </button>
-            <button
-              className="p-2 rounded hover:bg-gray-100"
-              title="Insert Image"
-            >
+            <button className="p-2 rounded hover:bg-gray-100" title="Insert Image">
               <Image className="w-4 h-4" />
             </button>
           </div>
-          
+
           <div className="flex items-center space-x-1 ml-auto">
-            <button
-              onClick={saveDocument}
-              className="p-2 rounded hover:bg-gray-100"
-              title="Save"
-            >
+            <button onClick={saveDocument} className="p-2 rounded hover:bg-gray-100" title="Save">
               <Save className="w-4 h-4" />
             </button>
-            
+
             <div className="relative group">
-              <button
-                className="p-2 rounded hover:bg-gray-100"
-                title="Export"
-              >
+              <button className="p-2 rounded hover:bg-gray-100" title="Export">
                 <Download className="w-4 h-4" />
               </button>
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible z-10">
@@ -659,7 +680,10 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
               <h3 className="font-semibold mb-3">Active Users</h3>
               <div className="space-y-2">
                 {users.map((user, index) => (
-                  <div key={user.userId} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                  <div
+                    key={user.userId}
+                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
+                  >
                     <div className="flex items-center">
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2"
@@ -691,10 +715,13 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
               <div className="p-4 border-b border-gray-200">
                 <h3 className="font-semibold">Comments</h3>
               </div>
-              
+
               <div className="flex-1 p-4 overflow-y-auto space-y-2">
                 {comments.map((comment) => (
-                  <div key={comment.id} className={`bg-gray-50 rounded-lg p-3 ${comment.resolved ? 'opacity-50' : ''}`}>
+                  <div
+                    key={comment.id}
+                    className={`bg-gray-50 rounded-lg p-3 ${comment.resolved ? 'opacity-50' : ''}`}
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">{comment.displayName}</span>
                       <span className="text-xs text-gray-500">
@@ -718,7 +745,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                   </div>
                 ))}
               </div>
-              
+
               {selection && (
                 <div className="p-4 border-t border-gray-200">
                   <textarea
@@ -728,7 +755,9 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                   />
                   <button
                     onClick={() => {
-                      const textarea = document.querySelector('textarea[placeholder="Add a comment..."]') as HTMLTextAreaElement;
+                      const textarea = document.querySelector(
+                        'textarea[placeholder="Add a comment..."]',
+                      ) as HTMLTextAreaElement;
                       if (textarea && textarea.value.trim()) {
                         addComment(textarea.value.trim());
                         textarea.value = '';
@@ -767,19 +796,21 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
         <div className="flex items-center space-x-4">
           <span>{content.length} characters</span>
           <span>{content.split('\n').length} lines</span>
-          <span>{content.split(/\s+/).filter(word => word.length > 0).length} words</span>
+          <span>{content.split(/\s+/).filter((word) => word.length > 0).length} words</span>
         </div>
         <div className="flex items-center space-x-2">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full ${
-            isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            <span className={`w-2 h-2 rounded-full mr-1 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+          <span
+            className={`inline-flex items-center px-2 py-1 rounded-full ${
+              isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full mr-1 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            ></span>
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
           {readOnly && (
-            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
-              Read Only
-            </span>
+            <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full">Read Only</span>
           )}
         </div>
       </div>

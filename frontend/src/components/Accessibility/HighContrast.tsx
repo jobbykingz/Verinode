@@ -28,7 +28,7 @@ export const HighContrast: React.FC<HighContrastProps> = ({
   children,
   className = '',
   showToggle = false,
-  colorBlindSupport = true
+  colorBlindSupport = true,
 }) => {
   const { preferences, updatePreference, announce } = useAccessibility();
   const [customPresets, setCustomPresets] = useState<ColorPreset[]>([]);
@@ -40,29 +40,29 @@ export const HighContrast: React.FC<HighContrastProps> = ({
       background: '#000000',
       foreground: '#ffffff',
       accent: '#ffff00',
-      border: '#ffffff'
+      border: '#ffffff',
     },
     {
       name: 'White on Black',
       background: '#000000',
       foreground: '#ffffff',
       accent: '#00ff00',
-      border: '#ffffff'
+      border: '#ffffff',
     },
     {
       name: 'Black on White',
       background: '#ffffff',
       foreground: '#000000',
       accent: '#0000ff',
-      border: '#000000'
+      border: '#000000',
     },
     {
       name: 'Yellow on Black',
       background: '#000000',
       foreground: '#ffff00',
       accent: '#ffffff',
-      border: '#ffff00'
-    }
+      border: '#ffff00',
+    },
   ];
 
   // Color blind filter presets
@@ -70,7 +70,7 @@ export const HighContrast: React.FC<HighContrastProps> = ({
     none: 'none',
     protanopia: 'url(#protanopia-filter)',
     deuteranopia: 'url(#deuteranopia-filter)',
-    tritanopia: 'url(#tritanopia-filter)'
+    tritanopia: 'url(#tritanopia-filter)',
   };
 
   // Apply high contrast styles
@@ -304,7 +304,7 @@ export const HighContrast: React.FC<HighContrastProps> = ({
       small: '14px',
       medium: '16px',
       large: '18px',
-      'extra-large': '20px'
+      'extra-large': '20px',
     };
 
     root.style.fontSize = fontSizes[size];
@@ -327,7 +327,11 @@ export const HighContrast: React.FC<HighContrastProps> = ({
   };
 
   return (
-    <div className={`high-contrast ${className}`} role="region" aria-label="High contrast and visual accessibility">
+    <div
+      className={`high-contrast ${className}`}
+      role="region"
+      aria-label="High contrast and visual accessibility"
+    >
       {/* High contrast toggle button */}
       {showToggle && (
         <button
@@ -342,13 +346,15 @@ export const HighContrast: React.FC<HighContrastProps> = ({
       )}
 
       {/* Accessibility controls panel */}
-      <div className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 
+      <div
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 
                       focus:bg-white focus:border-2 focus:border-blue-600 focus:rounded-lg 
                       focus:p-4 focus:shadow-lg"
-           role="group"
-           aria-label="Visual accessibility controls">
+        role="group"
+        aria-label="Visual accessibility controls"
+      >
         <h3 className="font-bold mb-4">Visual Accessibility</h3>
-        
+
         {/* High contrast toggle */}
         <div className="mb-4">
           <button
@@ -364,7 +370,7 @@ export const HighContrast: React.FC<HighContrastProps> = ({
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Font Size:</label>
           <div className="space-y-1">
-            {(['small', 'medium', 'large', 'extra-large'] as const).map(size => (
+            {(['small', 'medium', 'large', 'extra-large'] as const).map((size) => (
               <button
                 key={size}
                 onClick={() => changeFontSize(size)}
@@ -383,17 +389,19 @@ export const HighContrast: React.FC<HighContrastProps> = ({
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">Color Blind Mode:</label>
             <div className="space-y-1">
-              {(['none', 'protanopia', 'deuteranopia', 'tritanopia'] as ColorBlindMode[]).map(mode => (
-                <button
-                  key={mode}
-                  onClick={() => changeColorBlindMode(mode)}
-                  className={`block w-full text-left px-2 py-1 border rounded ${
-                    preferences.colorBlindMode === mode ? 'bg-blue-100 border-blue-500' : ''
-                  }`}
-                >
-                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
-                </button>
-              ))}
+              {(['none', 'protanopia', 'deuteranopia', 'tritanopia'] as ColorBlindMode[]).map(
+                (mode) => (
+                  <button
+                    key={mode}
+                    onClick={() => changeColorBlindMode(mode)}
+                    className={`block w-full text-left px-2 py-1 border rounded ${
+                      preferences.colorBlindMode === mode ? 'bg-blue-100 border-blue-500' : ''
+                    }`}
+                  >
+                    {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                  </button>
+                ),
+              )}
             </div>
           </div>
         )}

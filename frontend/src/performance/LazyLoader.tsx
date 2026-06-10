@@ -8,12 +8,12 @@ interface LazyLoaderProps {
   className?: string;
 }
 
-const LazyLoader: React.FC<LazyLoaderProps> = ({ 
-  children, 
-  placeholder, 
-  threshold = 0.1, 
+const LazyLoader: React.FC<LazyLoaderProps> = ({
+  children,
+  placeholder,
+  threshold = 0.1,
   rootMargin = '50px',
-  className = ''
+  className = '',
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,7 @@ const LazyLoader: React.FC<LazyLoaderProps> = ({
           observer.unobserve(entry.target);
         }
       },
-      { threshold, rootMargin }
+      { threshold, rootMargin },
     );
 
     if (containerRef.current) {
@@ -42,7 +42,9 @@ const LazyLoader: React.FC<LazyLoaderProps> = ({
 
   return (
     <div ref={containerRef} className={`lazy-container ${className}`}>
-      {isVisible ? children : (placeholder || <div className="min-h-[100px] w-full bg-slate-800/20 rounded-xl" />)}
+      {isVisible
+        ? children
+        : placeholder || <div className="min-h-[100px] w-full bg-slate-800/20 rounded-xl" />}
     </div>
   );
 };

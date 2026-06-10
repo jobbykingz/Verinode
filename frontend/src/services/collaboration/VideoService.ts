@@ -65,7 +65,7 @@ export class VideoService {
       try {
         this.socket = io(this.config.serverUrl, {
           auth: { token: this.config.authToken },
-          transports: ['websocket', 'polling']
+          transports: ['websocket', 'polling'],
         });
 
         this.socket.on('connect', () => {
@@ -134,7 +134,6 @@ export class VideoService {
         this.socket.on('chat-message', (message: any) => {
           this.emit('chatMessage', message);
         });
-
       } catch (error) {
         reject(error);
       }
@@ -150,7 +149,9 @@ export class VideoService {
   }
 
   // Local Media Management
-  async getLocalMedia(constraints: MediaStreamConstraints = { video: true, audio: true }): Promise<MediaStream> {
+  async getLocalMedia(
+    constraints: MediaStreamConstraints = { video: true, audio: true },
+  ): Promise<MediaStream> {
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
       return this.localStream;
@@ -162,20 +163,24 @@ export class VideoService {
 
   stopLocalMedia(): void {
     if (this.localStream) {
-      this.localStream.getTracks().forEach(track => track.stop());
+      this.localStream.getTracks().forEach((track) => track.stop());
       this.localStream = null;
     }
   }
 
   // Room Management
-  async createRoom(projectId: string, name: string, settings: VideoRoomSettings): Promise<VideoRoom> {
+  async createRoom(
+    projectId: string,
+    name: string,
+    settings: VideoRoomSettings,
+  ): Promise<VideoRoom> {
     if (!this.socket) {
       throw new Error('Not connected to video service');
     }
 
     return new Promise((resolve, reject) => {
       this.socket!.emit('create-room', { projectId, name, settings });
-      
+
       const timeout = setTimeout(() => {
         reject(new Error('Timeout creating room'));
       }, 10000);
@@ -197,7 +202,7 @@ export class VideoService {
 
     return new Promise((resolve, reject) => {
       this.socket!.emit('join-room', { roomId, password });
-      
+
       const timeout = setTimeout(() => {
         reject(new Error('Timeout joining room'));
       }, 10000);
@@ -244,12 +249,12 @@ export class VideoService {
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true
+        audio: true,
       });
 
       // Add screen share tracks to all peer connections
-      this.peerConnections.forEach(pc => {
-        screenStream.getTracks().forEach(track => {
+      this.peerConnections.forEach((pc) => {
+        screenStream.getTracks().forEach((track) => {
           pc.addTrack(track, screenStream);
         });
       });
@@ -262,7 +267,6 @@ export class VideoService {
       screenStream.getVideoTracks()[0].addEventListener('ended', () => {
         this.stopScreenShare(roomId);
       });
-
     } catch (error) {
       console.error('Error starting screen share:', error);
       throw new Error('Failed to start screen sharing');
@@ -335,7 +339,7 @@ export class VideoService {
         type: 'answer',
         payload: answer,
         userId: this.getUserId(),
-        targetUserId: userId
+        targetUserId: userId,
       });
     }
   }
@@ -358,13 +362,13 @@ export class VideoService {
     const pc = new RTCPeerConnection({
       iceServers: this.config.iceServers || [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ],
     });
 
     // Add local stream
     if (this.localStream) {
-      this.localStream.getTracks().forEach(track => {
+      this.localStream.getTracks().forEach((track) => {
         pc.addTrack(track, this.localStream!);
       });
     }
@@ -376,7 +380,7 @@ export class VideoService {
           type: 'ice-candidate',
           payload: event.candidate,
           userId: this.getUserId(),
-          targetUserId: userId
+          targetUserId: userId,
         });
       }
     };
@@ -389,7 +393,7 @@ export class VideoService {
     // Handle connection state
     pc.onconnectionstatechange = () => {
       this.emit('connectionStateChange', { userId, state: pc.connectionState });
-      
+
       if (pc.connectionState === 'closed' || pc.connectionState === 'failed') {
         this.cleanupPeerConnection(userId);
       }
@@ -409,7 +413,7 @@ export class VideoService {
 
   private cleanup(): void {
     this.stopLocalMedia();
-    this.peerConnections.forEach(pc => pc.close());
+    this.peerConnections.forEach((pc) => pc.close());
     this.peerConnections.clear();
   }
 
@@ -444,7 +448,7 @@ export class VideoService {
   private emit(event: string, data?: any): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.forEach(handler => {
+      handlers.forEach((handler) => {
         try {
           handler(data);
         } catch (error) {
@@ -458,7 +462,7 @@ export class VideoService {
   getConnectionStats(): { activeConnections: number; localStreamActive: boolean } {
     return {
       activeConnections: this.peerConnections.size,
-      localStreamActive: !!this.localStream
+      localStreamActive: !!this.localStream,
     };
   }
 

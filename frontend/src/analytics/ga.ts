@@ -15,8 +15,7 @@ declare global {
 let isInitialized = false;
 let missingIdLogged = false;
 
-export const getAnalyticsMeasurementId = (): string =>
-  process.env.REACT_APP_GA_ID || '';
+export const getAnalyticsMeasurementId = (): string => process.env.REACT_APP_GA_ID || '';
 
 export const isAnalyticsEnabled = (): boolean =>
   typeof window !== 'undefined' && getAnalyticsMeasurementId().length > 0;
@@ -59,7 +58,7 @@ export const initAnalytics = (): void => {
   if (!measurementId) {
     if (!missingIdLogged) {
       logDevInfo(
-        'GA4 analytics is disabled because no measurement ID is configured. Set REACT_APP_GA_ID to enable analytics.'
+        'GA4 analytics is disabled because no measurement ID is configured. Set REACT_APP_GA_ID to enable analytics.',
       );
       missingIdLogged = true;
     }
@@ -76,10 +75,7 @@ export const initAnalytics = (): void => {
   isInitialized = true;
 };
 
-const sendGtagEvent = (
-  action: string,
-  params: Record<string, string | number | boolean>
-): void => {
+const sendGtagEvent = (action: string, params: Record<string, string | number | boolean>): void => {
   if (!isAnalyticsEnabled()) {
     return;
   }
@@ -105,12 +101,7 @@ export const trackPageView = (pagePath?: string): void => {
   });
 };
 
-export const trackEvent = ({
-  action,
-  category,
-  label,
-  value,
-}: TrackEventParams): void => {
+export const trackEvent = ({ action, category, label, value }: TrackEventParams): void => {
   if (!action) {
     return;
   }

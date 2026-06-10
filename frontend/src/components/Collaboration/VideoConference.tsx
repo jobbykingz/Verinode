@@ -1,5 +1,21 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, MessageSquare, Users, Settings, Record, Square, Volume2, VolumeX } from 'lucide-react';
+import {
+  Phone,
+  PhoneOff,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Monitor,
+  MonitorOff,
+  MessageSquare,
+  Users,
+  Settings,
+  Record,
+  Square,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import toast from 'react-hot-toast';
 
@@ -34,7 +50,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
   projectId,
   roomId: initialRoomId,
   onClose,
-  className = ''
+  className = '',
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -59,7 +75,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     enableRecording: false,
     enableChat: true,
     enableScreenShare: true,
-    waitingRoom: false
+    waitingRoom: false,
   });
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
@@ -76,7 +92,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     }
 
     const newSocket = io(process.env.REACT_APP_VIDEO_SERVICE_URL || 'http://localhost:3001', {
-      auth: { token }
+      auth: { token },
     });
 
     newSocket.on('connect', () => {
@@ -89,57 +105,57 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
       console.log('Disconnected from video conference service');
     });
 
-    newSocket.on('room-created', (data: { roomId: string, room: any }) => {
+    newSocket.on('room-created', (data: { roomId: string; room: any }) => {
       setCurrentRoom(data.roomId);
       toast.success(`Room "${data.room.name}" created successfully`);
     });
 
-    newSocket.on('joined-room', (data: { room: any, participant: Participant }) => {
+    newSocket.on('joined-room', (data: { room: any; participant: Participant }) => {
       setCurrentRoom(data.room.id);
       setParticipants(data.room.participants);
       toast.success(`Joined room: ${data.room.name}`);
     });
 
-    newSocket.on('participant-joined', (data: { participant: Participant, room: any }) => {
+    newSocket.on('participant-joined', (data: { participant: Participant; room: any }) => {
       setParticipants(data.room.participants);
       toast(`${data.participant.displayName} joined the room`);
     });
 
     newSocket.on('participant-left', (data: { participant: Participant }) => {
-      setParticipants(prev => prev.filter(p => p.userId !== data.participant.userId));
-      
+      setParticipants((prev) => prev.filter((p) => p.userId !== data.participant.userId));
+
       // Clean up peer connection
       const pc = peerConnections.current.get(data.participant.userId);
       if (pc) {
         pc.close();
         peerConnections.current.delete(data.participant.userId);
       }
-      
+
       toast(`${data.participant.displayName} left the room`);
     });
 
     newSocket.on('participant-updated', (data: { participant: Participant }) => {
-      setParticipants(prev => prev.map(p => 
-        p.userId === data.participant.userId ? data.participant : p
-      ));
+      setParticipants((prev) =>
+        prev.map((p) => (p.userId === data.participant.userId ? data.participant : p)),
+      );
     });
 
     newSocket.on('signaling', handleSignaling);
     newSocket.on('chat-message', (message: ChatMessage) => {
-      setChatMessages(prev => [...prev, message]);
+      setChatMessages((prev) => [...prev, message]);
     });
 
     newSocket.on('screen-share-started', (data: { participant: Participant }) => {
-      setParticipants(prev => prev.map(p => 
-        p.userId === data.participant.userId ? data.participant : p
-      ));
+      setParticipants((prev) =>
+        prev.map((p) => (p.userId === data.participant.userId ? data.participant : p)),
+      );
       toast(`${data.participant.displayName} started screen sharing`);
     });
 
     newSocket.on('screen-share-stopped', (data: { participant: Participant }) => {
-      setParticipants(prev => prev.map(p => 
-        p.userId === data.participant.userId ? data.participant : p
-      ));
+      setParticipants((prev) =>
+        prev.map((p) => (p.userId === data.participant.userId ? data.participant : p)),
+      );
       toast(`${data.participant.displayName} stopped screen sharing`);
     });
 
@@ -173,7 +189,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
 
     return () => {
       if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
+        localStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [isConnected]);
@@ -189,11 +205,11 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: true,
-        audio: true
+        audio: true,
       });
 
       setLocalStream(stream);
-      
+
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
       }
@@ -211,7 +227,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
       socket.emit('create-room', {
         projectId,
         name: roomName,
-        settings: roomSettings
+        settings: roomSettings,
       });
     } catch (error) {
       toast.error('Failed to create room');
@@ -226,7 +242,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     try {
       socket.emit('join-room', {
         roomId: joiningRoomId,
-        password: roomSettings.password || undefined
+        password: roomSettings.password || undefined,
       });
     } catch (error) {
       toast.error('Failed to join room');
@@ -239,9 +255,9 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
       setCurrentRoom(null);
       setParticipants([]);
       setChatMessages([]);
-      
+
       // Clean up all peer connections
-      peerConnections.current.forEach(pc => pc.close());
+      peerConnections.current.forEach((pc) => pc.close());
       peerConnections.current.clear();
     }
   };
@@ -252,7 +268,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
       if (audioTrack) {
         audioTrack.enabled = !isAudioEnabled;
         setIsAudioEnabled(!isAudioEnabled);
-        
+
         if (socket && currentRoom) {
           socket.emit('toggle-audio', { roomId: currentRoom });
         }
@@ -266,7 +282,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
       if (videoTrack) {
         videoTrack.enabled = !isVideoEnabled;
         setIsVideoEnabled(!isVideoEnabled);
-        
+
         if (socket && currentRoom) {
           socket.emit('toggle-video', { roomId: currentRoom });
         }
@@ -278,7 +294,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     try {
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
-        audio: true
+        audio: true,
       });
 
       if (screenShareRef.current) {
@@ -304,7 +320,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
   const stopScreenShare = () => {
     if (screenShareRef.current && screenShareRef.current.srcObject) {
       const stream = screenShareRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       screenShareRef.current.srcObject = null;
     }
 
@@ -330,7 +346,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
 
     socket.emit('chat-message', {
       roomId: currentRoom,
-      message: newMessage.trim()
+      message: newMessage.trim(),
     });
 
     setNewMessage('');
@@ -362,13 +378,13 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
+        { urls: 'stun:stun1.l.google.com:19302' },
+      ],
     });
 
     // Add local stream
     if (localStream) {
-      localStream.getTracks().forEach(track => {
+      localStream.getTracks().forEach((track) => {
         pc.addTrack(track, localStream);
       });
     }
@@ -381,7 +397,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
           payload: event.candidate,
           roomId: currentRoom,
           userId: socket.userId,
-          targetUserId: userId
+          targetUserId: userId,
         });
       }
     };
@@ -389,9 +405,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     // Handle remote stream
     pc.ontrack = (event) => {
       const stream = event.streams[0];
-      setParticipants(prev => prev.map(p => 
-        p.userId === userId ? { ...p, stream } : p
-      ));
+      setParticipants((prev) => prev.map((p) => (p.userId === userId ? { ...p, stream } : p)));
     };
 
     peerConnections.current.set(userId, pc);
@@ -414,7 +428,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
         payload: answer,
         roomId: currentRoom,
         userId: socket.userId,
-        targetUserId: userId
+        targetUserId: userId,
       });
     }
   };
@@ -435,15 +449,15 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
 
   const cleanup = () => {
     if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
+      localStream.getTracks().forEach((track) => track.stop());
     }
 
     if (screenShareRef.current?.srcObject) {
       const stream = screenShareRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
     }
 
-    peerConnections.current.forEach(pc => pc.close());
+    peerConnections.current.forEach((pc) => pc.close());
     peerConnections.current.clear();
   };
 
@@ -451,7 +465,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
     return (
       <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
         <h2 className="text-2xl font-bold mb-6">Video Conference</h2>
-        
+
         <div className="space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-3">Create New Room</h3>
@@ -463,7 +477,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                 onChange={(e) => setRoomName(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -474,66 +488,81 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                     min="2"
                     max="100"
                     value={roomSettings.maxParticipants}
-                    onChange={(e) => setRoomSettings(prev => ({ ...prev, maxParticipants: parseInt(e.target.value) }))}
+                    onChange={(e) =>
+                      setRoomSettings((prev) => ({
+                        ...prev,
+                        maxParticipants: parseInt(e.target.value),
+                      }))
+                    }
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
                       type="checkbox"
                       checked={roomSettings.requirePassword}
-                      onChange={(e) => setRoomSettings(prev => ({ ...prev, requirePassword: e.target.checked }))}
+                      onChange={(e) =>
+                        setRoomSettings((prev) => ({ ...prev, requirePassword: e.target.checked }))
+                      }
                       className="mr-2"
                     />
                     <span className="text-sm">Require Password</span>
                   </label>
-                  
+
                   {roomSettings.requirePassword && (
                     <input
                       type="password"
                       placeholder="Password"
                       value={roomSettings.password}
-                      onChange={(e) => setRoomSettings(prev => ({ ...prev, password: e.target.value }))}
+                      onChange={(e) =>
+                        setRoomSettings((prev) => ({ ...prev, password: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   )}
                 </div>
               </div>
-              
+
               <div className="flex flex-wrap gap-2">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={roomSettings.enableRecording}
-                    onChange={(e) => setRoomSettings(prev => ({ ...prev, enableRecording: e.target.checked }))}
+                    onChange={(e) =>
+                      setRoomSettings((prev) => ({ ...prev, enableRecording: e.target.checked }))
+                    }
                     className="mr-2"
                   />
                   <span className="text-sm">Enable Recording</span>
                 </label>
-                
+
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={roomSettings.enableChat}
-                    onChange={(e) => setRoomSettings(prev => ({ ...prev, enableChat: e.target.checked }))}
+                    onChange={(e) =>
+                      setRoomSettings((prev) => ({ ...prev, enableChat: e.target.checked }))
+                    }
                     className="mr-2"
                   />
                   <span className="text-sm">Enable Chat</span>
                 </label>
-                
+
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     checked={roomSettings.enableScreenShare}
-                    onChange={(e) => setRoomSettings(prev => ({ ...prev, enableScreenShare: e.target.checked }))}
+                    onChange={(e) =>
+                      setRoomSettings((prev) => ({ ...prev, enableScreenShare: e.target.checked }))
+                    }
                     className="mr-2"
                   />
                   <span className="text-sm">Enable Screen Share</span>
                 </label>
               </div>
-              
+
               <button
                 onClick={createRoom}
                 disabled={!roomName.trim() || isCreatingRoom || !isConnected}
@@ -543,7 +572,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
               </button>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold mb-3">Join Existing Room</h3>
             <div className="space-y-4">
@@ -554,7 +583,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                 onChange={(e) => setJoiningRoomId(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              
+
               <button
                 onClick={joinRoom}
                 disabled={!joiningRoomId.trim() || !isConnected}
@@ -565,12 +594,16 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 text-center">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-            isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}>
-            <span className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+              isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            ></span>
             {isConnected ? 'Connected' : 'Disconnected'}
           </span>
         </div>
@@ -590,7 +623,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
               {participants.length} participant{participants.length !== 1 ? 's' : ''}
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {isRecording && (
               <span className="flex items-center text-red-600">
@@ -598,14 +631,14 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                 Recording
               </span>
             )}
-            
+
             <button
               onClick={() => setShowParticipants(!showParticipants)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
             >
               <Users className="w-5 h-5" />
             </button>
-            
+
             <button
               onClick={() => setShowChat(!showChat)}
               className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg relative"
@@ -615,7 +648,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                 <span className="absolute top-1 right-1 w-2 h-2 bg-blue-600 rounded-full"></span>
               )}
             </button>
-            
+
             {onClose && (
               <button
                 onClick={onClose}
@@ -666,7 +699,10 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
 
             {/* Participant Videos */}
             {participants.map((participant) => (
-              <div key={participant.userId} className="relative bg-gray-900 rounded-lg overflow-hidden">
+              <div
+                key={participant.userId}
+                className="relative bg-gray-900 rounded-lg overflow-hidden"
+              >
                 {participant.stream ? (
                   <video
                     autoPlay
@@ -707,7 +743,10 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
               <h3 className="font-semibold mb-3">Participants</h3>
               <div className="space-y-2">
                 {participants.map((participant) => (
-                  <div key={participant.userId} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                  <div
+                    key={participant.userId}
+                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
+                  >
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center mr-2">
                         <span className="text-xs font-semibold">
@@ -736,11 +775,8 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
               <div className="p-4 border-b border-gray-200">
                 <h3 className="font-semibold">Chat</h3>
               </div>
-              
-              <div
-                ref={chatContainerRef}
-                className="flex-1 p-4 overflow-y-auto space-y-2"
-              >
+
+              <div ref={chatContainerRef} className="flex-1 p-4 overflow-y-auto space-y-2">
                 {chatMessages.map((message) => (
                   <div key={message.id} className="bg-gray-50 rounded-lg p-2">
                     <div className="flex items-center justify-between mb-1">
@@ -753,7 +789,7 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                   </div>
                 ))}
               </div>
-              
+
               <div className="p-4 border-t border-gray-200">
                 <div className="flex space-x-2">
                   <input
@@ -812,7 +848,11 @@ export const VideoConference: React.FC<VideoConferenceProps> = ({
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {isScreenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+              {isScreenSharing ? (
+                <MonitorOff className="w-5 h-5" />
+              ) : (
+                <Monitor className="w-5 h-5" />
+              )}
             </button>
           )}
 

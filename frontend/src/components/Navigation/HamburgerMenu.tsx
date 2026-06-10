@@ -6,7 +6,11 @@ interface HamburgerMenuProps {
   className?: string;
 }
 
-export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({ isOpen, onToggle, className = '' }) => {
+export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
+  isOpen,
+  onToggle,
+  className = '',
+}) => {
   return (
     <button
       onClick={onToggle}

@@ -8,7 +8,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
     price: 0,
     category: 'custom',
     tags: [],
-    isPublic: true
+    isPublic: true,
   });
 
   const [tagInput, setTagInput] = useState('');
@@ -16,11 +16,23 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
   const [errors, setErrors] = useState({});
 
   const categories = [
-    { id: 'identity', name: 'Identity Verification', description: 'Identity and KYC verification templates' },
+    {
+      id: 'identity',
+      name: 'Identity Verification',
+      description: 'Identity and KYC verification templates',
+    },
     { id: 'credential', name: 'Credentials', description: 'Academic and professional credentials' },
-    { id: 'document', name: 'Document Verification', description: 'Document authenticity verification' },
-    { id: 'transaction', name: 'Transaction Proofs', description: 'Financial transaction verification' },
-    { id: 'custom', name: 'Custom Templates', description: 'Specialized verification templates' }
+    {
+      id: 'document',
+      name: 'Document Verification',
+      description: 'Document authenticity verification',
+    },
+    {
+      id: 'transaction',
+      name: 'Transaction Proofs',
+      description: 'Financial transaction verification',
+    },
+    { id: 'custom', name: 'Custom Templates', description: 'Specialized verification templates' },
   ];
 
   const validateForm = () => {
@@ -56,7 +68,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -66,7 +78,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
     if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
       setFormData({
         ...formData,
-        tags: [...formData.tags, tagInput.trim()]
+        tags: [...formData.tags, tagInput.trim()],
       });
       setTagInput('');
       if (errors.tags) {
@@ -80,7 +92,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
   const handleRemoveTag = (tagToRemove) => {
     setFormData({
       ...formData,
-      tags: formData.tags.filter(tag => tag !== tagToRemove)
+      tags: formData.tags.filter((tag) => tag !== tagToRemove),
     });
   };
 
@@ -118,19 +130,26 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
           {previewMode ? (
             <div className="space-y-6">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-4">{formData.title || 'Template Title'}</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  {formData.title || 'Template Title'}
+                </h3>
                 <div className="flex items-center space-x-4 mb-4">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    {categories.find(c => c.id === formData.category)?.name || 'Custom'}
+                    {categories.find((c) => c.id === formData.category)?.name || 'Custom'}
                   </span>
                   <span className="flex items-center text-lg font-bold text-green-600">
                     {formData.price.toFixed(2)} XLM
                   </span>
                 </div>
-                <p className="text-gray-700 mb-4">{formData.description || 'Template description will appear here...'}</p>
+                <p className="text-gray-700 mb-4">
+                  {formData.description || 'Template description will appear here...'}
+                </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {formData.tags.map(tag => (
-                    <span key={tag} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {formData.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                    >
                       {tag}
                     </span>
                   ))}
@@ -162,15 +181,16 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
                   maxLength={100}
                 />
                 {errors.title && (
-                  <div className="flex items-center mt-2 text-red-600 text-sm">
-                    {errors.title}
-                  </div>
+                  <div className="flex items-center mt-2 text-red-600 text-sm">{errors.title}</div>
                 )}
               </div>
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Description *
                 </label>
                 <textarea
@@ -194,7 +214,10 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
               {/* Category and Price */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="category"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Category *
                   </label>
                   <select
@@ -203,7 +226,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
                     onChange={(e) => handleInputChange('category', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
                       </option>
@@ -237,11 +260,9 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
 
               {/* Tags */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Tags *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tags *</label>
                 <div className="flex flex-wrap gap-2 mb-3">
-                  {formData.tags.map(tag => (
+                  {formData.tags.map((tag) => (
                     <span
                       key={tag}
                       className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
@@ -277,9 +298,7 @@ const TemplateCreator = ({ onSubmit, onCancel, isLoading = false }) => {
                   </button>
                 </div>
                 {errors.tags && (
-                  <div className="flex items-center mt-2 text-red-600 text-sm">
-                    {errors.tags}
-                  </div>
+                  <div className="flex items-center mt-2 text-red-600 text-sm">{errors.tags}</div>
                 )}
               </div>
 

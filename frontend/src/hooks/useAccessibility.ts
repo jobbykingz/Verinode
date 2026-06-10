@@ -5,12 +5,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { accessibilityService, AccessibilityPreferences } from '../services/accessibilityService';
-import { 
-  FocusManager, 
-  AriaUtils, 
-  ScreenReaderUtils, 
+import {
+  FocusManager,
+  AriaUtils,
+  ScreenReaderUtils,
   VoiceCommandUtils,
-  AccessibilityValidator 
+  AccessibilityValidator,
 } from '../utils/accessibilityUtils';
 
 interface CustomEvent<T = any> extends Event {
@@ -21,29 +21,29 @@ export interface UseAccessibilityReturn {
   // Preferences
   preferences: AccessibilityPreferences;
   updatePreference: <K extends keyof AccessibilityPreferences>(
-    key: K, 
-    value: AccessibilityPreferences[K]
+    key: K,
+    value: AccessibilityPreferences[K],
   ) => void;
-  
+
   // Screen reader
   isScreenReaderActive: boolean;
   announce: (message: string, priority?: 'polite' | 'assertive') => void;
-  
+
   // Focus management
   saveFocus: () => void;
   restoreFocus: () => void;
   trapFocus: (element: HTMLElement) => () => void;
-  
+
   // Voice commands
   isVoiceSupported: boolean;
   isVoiceListening: boolean;
   startVoiceCommands: (commands: Record<string, () => void>) => boolean;
   toggleVoiceListening: () => void;
-  
+
   // Validation
   validateAccessibility: () => ReturnType<typeof AccessibilityValidator.runFullValidation>;
   getComplianceReport: () => ReturnType<typeof accessibilityService.generateAccessibilityReport>;
-  
+
   // Utilities
   generateId: (prefix?: string) => string;
   setupAriaAttributes: (element: HTMLElement, attributes: Record<string, string>) => void;
@@ -51,7 +51,7 @@ export interface UseAccessibilityReturn {
 
 export const useAccessibility = (): UseAccessibilityReturn => {
   const [preferences, setPreferences] = useState<AccessibilityPreferences>(
-    accessibilityService.getAllPreferences()
+    accessibilityService.getAllPreferences(),
   );
   const [isScreenReaderActive, setIsScreenReaderActive] = useState(false);
   const [isVoiceListening, setIsVoiceListening] = useState(false);
@@ -59,15 +59,21 @@ export const useAccessibility = (): UseAccessibilityReturn => {
   // Listen for preference changes
   useEffect(() => {
     const handlePreferenceChange = (event: Event) => {
-      const customEvent = event as CustomEvent<{key: string; value: any}>;
+      const customEvent = event as CustomEvent<{ key: string; value: any }>;
       const { key, value } = customEvent.detail;
       setPreferences((prev: AccessibilityPreferences) => ({ ...prev, [key]: value }));
     };
 
-    document.addEventListener('accessibilityPreferenceChanged', handlePreferenceChange as EventListener);
-    
+    document.addEventListener(
+      'accessibilityPreferenceChanged',
+      handlePreferenceChange as EventListener,
+    );
+
     return () => {
-      document.removeEventListener('accessibilityPreferenceChanged', handlePreferenceChange as EventListener);
+      document.removeEventListener(
+        'accessibilityPreferenceChanged',
+        handlePreferenceChange as EventListener,
+      );
     };
   }, []);
 
@@ -84,12 +90,12 @@ export const useAccessibility = (): UseAccessibilityReturn => {
   }, []);
 
   // Update preference
-  const updatePreference = useCallback(<K extends keyof AccessibilityPreferences>(
-    key: K, 
-    value: AccessibilityPreferences[K]
-  ) => {
-    accessibilityService.updatePreference(key, value);
-  }, []);
+  const updatePreference = useCallback(
+    <K extends keyof AccessibilityPreferences>(key: K, value: AccessibilityPreferences[K]) => {
+      accessibilityService.updatePreference(key, value);
+    },
+    [],
+  );
 
   // Screen reader announcements
   const announce = useCallback((message: string, priority: 'polite' | 'assertive' = 'polite') => {
@@ -135,9 +141,12 @@ export const useAccessibility = (): UseAccessibilityReturn => {
     return AriaUtils.generateUniqueId(prefix);
   }, []);
 
-  const setupAriaAttributes = useCallback((element: HTMLElement, attributes: Record<string, string>) => {
-    AriaUtils.setAriaAttributes(element, attributes);
-  }, []);
+  const setupAriaAttributes = useCallback(
+    (element: HTMLElement, attributes: Record<string, string>) => {
+      AriaUtils.setAriaAttributes(element, attributes);
+    },
+    [],
+  );
 
   // Auto-setup ARIA relationships
   useEffect(() => {

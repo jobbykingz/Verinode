@@ -52,16 +52,21 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
         className="fixed top-4 left-4 z-50 p-2 rounded-md bg-gray-800 text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white"
         aria-label="Toggle navigation menu"
       >
-        <svg
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7a2 2 0 002-2v-4a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2h7a2 2 0 002-2v-4z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16m-7 6h7a2 2 0 002-2v-4a2 2 0 00-2-2H6a2 2 0 00-2 2v4a2 2 0 002 2h7a2 2 0 002-2v-4z"
+            />
           )}
         </svg>
       </button>
@@ -70,7 +75,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
       {isOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-black bg-opacity-50" />
-          
+
           <div
             ref={menuRef}
             className="fixed top-0 left-0 bottom-0 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out"
@@ -82,10 +87,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
             <div className="flex flex-col h-full">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h2
-                  id="mobile-menu-title"
-                  className="text-lg font-semibold text-gray-900"
-                >
+                <h2 id="mobile-menu-title" className="text-lg font-semibold text-gray-900">
                   Menu
                 </h2>
                 <button
@@ -94,7 +96,12 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
                   aria-label="Close navigation menu"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -111,9 +118,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({ items, onNavigate, current
                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 border-2 border-transparent'
                     }`}
                   >
-                    {item.icon && (
-                      <span className="mr-3 text-xl">{item.icon}</span>
-                    )}
+                    {item.icon && <span className="mr-3 text-xl">{item.icon}</span>}
                     <span className="flex-1 text-sm font-medium">{item.label}</span>
                     {item.badge && item.badge > 0 && (
                       <span className="ml-2 px-2 py-1 text-xs font-medium bg-red-500 text-white rounded-full">

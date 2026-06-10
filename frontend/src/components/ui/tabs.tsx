@@ -35,7 +35,13 @@ const TabsContext = React.createContext<TabsContextType>({
   setActiveTab: () => {},
 });
 
-export const Tabs: React.FC<TabsProps> = ({ defaultValue = '', value, onValueChange, children, className = '' }) => {
+export const Tabs: React.FC<TabsProps> = ({
+  defaultValue = '',
+  value,
+  onValueChange,
+  children,
+  className = '',
+}) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
   const activeTab = value !== undefined ? value : internalValue;
 
@@ -69,9 +75,7 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children, class
       aria-selected={isActive}
       onClick={() => setActiveTab(value)}
       className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
-        isActive
-          ? 'bg-white text-gray-900 shadow-sm'
-          : 'text-gray-600 hover:text-gray-900'
+        isActive ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
       } ${className}`}
     >
       {children}

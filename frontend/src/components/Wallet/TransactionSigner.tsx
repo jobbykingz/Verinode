@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { PenTool, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Copy, ExternalLink } from 'lucide-react';
+import {
+  PenTool,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Copy,
+  ExternalLink,
+} from 'lucide-react';
 import { useFreighter } from '../../hooks/useFreighter';
 import freighterService, { FreighterTransaction } from '../../services/freighterService';
 import toast from 'react-hot-toast';
@@ -25,16 +34,10 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
   onTransactionFailed,
   className = '',
   showPreview = true,
-  allowCustomXDR = false
+  allowCustomXDR = false,
 }) => {
-  const {
-    isConnected,
-    account,
-    network,
-    signTransaction,
-    getErrorMessage,
-    isValidAddress
-  } = useFreighter();
+  const { isConnected, account, network, signTransaction, getErrorMessage, isValidAddress } =
+    useFreighter();
 
   const [isSigning, setIsSigning] = useState(false);
   const [transactionXdr, setTransactionXdr] = useState('');
@@ -44,7 +47,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
     to: '',
     amount: '',
     asset: '',
-    memo: ''
+    memo: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -59,11 +62,18 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
 
     if (!customTransaction.amount?.trim()) {
       newErrors.amount = 'Amount is required';
-    } else if (isNaN(parseFloat(customTransaction.amount)) || parseFloat(customTransaction.amount) <= 0) {
+    } else if (
+      isNaN(parseFloat(customTransaction.amount)) ||
+      parseFloat(customTransaction.amount) <= 0
+    ) {
       newErrors.amount = 'Amount must be a positive number';
     }
 
-    if (customTransaction.asset && customTransaction.asset.trim() && !/^[A-Z0-9]{12}$/.test(customTransaction.asset)) {
+    if (
+      customTransaction.asset &&
+      customTransaction.asset.trim() &&
+      !/^[A-Z0-9]{12}$/.test(customTransaction.asset)
+    ) {
       newErrors.asset = 'Invalid asset code (must be 12 characters)';
     }
 
@@ -86,7 +96,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
           to: customTransaction.to!,
           amount: customTransaction.amount!,
           asset: customTransaction.asset,
-          memo: customTransaction.memo
+          memo: customTransaction.memo,
         };
 
         // This would typically involve creating a proper transaction
@@ -106,10 +116,10 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
     setIsSigning(true);
     try {
       const signedXdr = await signTransaction(xdrToSign);
-      
+
       setTransactionXdr(signedXdr);
       toast.success('Transaction signed successfully!');
-      
+
       if (onTransactionSigned) {
         onTransactionSigned(signedXdr);
       }
@@ -120,7 +130,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
         setTransactionPreview({
           to: 'Unknown',
           amount: 'Unknown',
-          fee: 'Unknown'
+          fee: 'Unknown',
         });
       } catch (error) {
         console.error('Failed to preview transaction:', error);
@@ -128,7 +138,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       toast.error(errorMessage);
-      
+
       if (onTransactionFailed) {
         onTransactionFailed(error instanceof Error ? error : new Error(errorMessage));
       }
@@ -149,7 +159,10 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
   const viewOnStellarExpert = () => {
     if (transactionXdr) {
       const encoded = encodeURIComponent(transactionXdr);
-      window.open(`https://stellar.expert/explorer/${network?.network === 'TESTNET' ? 'testnet' : 'public'}/tx/${encoded}`, '_blank');
+      window.open(
+        `https://stellar.expert/explorer/${network?.network === 'TESTNET' ? 'testnet' : 'public'}/tx/${encoded}`,
+        '_blank',
+      );
     }
   };
 
@@ -166,9 +179,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
       <div className={`bg-gray-50 border border-gray-200 rounded-lg p-4 ${className}`}>
         <div className="flex items-center space-x-3">
           <AlertCircle className="w-5 h-5 text-gray-600" />
-          <p className="text-sm text-gray-700">
-            Connect your wallet to sign transactions
-          </p>
+          <p className="text-sm text-gray-700">Connect your wallet to sign transactions</p>
         </div>
       </div>
     );
@@ -183,9 +194,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
         </div>
         <div className="flex items-center space-x-2 text-sm text-gray-600">
           <span>Network:</span>
-          <span className="font-medium text-gray-900">
-            {network?.network || 'Unknown'}
-          </span>
+          <span className="font-medium text-gray-900">{network?.network || 'Unknown'}</span>
         </div>
       </div>
 
@@ -201,33 +210,29 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
               <input
                 type="text"
                 value={customTransaction.to}
-                onChange={(e) => setCustomTransaction(prev => ({ ...prev, to: e.target.value }))}
+                onChange={(e) => setCustomTransaction((prev) => ({ ...prev, to: e.target.value }))}
                 placeholder="G..."
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.to ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.to && (
-                <p className="text-xs text-red-600 mt-1">{errors.to}</p>
-              )}
+              {errors.to && <p className="text-xs text-red-600 mt-1">{errors.to}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Amount (XLM)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (XLM)</label>
               <input
                 type="text"
                 value={customTransaction.amount}
-                onChange={(e) => setCustomTransaction(prev => ({ ...prev, amount: e.target.value }))}
+                onChange={(e) =>
+                  setCustomTransaction((prev) => ({ ...prev, amount: e.target.value }))
+                }
                 placeholder="0.1"
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.amount ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.amount && (
-                <p className="text-xs text-red-600 mt-1">{errors.amount}</p>
-              )}
+              {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount}</p>}
             </div>
 
             <div>
@@ -237,15 +242,15 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
               <input
                 type="text"
                 value={customTransaction.asset}
-                onChange={(e) => setCustomTransaction(prev => ({ ...prev, asset: e.target.value }))}
+                onChange={(e) =>
+                  setCustomTransaction((prev) => ({ ...prev, asset: e.target.value }))
+                }
                 placeholder="USD"
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   errors.asset ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
-              {errors.asset && (
-                <p className="text-xs text-red-600 mt-1">{errors.asset}</p>
-              )}
+              {errors.asset && <p className="text-xs text-red-600 mt-1">{errors.asset}</p>}
             </div>
 
             <div>
@@ -255,7 +260,9 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
               <input
                 type="text"
                 value={customTransaction.memo}
-                onChange={(e) => setCustomTransaction(prev => ({ ...prev, memo: e.target.value }))}
+                onChange={(e) =>
+                  setCustomTransaction((prev) => ({ ...prev, memo: e.target.value }))
+                }
                 placeholder="Payment memo"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -266,9 +273,7 @@ const TransactionSigner: React.FC<TransactionSignerProps> = ({
 
       {/* XDR Input */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Transaction XDR
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Transaction XDR</label>
         <div className="relative">
           <textarea
             value={transactionXdr}

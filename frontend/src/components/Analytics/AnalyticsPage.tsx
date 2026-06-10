@@ -15,7 +15,7 @@ export const AnalyticsPage: React.FC = () => {
     { id: 'trends', label: 'Trends', icon: BarChart3 },
     { id: 'behavior', label: 'Behavior', icon: Users },
     { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'visualization', label: 'Visualization', icon: BarChart3 }
+    { id: 'visualization', label: 'Visualization', icon: BarChart3 },
   ];
 
   const renderContent = () => {
@@ -46,7 +46,7 @@ export const AnalyticsPage: React.FC = () => {
                 Advanced analytics and business insights for Verinode
               </p>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button className="flex items-center gap-2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                 <Settings className="w-4 h-4" />
@@ -58,7 +58,7 @@ export const AnalyticsPage: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="flex space-x-8">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -81,9 +81,7 @@ export const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {renderContent()}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{renderContent()}</div>
     </div>
   );
 };

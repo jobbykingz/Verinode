@@ -27,9 +27,7 @@ export const SyncStatus: React.FC = () => {
 
   if (syncStatus === 'error') {
     return (
-      <div className="text-sm text-red-600 font-medium">
-        Sync failed. Will retry automatically.
-      </div>
+      <div className="text-sm text-red-600 font-medium">Sync failed. Will retry automatically.</div>
     );
   }
 

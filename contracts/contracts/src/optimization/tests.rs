@@ -2,6 +2,7 @@
 mod tests {
     use super::*;
     use soroban_sdk::{Env, Address, Bytes};
+    extern crate alloc;
 
     #[test]
     fn test_ai_optimizer() {
@@ -330,7 +331,7 @@ mod tests {
                 current_gas_cost: 15000,
                 optimized_gas_cost: 10000,
                 savings_percentage: 33.3,
-                suggestion_type: SuggestionType::AlgorithmImprovement,
+                suggestion_type:            SuggestionType::MemoryOptimization,
                 description: "Improve algorithm".to_string(),
                 code_changes: vec!["Replace nested loops".to_string()],
                 confidence_score: 0.7,

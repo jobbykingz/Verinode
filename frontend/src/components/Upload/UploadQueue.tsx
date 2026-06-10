@@ -57,9 +57,13 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
   onClose,
   style,
 }) => {
-  const [sortBy, setSortBy] = useState<'name' | 'size' | 'status' | 'priority' | 'progress'>('status');
+  const [sortBy, setSortBy] = useState<'name' | 'size' | 'status' | 'priority' | 'progress'>(
+    'status',
+  );
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filterBy, setFilterBy] = useState<'all' | 'pending' | 'uploading' | 'paused' | 'completed' | 'failed'>('all');
+  const [filterBy, setFilterBy] = useState<
+    'all' | 'pending' | 'uploading' | 'paused' | 'completed' | 'failed'
+  >('all');
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [showBatchActions, setShowBatchActions] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -77,12 +81,12 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
   const queueStats = useMemo(() => {
     const stats = {
       total: files.length,
-      pending: files.filter(f => f.status.state === 'pending').length,
-      uploading: files.filter(f => f.status.state === 'uploading').length,
-      paused: files.filter(f => f.status.state === 'paused').length,
-      completed: files.filter(f => f.status.state === 'completed').length,
-      failed: files.filter(f => f.status.state === 'failed').length,
-      cancelled: files.filter(f => f.status.state === 'cancelled').length,
+      pending: files.filter((f) => f.status.state === 'pending').length,
+      uploading: files.filter((f) => f.status.state === 'uploading').length,
+      paused: files.filter((f) => f.status.state === 'paused').length,
+      completed: files.filter((f) => f.status.state === 'completed').length,
+      failed: files.filter((f) => f.status.state === 'failed').length,
+      cancelled: files.filter((f) => f.status.state === 'cancelled').length,
       totalSize: files.reduce((sum, f) => sum + f.size, 0),
       uploadedSize: files.reduce((sum, f) => sum + f.progress.bytesUploaded, 0),
       averageSpeed: files.reduce((sum, f) => sum + f.progress.speed, 0) / files.length || 0,
@@ -97,7 +101,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
 
     // Apply filter
     if (filterBy !== 'all') {
-      filtered = filtered.filter(f => f.status.state === filterBy);
+      filtered = filtered.filter((f) => f.status.state === filterBy);
     }
 
     // Apply sort
@@ -147,15 +151,15 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
     if (selectedFiles.size === processedFiles.length) {
       setSelectedFiles(new Set());
     } else {
-      setSelectedFiles(new Set(processedFiles.map(f => f.id)));
+      setSelectedFiles(new Set(processedFiles.map((f) => f.id)));
     }
     setShowBatchActions(selectedFiles.size > 0);
   };
 
   // Batch actions
   const handleBatchRetry = () => {
-    const failedFiles = Array.from(selectedFiles).filter(fileId => {
-      const file = files.find(f => f.id === fileId);
+    const failedFiles = Array.from(selectedFiles).filter((fileId) => {
+      const file = files.find((f) => f.id === fileId);
       return file && (file.status.state === 'failed' || file.status.state === 'cancelled');
     });
 
@@ -164,14 +168,14 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       return;
     }
 
-    failedFiles.forEach(fileId => onRetryFile?.(fileId));
+    failedFiles.forEach((fileId) => onRetryFile?.(fileId));
     setSelectedFiles(new Set());
     setShowBatchActions(false);
   };
 
   const handleBatchPause = () => {
-    const uploadingFiles = Array.from(selectedFiles).filter(fileId => {
-      const file = files.find(f => f.id === fileId);
+    const uploadingFiles = Array.from(selectedFiles).filter((fileId) => {
+      const file = files.find((f) => f.id === fileId);
       return file && file.status.state === 'uploading';
     });
 
@@ -180,14 +184,14 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       return;
     }
 
-    uploadingFiles.forEach(fileId => onPauseFile?.(fileId));
+    uploadingFiles.forEach((fileId) => onPauseFile?.(fileId));
     setSelectedFiles(new Set());
     setShowBatchActions(false);
   };
 
   const handleBatchResume = () => {
-    const pausedFiles = Array.from(selectedFiles).filter(fileId => {
-      const file = files.find(f => f.id === fileId);
+    const pausedFiles = Array.from(selectedFiles).filter((fileId) => {
+      const file = files.find((f) => f.id === fileId);
       return file && file.status.state === 'paused';
     });
 
@@ -196,7 +200,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       return;
     }
 
-    pausedFiles.forEach(fileId => onResumeFile?.(fileId));
+    pausedFiles.forEach((fileId) => onResumeFile?.(fileId));
     setSelectedFiles(new Set());
     setShowBatchActions(false);
   };
@@ -211,12 +215,12 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
           text: 'Cancel Uploads',
           style: 'destructive',
           onPress: () => {
-            selectedFiles.forEach(fileId => onCancelFile?.(fileId));
+            selectedFiles.forEach((fileId) => onCancelFile?.(fileId));
             setSelectedFiles(new Set());
             setShowBatchActions(false);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -230,12 +234,12 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
           text: 'Remove Files',
           style: 'destructive',
           onPress: () => {
-            selectedFiles.forEach(fileId => onRemove?.(fileId));
+            selectedFiles.forEach((fileId) => onRemove?.(fileId));
             setSelectedFiles(new Set());
             setShowBatchActions(false);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -249,11 +253,11 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
-    
+
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
@@ -295,7 +299,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
         </TouchableOpacity>
         <Text style={styles.title}>Upload Queue</Text>
       </View>
-      
+
       <View style={styles.headerRight}>
         <TouchableOpacity style={styles.headerButton} onPress={handleRefresh}>
           <Icon name="refresh" size={20} color="#7F8C8D" />
@@ -310,32 +314,24 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
         <Text style={styles.statNumber}>{queueStats.total}</Text>
         <Text style={styles.statLabel}>Total</Text>
       </View>
-      
+
       <View style={styles.statItem}>
-        <Text style={[styles.statNumber, { color: '#6C5CE7' }]}>
-          {queueStats.uploading}
-        </Text>
+        <Text style={[styles.statNumber, { color: '#6C5CE7' }]}>{queueStats.uploading}</Text>
         <Text style={styles.statLabel}>Uploading</Text>
       </View>
-      
+
       <View style={styles.statItem}>
-        <Text style={[styles.statNumber, { color: '#FFA500' }]}>
-          {queueStats.paused}
-        </Text>
+        <Text style={[styles.statNumber, { color: '#FFA500' }]}>{queueStats.paused}</Text>
         <Text style={styles.statLabel}>Paused</Text>
       </View>
-      
+
       <View style={styles.statItem}>
-        <Text style={[styles.statNumber, { color: '#6BCF7F' }]}>
-          {queueStats.completed}
-        </Text>
+        <Text style={[styles.statNumber, { color: '#6BCF7F' }]}>{queueStats.completed}</Text>
         <Text style={styles.statLabel}>Completed</Text>
       </View>
-      
+
       <View style={styles.statItem}>
-        <Text style={[styles.statNumber, { color: '#FF6B6B' }]}>
-          {queueStats.failed}
-        </Text>
+        <Text style={[styles.statNumber, { color: '#FF6B6B' }]}>{queueStats.failed}</Text>
         <Text style={styles.statLabel}>Failed</Text>
       </View>
     </View>
@@ -345,26 +341,21 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
     <View style={styles.overallProgressContainer}>
       <View style={styles.progressHeader}>
         <Text style={styles.progressTitle}>Overall Progress</Text>
-        <Text style={styles.progressPercentage}>
-          {Math.round(progress)}%
-        </Text>
+        <Text style={styles.progressPercentage}>{Math.round(progress)}%</Text>
       </View>
-      
+
       <View style={styles.progressBar}>
-        <View
-          style={[
-            styles.progressBarFill,
-            { width: `${progress}%` },
-          ]}
-        />
+        <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
       </View>
-      
+
       <View style={styles.progressDetails}>
         <Text style={styles.progressText}>
           {formatFileSize(queueStats.uploadedSize)} / {formatFileSize(queueStats.totalSize)}
         </Text>
         <Text style={styles.progressText}>
-          {queueStats.averageSpeed > 0 ? `${formatFileSize(queueStats.averageSpeed)}/s` : 'Calculating...'}
+          {queueStats.averageSpeed > 0
+            ? `${formatFileSize(queueStats.averageSpeed)}/s`
+            : 'Calculating...'}
         </Text>
       </View>
     </View>
@@ -383,14 +374,11 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
             size={20}
             color={isUploading ? '#FFFFFF' : '#7F8C8D'}
           />
-          <Text style={[
-            styles.controlButtonText,
-            isUploading && styles.controlButtonTextActive,
-          ]}>
+          <Text style={[styles.controlButtonText, isUploading && styles.controlButtonTextActive]}>
             {isUploading ? 'Pause All' : 'Resume All'}
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.controlButton}
           onPress={onRetry}
@@ -399,7 +387,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
           <Icon name="refresh" size={20} color="#3498DB" />
           <Text style={styles.controlButtonText}>Retry All</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.controlButton}
           onPress={onCancel}
@@ -409,7 +397,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
           <Text style={styles.controlButtonText}>Cancel All</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.controlRow}>
         <TouchableOpacity
           style={styles.sortButton}
@@ -425,7 +413,7 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
             Sort by {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.sortButton}
           onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -445,24 +433,24 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       {(['all', 'pending', 'uploading', 'paused', 'completed', 'failed'] as const).map((filter) => (
         <TouchableOpacity
           key={filter}
-          style={[
-            styles.filterButton,
-            filterBy === filter && styles.filterButtonActive,
-          ]}
+          style={[styles.filterButton, filterBy === filter && styles.filterButtonActive]}
           onPress={() => setFilterBy(filter)}
         >
-          <Text style={[
-            styles.filterButtonText,
-            filterBy === filter && styles.filterButtonTextActive,
-          ]}>
-            {filter.charAt(0).toUpperCase() + filter.slice(1)}
-            {' '}
-            {filter === 'all' ? queueStats.total :
-              filter === 'pending' ? queueStats.pending :
-              filter === 'uploading' ? queueStats.uploading :
-              filter === 'paused' ? queueStats.paused :
-              filter === 'completed' ? queueStats.completed :
-              queueStats.failed}
+          <Text
+            style={[styles.filterButtonText, filterBy === filter && styles.filterButtonTextActive]}
+          >
+            {filter.charAt(0).toUpperCase() + filter.slice(1)}{' '}
+            {filter === 'all'
+              ? queueStats.total
+              : filter === 'pending'
+                ? queueStats.pending
+                : filter === 'uploading'
+                  ? queueStats.uploading
+                  : filter === 'paused'
+                    ? queueStats.paused
+                    : filter === 'completed'
+                      ? queueStats.completed
+                      : queueStats.failed}
           </Text>
         </TouchableOpacity>
       ))}
@@ -477,28 +465,28 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
         <Text style={styles.batchActionsTitle}>
           {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''} selected
         </Text>
-        
+
         <View style={styles.batchActionButtons}>
           <TouchableOpacity style={styles.batchActionButton} onPress={handleBatchRetry}>
             <Icon name="refresh" size={16} color="#3498DB" />
             <Text style={styles.batchActionText}>Retry</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.batchActionButton} onPress={handleBatchPause}>
             <Icon name="pause" size={16} color="#FFA500" />
             <Text style={styles.batchActionText}>Pause</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.batchActionButton} onPress={handleBatchResume}>
             <Icon name="play-arrow" size={16} color="#6BCF7F" />
             <Text style={styles.batchActionText}>Resume</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.batchActionButton} onPress={handleBatchCancel}>
             <Icon name="cancel" size={16} color="#FF6B6B" />
             <Text style={styles.batchActionText}>Cancel</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.batchActionButton} onPress={handleBatchRemove}>
             <Icon name="delete" size={16} color="#95A5A6" />
             <Text style={styles.batchActionText}>Remove</Text>
@@ -510,17 +498,14 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
 
   const renderFileItem = (file: UploadFile) => (
     <View key={file.id} style={styles.fileItem}>
-      <TouchableOpacity
-        style={styles.fileCheckbox}
-        onPress={() => toggleFileSelection(file.id)}
-      >
+      <TouchableOpacity style={styles.fileCheckbox} onPress={() => toggleFileSelection(file.id)}>
         <Icon
           name={selectedFiles.has(file.id) ? 'check-box' : 'check-box-outline-blank'}
           size={20}
           color={selectedFiles.has(file.id) ? '#6C5CE7' : '#7F8C8D'}
         />
       </TouchableOpacity>
-      
+
       <View style={styles.fileInfo}>
         <View style={styles.fileHeader}>
           <Text style={styles.fileName} numberOfLines={1}>
@@ -532,12 +517,10 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
               size={16}
               color={getPriorityColor(file.priority)}
             />
-            <Text style={styles.fileSize}>
-              {formatFileSize(file.size)}
-            </Text>
+            <Text style={styles.fileSize}>{formatFileSize(file.size)}</Text>
           </View>
         </View>
-        
+
         <UploadProgress
           file={file}
           compact={true}
@@ -547,11 +530,8 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
           onRetry={() => onRetryFile?.(file.id)}
         />
       </View>
-      
-      <TouchableOpacity
-        style={styles.fileRemove}
-        onPress={() => onRemove?.(file.id)}
-      >
+
+      <TouchableOpacity style={styles.fileRemove} onPress={() => onRemove?.(file.id)}>
         <Icon name="close" size={20} color="#FF6B6B" />
       </TouchableOpacity>
     </View>
@@ -565,34 +545,33 @@ export const UploadQueue: React.FC<UploadQueueProps> = ({
       {renderControls()}
       {renderFilters()}
       {renderBatchActions()}
-      
+
       <ScrollView
         style={styles.fileList}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       >
         {processedFiles.length === 0 ? (
           <View style={styles.emptyState}>
             <Icon name="inbox" size={64} color="#BDC3C7" />
             <Text style={styles.emptyStateText}>No files in queue</Text>
             <Text style={styles.emptyStateSubtext}>
-              {filterBy === 'all' 
-                ? 'Add files to start uploading'
-                : `No ${filterBy} files found`
-              }
+              {filterBy === 'all' ? 'Add files to start uploading' : `No ${filterBy} files found`}
             </Text>
           </View>
         ) : (
           processedFiles.map(renderFileItem)
         )}
       </ScrollView>
-      
+
       {showBatchActions && (
         <View style={styles.selectAllContainer}>
           <TouchableOpacity style={styles.selectAllButton} onPress={selectAllFiles}>
             <Icon
-              name={selectedFiles.size === processedFiles.length ? 'check-box' : 'check-box-outline-blank'}
+              name={
+                selectedFiles.size === processedFiles.length
+                  ? 'check-box'
+                  : 'check-box-outline-blank'
+              }
               size={20}
               color="#6C5CE7"
             />

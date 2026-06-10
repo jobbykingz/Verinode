@@ -11,7 +11,10 @@ interface ThemeSelectorProps {
   showBrandCustomization?: boolean;
 }
 
-export default function ThemeSelector({ className = '', showBrandCustomization = true }: ThemeSelectorProps) {
+export default function ThemeSelector({
+  className = '',
+  showBrandCustomization = true,
+}: ThemeSelectorProps) {
   const { state, switchTheme, deleteTheme, exportTheme, importTheme } = useThemeManager();
   const [isOpen, setIsOpen] = useState(false);
   const [showCustomThemeEditor, setShowCustomThemeEditor] = useState(false);
@@ -41,9 +44,9 @@ export default function ThemeSelector({ className = '', showBrandCustomization =
     const themeData = exportTheme(themeId);
     if (themeData) {
       const theme = allThemes[themeId];
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(themeData);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(themeData);
       const exportFileDefaultName = `theme-${theme.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-      
+
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', exportFileDefaultName);
@@ -72,18 +75,9 @@ export default function ThemeSelector({ className = '', showBrandCustomization =
         }}
       >
         <div className="h-8 flex">
-          <div
-            className="flex-1"
-            style={{ backgroundColor: theme.colors.primary }}
-          />
-          <div
-            className="flex-1"
-            style={{ backgroundColor: theme.colors.secondary }}
-          />
-          <div
-            className="flex-1"
-            style={{ backgroundColor: theme.colors.accent }}
-          />
+          <div className="flex-1" style={{ backgroundColor: theme.colors.primary }} />
+          <div className="flex-1" style={{ backgroundColor: theme.colors.secondary }} />
+          <div className="flex-1" style={{ backgroundColor: theme.colors.accent }} />
         </div>
         <div className="h-12 p-2">
           <div
@@ -243,17 +237,9 @@ export default function ThemeSelector({ className = '', showBrandCustomization =
         </AnimatePresence>
       </div>
 
-      {showCustomThemeEditor && (
-        <CustomTheme
-          onClose={() => setShowCustomThemeEditor(false)}
-        />
-      )}
+      {showCustomThemeEditor && <CustomTheme onClose={() => setShowCustomThemeEditor(false)} />}
 
-      {showBrandEditor && (
-        <BrandCustomization
-          onClose={() => setShowBrandEditor(false)}
-        />
-      )}
+      {showBrandEditor && <BrandCustomization onClose={() => setShowBrandEditor(false)} />}
 
       {previewTheme && (
         <div
@@ -280,7 +266,7 @@ export default function ThemeSelector({ className = '', showBrandCustomization =
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6">
               <div
                 className="space-y-6"

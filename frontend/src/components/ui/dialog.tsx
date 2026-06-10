@@ -66,7 +66,10 @@ export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className = 
   return <h2 className={`text-lg font-semibold text-gray-900 ${className}`}>{children}</h2>;
 };
 
-export const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className = '' }) => {
+export const DialogDescription: React.FC<DialogDescriptionProps> = ({
+  children,
+  className = '',
+}) => {
   return <p className={`text-sm text-gray-500 mt-1 ${className}`}>{children}</p>;
 };
 

@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+} from 'recharts';
 import { Activity, Shield, Zap, TrendingUp, AlertTriangle } from 'lucide-react';
 
 interface ContractMetric {
@@ -25,7 +36,7 @@ const ContractAnalytics: React.FC = () => {
           date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           usage: Math.floor(Math.random() * 500) + 200,
           latency: Math.floor(Math.random() * 50) + 120,
-          successRate: 95 + Math.random() * 4.9
+          successRate: 95 + Math.random() * 4.9,
         });
       }
       setMetrics(data);
@@ -34,10 +45,30 @@ const ContractAnalytics: React.FC = () => {
   }, []);
 
   const stats = [
-    { label: 'Total Calls', value: '14.2k', icon: <Activity className="w-5 h-5" />, color: 'from-blue-500 to-cyan-500' },
-    { label: 'Avg Latency', value: '142ms', icon: <Zap className="w-5 h-5" />, color: 'from-amber-500 to-orange-500' },
-    { label: 'Proof Success', value: '99.4%', icon: <Shield className="w-5 h-5" />, color: 'from-emerald-500 to-teal-500' },
-    { label: 'Active Users', value: '842', icon: <TrendingUp className="w-5 h-5" />, color: 'from-indigo-500 to-purple-500' },
+    {
+      label: 'Total Calls',
+      value: '14.2k',
+      icon: <Activity className="w-5 h-5" />,
+      color: 'from-blue-500 to-cyan-500',
+    },
+    {
+      label: 'Avg Latency',
+      value: '142ms',
+      icon: <Zap className="w-5 h-5" />,
+      color: 'from-amber-500 to-orange-500',
+    },
+    {
+      label: 'Proof Success',
+      value: '99.4%',
+      icon: <Shield className="w-5 h-5" />,
+      color: 'from-emerald-500 to-teal-500',
+    },
+    {
+      label: 'Active Users',
+      value: '842',
+      icon: <TrendingUp className="w-5 h-5" />,
+      color: 'from-indigo-500 to-purple-500',
+    },
   ];
 
   return (
@@ -51,20 +82,32 @@ const ContractAnalytics: React.FC = () => {
             </h1>
             <p className="text-slate-400 mt-1">Real-time performance metrics and usage tracking</p>
           </div>
-          <div className={`px-4 py-2 rounded-full flex items-center space-x-2 border ${
-            healthStatus === 'HEALTHY' ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 
-            'bg-amber-500/10 border-amber-500/50 text-amber-400'
-          }`}>
-            <div className={`w-2 h-2 rounded-full animate-pulse ${healthStatus === 'HEALTHY' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-            <span className="text-sm font-semibold uppercase tracking-wider">{healthStatus} System</span>
+          <div
+            className={`px-4 py-2 rounded-full flex items-center space-x-2 border ${
+              healthStatus === 'HEALTHY'
+                ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
+                : 'bg-amber-500/10 border-amber-500/50 text-amber-400'
+            }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full animate-pulse ${healthStatus === 'HEALTHY' ? 'bg-emerald-500' : 'bg-amber-500'}`}
+            />
+            <span className="text-sm font-semibold uppercase tracking-wider">
+              {healthStatus} System
+            </span>
           </div>
         </div>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, idx) => (
-            <div key={idx} className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 rounded-2xl hover:border-blue-500/30 transition-all group overflow-hidden relative">
-              <div className={`absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`} />
+            <div
+              key={idx}
+              className="bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 rounded-2xl hover:border-blue-500/30 transition-all group overflow-hidden relative"
+            >
+              <div
+                className={`absolute -right-4 -bottom-4 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`}
+              />
               <div className="flex justify-between items-start">
                 <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color} opacity-80`}>
                   {stat.icon}
@@ -84,25 +127,50 @@ const ContractAnalytics: React.FC = () => {
           <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 p-6 rounded-3xl">
             <h2 className="text-xl font-bold mb-6 flex items-center">
               Usage Throughout (30d)
-              <span className="ml-3 px-2 py-0.5 text-xs bg-blue-500/20 text-blue-400 rounded-lg">+12.4% vs last mo</span>
+              <span className="ml-3 px-2 py-0.5 text-xs bg-blue-500/20 text-blue-400 rounded-lg">
+                +12.4% vs last mo
+              </span>
             </h2>
             <div className="h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={metrics}>
                   <defs>
                     <linearGradient id="usageGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                  <XAxis dataKey="date" stroke="#94a3b8" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
-                  <YAxis stroke="#94a3b8" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
+                  <XAxis
+                    dataKey="date"
+                    stroke="#94a3b8"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12 }}
+                    dy={10}
+                  />
+                  <YAxis
+                    stroke="#94a3b8"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#1e293b',
+                      border: '1px solid #334155',
+                      borderRadius: '12px',
+                    }}
                     itemStyle={{ color: '#f8fafc' }}
                   />
-                  <Area type="monotone" dataKey="usage" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#usageGradient)" />
+                  <Area
+                    type="monotone"
+                    dataKey="usage"
+                    stroke="#3b82f6"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#usageGradient)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -134,7 +202,8 @@ const ContractAnalytics: React.FC = () => {
               </div>
               <h2 className="text-xl font-bold mb-2">Predictive Insights</h2>
               <p className="text-sm text-slate-300 mb-4 font-light leading-relaxed">
-                Based on current activity trends, your usage will likely surge by <span className="text-indigo-400 font-bold">22.4%</span> in the next 14 days.
+                Based on current activity trends, your usage will likely surge by{' '}
+                <span className="text-indigo-400 font-bold">22.4%</span> in the next 14 days.
               </p>
               <button className="w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-semibold transition-colors">
                 View Detailed Forecast

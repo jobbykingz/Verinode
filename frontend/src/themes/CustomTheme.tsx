@@ -78,7 +78,9 @@ const fontFamilies = [
 
 export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps) {
   const { createCustomTheme, updateTheme } = useThemeManager();
-  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'spacing' | 'borders' | 'shadows'>('colors');
+  const [activeTab, setActiveTab] = useState<
+    'colors' | 'typography' | 'spacing' | 'borders' | 'shadows'
+  >('colors');
   const [theme, setTheme] = useState<Omit<Theme, 'id'>>({ ...defaultTheme, ...initialTheme });
   const [validation, setValidation] = useState<ThemeValidation | null>(null);
   const [showPreview, setShowPreview] = useState(true);
@@ -96,8 +98,9 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
 
     const bgLuminance = getLuminance(themeData.colors.background);
     const textLuminance = getLuminance(themeData.colors.text);
-    const contrastRatio = (Math.max(bgLuminance, textLuminance) + 0.05) / (Math.min(bgLuminance, textLuminance) + 0.05);
-    
+    const contrastRatio =
+      (Math.max(bgLuminance, textLuminance) + 0.05) / (Math.min(bgLuminance, textLuminance) + 0.05);
+
     contrastRatios.text = {
       ratio: contrastRatio,
       AA: contrastRatio >= 4.5,
@@ -123,12 +126,12 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;
     const b = rgb & 0xff;
-    
-    const [lr, lg, lb] = [r, g, b].map(c => {
+
+    const [lr, lg, lb] = [r, g, b].map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
   };
 
@@ -167,9 +170,9 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
 
   const handleExport = () => {
     const dataStr = JSON.stringify(theme, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     const exportFileDefaultName = `theme-${theme.name.toLowerCase().replace(/\s+/g, '-')}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -295,12 +298,16 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                           <div className="flex items-center gap-2">
                             <ColorPicker
                               value={value}
-                              onChange={(newColor) => handleColorChange(key as keyof typeof theme.colors, newColor)}
+                              onChange={(newColor) =>
+                                handleColorChange(key as keyof typeof theme.colors, newColor)
+                              }
                             />
                             <input
                               type="text"
                               value={value}
-                              onChange={(e) => handleColorChange(key as keyof typeof theme.colors, e.target.value)}
+                              onChange={(e) =>
+                                handleColorChange(key as keyof typeof theme.colors, e.target.value)
+                              }
                               className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                           </div>
@@ -321,7 +328,9 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                     <h3 className="text-lg font-semibold text-gray-900">Typography</h3>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Font Family</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Font Family
+                        </label>
                         <select
                           value={theme.typography.fontFamily}
                           onChange={(e) => handleTypographyChange('fontFamily', e.target.value)}
@@ -334,9 +343,11 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                           ))}
                         </select>
                       </div>
-                      
+
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Font Sizes</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Font Sizes
+                        </label>
                         <div className="grid grid-cols-2 gap-2">
                           {Object.entries(theme.typography.fontSize).map(([key, value]) => (
                             <div key={key} className="flex items-center gap-2">
@@ -344,7 +355,9 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                               <input
                                 type="text"
                                 value={value}
-                                onChange={(e) => handleTypographyChange(`fontSize.${key}`, e.target.value)}
+                                onChange={(e) =>
+                                  handleTypographyChange(`fontSize.${key}`, e.target.value)
+                                }
                                 className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                               />
                             </div>
@@ -371,10 +384,12 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                           <input
                             type="text"
                             value={value}
-                            onChange={(e) => setTheme({
-                              ...theme,
-                              spacing: { ...theme.spacing, [key]: e.target.value }
-                            })}
+                            onChange={(e) =>
+                              setTheme({
+                                ...theme,
+                                spacing: { ...theme.spacing, [key]: e.target.value },
+                              })
+                            }
                             className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
@@ -399,10 +414,12 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                           <input
                             type="text"
                             value={value}
-                            onChange={(e) => setTheme({
-                              ...theme,
-                              borderRadius: { ...theme.borderRadius, [key]: e.target.value }
-                            })}
+                            onChange={(e) =>
+                              setTheme({
+                                ...theme,
+                                borderRadius: { ...theme.borderRadius, [key]: e.target.value },
+                              })
+                            }
                             className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
@@ -427,10 +444,12 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                           <input
                             type="text"
                             value={value}
-                            onChange={(e) => setTheme({
-                              ...theme,
-                              shadows: { ...theme.shadows, [key]: e.target.value }
-                            })}
+                            onChange={(e) =>
+                              setTheme({
+                                ...theme,
+                                shadows: { ...theme.shadows, [key]: e.target.value },
+                              })
+                            }
                             className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
@@ -478,7 +497,7 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                   >
                     Primary Button
                   </div>
-                  
+
                   <div
                     className="p-3 rounded-md border"
                     style={{
@@ -491,10 +510,20 @@ export default function CustomTheme({ onClose, initialTheme }: CustomThemeProps)
                   </div>
 
                   <div className="space-y-2">
-                    <h4 style={{ fontSize: theme.typography.fontSize.lg, fontWeight: theme.typography.fontWeight.semibold }}>
+                    <h4
+                      style={{
+                        fontSize: theme.typography.fontSize.lg,
+                        fontWeight: theme.typography.fontWeight.semibold,
+                      }}
+                    >
                       Typography Sample
                     </h4>
-                    <p style={{ fontSize: theme.typography.fontSize.base, color: theme.colors.textSecondary }}>
+                    <p
+                      style={{
+                        fontSize: theme.typography.fontSize.base,
+                        color: theme.colors.textSecondary,
+                      }}
+                    >
                       This is a sample text to demonstrate the typography settings.
                     </p>
                   </div>

@@ -13,7 +13,11 @@ const VisualizationDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
   const tabs = [
-    { id: 'overview' as TabType, label: 'Analytics Overview', icon: <BarChart3 className="w-4 h-4" /> },
+    {
+      id: 'overview' as TabType,
+      label: 'Analytics Overview',
+      icon: <BarChart3 className="w-4 h-4" />,
+    },
     { id: 'proofs' as TabType, label: 'Proof Metrics', icon: <Activity className="w-4 h-4" /> },
     { id: 'trends' as TabType, label: 'Trend Analysis', icon: <TrendingUp className="w-4 h-4" /> },
     { id: 'heatmap' as TabType, label: 'Usage Heat Map', icon: <LayoutGrid className="w-4 h-4" /> },
@@ -76,18 +80,10 @@ const VisualizationDashboard: React.FC = () => {
           transition={{ duration: 0.3 }}
         >
           {activeTab === 'overview' && (
-            <AnalyticsDashboard
-              onExport={handleExport}
-              className="space-y-6"
-            />
+            <AnalyticsDashboard onExport={handleExport} className="space-y-6" />
           )}
 
-          {activeTab === 'proofs' && (
-            <ProofMetrics
-              onExport={handleExport}
-              className="space-y-6"
-            />
-          )}
+          {activeTab === 'proofs' && <ProofMetrics onExport={handleExport} className="space-y-6" />}
 
           {activeTab === 'trends' && (
             <TrendAnalysis
@@ -138,9 +134,7 @@ const VisualizationDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             <p>© 2024 Verinode Data Visualization Suite. All rights reserved.</p>
-            <p className="mt-2">
-              Built with React, Chart.js, D3.js, and Tailwind CSS
-            </p>
+            <p className="mt-2">Built with React, Chart.js, D3.js, and Tailwind CSS</p>
           </div>
         </div>
       </div>

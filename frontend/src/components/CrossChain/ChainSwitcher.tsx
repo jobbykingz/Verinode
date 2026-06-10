@@ -33,8 +33,8 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
       nativeCurrency: {
         name: 'Ether',
         symbol: 'ETH',
-        decimals: 18
-      }
+        decimals: 18,
+      },
     },
     {
       chainId: 137,
@@ -44,8 +44,8 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
       nativeCurrency: {
         name: 'MATIC',
         symbol: 'MATIC',
-        decimals: 18
-      }
+        decimals: 18,
+      },
     },
     {
       chainId: 56,
@@ -55,9 +55,9 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
       nativeCurrency: {
         name: 'BNB',
         symbol: 'BNB',
-        decimals: 18
-      }
-    }
+        decimals: 18,
+      },
+    },
   ];
 
   useEffect(() => {
@@ -99,7 +99,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
 
     try {
       if (typeof window !== 'undefined' && window.ethereum) {
-        const chainConfig = supportedChains.find(chain => chain.chainId === chainId);
+        const chainConfig = supportedChains.find((chain) => chain.chainId === chainId);
         if (!chainConfig) {
           throw new Error('Chain not supported');
         }
@@ -108,7 +108,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
         try {
           await window.ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: `0x${chainId.toString(16)}` }]
+            params: [{ chainId: `0x${chainId.toString(16)}` }],
           });
         } catch (switchError: any) {
           // This error code indicates that the chain has not been added to MetaMask
@@ -121,9 +121,9 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
                   chainName: chainConfig.chainName,
                   rpcUrls: [chainConfig.rpcUrl],
                   blockExplorerUrls: [chainConfig.blockExplorer],
-                  nativeCurrency: chainConfig.nativeCurrency
-                }
-              ]
+                  nativeCurrency: chainConfig.nativeCurrency,
+                },
+              ],
             });
           } else {
             throw switchError;
@@ -154,7 +154,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
   };
 
   const getCurrentChainConfig = () => {
-    return supportedChains.find(chain => chain.chainId === currentChain);
+    return supportedChains.find((chain) => chain.chainId === currentChain);
   };
 
   const getChainIcon = (chainId: number) => {
@@ -194,7 +194,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
             Connect Wallet
           </button>
         )}
-        
+
         {walletConnected && (
           <div className="relative">
             <button
@@ -203,9 +203,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
               className="flex items-center space-x-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span className="text-lg">{getChainIcon(currentChain)}</span>
-              <span className="font-medium">
-                {getCurrentChainConfig()?.chainName || 'Unknown'}
-              </span>
+              <span className="font-medium">{getCurrentChainConfig()?.chainName || 'Unknown'}</span>
               <span className="text-xs text-gray-400">
                 {getCurrentChainConfig()?.nativeCurrency.symbol}
               </span>
@@ -241,7 +239,9 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
                           : 'hover:bg-gray-50'
                       } disabled:opacity-50`}
                     >
-                      <div className={`w-8 h-8 ${getChainColor(chain.chainId)} rounded-full flex items-center justify-center text-white text-sm font-bold`}>
+                      <div
+                        className={`w-8 h-8 ${getChainColor(chain.chainId)} rounded-full flex items-center justify-center text-white text-sm font-bold`}
+                      >
                         {chain.nativeCurrency.symbol}
                       </div>
                       <div className="flex-1 text-left">
@@ -264,7 +264,7 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
                     </button>
                   ))}
                 </div>
-                
+
                 <div className="border-t border-gray-200 p-3">
                   <div className="text-xs text-gray-500">
                     <div className="flex items-center justify-between mb-1">
@@ -273,7 +273,9 @@ const ChainSwitcher: React.FC<ChainSwitcherProps> = ({ onChainChange, className 
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Status:</span>
-                      <span className={`font-medium ${walletConnected ? 'text-green-600' : 'text-red-600'}`}>
+                      <span
+                        className={`font-medium ${walletConnected ? 'text-green-600' : 'text-red-600'}`}
+                      >
                         {walletConnected ? 'Connected' : 'Disconnected'}
                       </span>
                     </div>

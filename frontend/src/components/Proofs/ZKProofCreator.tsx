@@ -23,7 +23,7 @@ export const ZKProofCreator: React.FC = () => {
     description: '',
     publicInputs: '',
     verificationKey: '',
-    expiresAt: ''
+    expiresAt: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export const ZKProofCreator: React.FC = () => {
     try {
       const response = await fetch('/api/zk-proofs');
       const data = await response.json();
-      
+
       if (data.success) {
         setProofs(data.data);
       }
@@ -48,9 +48,9 @@ export const ZKProofCreator: React.FC = () => {
   };
 
   const handleInputChange = (field: keyof ZKProofForm, value: string) => {
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
     setError(null);
   };
@@ -78,7 +78,7 @@ export const ZKProofCreator: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -99,9 +99,9 @@ export const ZKProofCreator: React.FC = () => {
           verificationKey: form.verificationKey,
           expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
           metadata: {
-            creator: 'current-user' // Would get from auth context
-          }
-        })
+            creator: 'current-user', // Would get from auth context
+          },
+        }),
       });
 
       const data = await response.json();
@@ -112,7 +112,7 @@ export const ZKProofCreator: React.FC = () => {
           description: '',
           publicInputs: '',
           verificationKey: '',
-          expiresAt: ''
+          expiresAt: '',
         });
         await fetchZKProofs();
       } else {
@@ -131,7 +131,7 @@ export const ZKProofCreator: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
       });
 
       const data = await response.json();
@@ -150,7 +150,7 @@ export const ZKProofCreator: React.FC = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Create ZK-Proof</h2>
-        
+
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
             <p className="text-red-700">{error}</p>
@@ -160,9 +160,7 @@ export const ZKProofCreator: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Proof Type
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Proof Type</label>
               <select
                 value={form.proofType}
                 onChange={(e) => handleInputChange('proofType', e.target.value)}
@@ -191,9 +189,7 @@ export const ZKProofCreator: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea
               value={form.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
@@ -242,7 +238,7 @@ export const ZKProofCreator: React.FC = () => {
 
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-4">Your ZK-Proofs</h3>
-        
+
         {proofs.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No ZK-proofs created yet</p>
         ) : (
@@ -282,7 +278,8 @@ export const ZKProofCreator: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {proof.description.substring(0, 50)}{proof.description.length > 50 ? '...' : ''}
+                      {proof.description.substring(0, 50)}
+                      {proof.description.length > 50 ? '...' : ''}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(proof.createdAt).toLocaleDateString()}

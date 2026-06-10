@@ -1,4 +1,5 @@
 use soroban_sdk::{Env, String, Vec};
+extern crate alloc;
 use super::ai_optimizer::{OptimizationSuggestion, SuggestionType};
 
 #[derive(Clone, Debug, PartialEq)]

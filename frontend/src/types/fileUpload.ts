@@ -561,7 +561,7 @@ export interface UseFileUploadReturn {
   clear: () => void;
   retryAll: () => void;
   pauseAll: () => void;
-  resumeAll: () void;
+  resumeAll: () => void;
   cancelAll: () => void;
   getStats: () => UploadStats;
 }

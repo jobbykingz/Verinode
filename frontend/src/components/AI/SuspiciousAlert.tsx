@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,7 +32,7 @@ import {
   Eye,
   Archive,
   AlertCircle,
-  Zap
+  Zap,
 } from 'lucide-react';
 
 interface SuspiciousAlertProps {
@@ -47,7 +41,12 @@ interface SuspiciousAlertProps {
     proofId: string;
     proofHash: string;
     issuerAddress: string;
-    alertType: 'suspicious_pattern' | 'high_risk' | 'critical_threat' | 'fraud_detected' | 'anomaly_detected';
+    alertType:
+      | 'suspicious_pattern'
+      | 'high_risk'
+      | 'critical_threat'
+      | 'fraud_detected'
+      | 'anomaly_detected';
     severity: 'low' | 'medium' | 'high' | 'critical';
     title: string;
     description: string;
@@ -83,7 +82,7 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
   alert,
   onStatusUpdate,
   onAssign,
-  currentUser = 'current-user'
+  currentUser = 'current-user',
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [resolutionDialogOpen, setResolutionDialogOpen] = useState(false);
@@ -225,9 +224,7 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                 <span className="ml-1">{alert.status.replace('_', ' ').toUpperCase()}</span>
               </Badge>
             </div>
-            <div className="text-sm text-gray-500">
-              {formatTimeAgo(alert.createdAt)}
-            </div>
+            <div className="text-sm text-gray-500">{formatTimeAgo(alert.createdAt)}</div>
           </div>
         </div>
       </CardHeader>
@@ -240,19 +237,23 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
         <div className="flex items-center space-x-4 text-sm">
           <div className="flex items-center space-x-2">
             <span className="font-medium">Risk Score:</span>
-            <span className={`font-bold ${
-              alert.riskScore >= 0.8 ? 'text-green-600' :
-              alert.riskScore >= 0.6 ? 'text-yellow-600' :
-              alert.riskScore >= 0.4 ? 'text-orange-600' : 'text-red-600'
-            }`}>
+            <span
+              className={`font-bold ${
+                alert.riskScore >= 0.8
+                  ? 'text-green-600'
+                  : alert.riskScore >= 0.6
+                    ? 'text-yellow-600'
+                    : alert.riskScore >= 0.4
+                      ? 'text-orange-600'
+                      : 'text-red-600'
+              }`}
+            >
               {(alert.riskScore * 100).toFixed(1)}%
             </span>
           </div>
           <div className="flex items-center space-x-2">
             <span className="font-medium">Confidence:</span>
-            <span className="font-bold text-blue-600">
-              {(alert.confidence * 100).toFixed(1)}%
-            </span>
+            <span className="font-bold text-blue-600">{(alert.confidence * 100).toFixed(1)}%</span>
           </div>
         </div>
 
@@ -267,15 +268,11 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
             )}
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setExpanded(!expanded)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setExpanded(!expanded)}>
               <Eye className="h-4 w-4 mr-1" />
               {expanded ? 'Hide' : 'Show'} Details
             </Button>
-            
+
             {alert.status === 'open' && (
               <>
                 <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
@@ -307,9 +304,7 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                       <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleAssign}>
-                        Assign
-                      </Button>
+                      <Button onClick={handleAssign}>Assign</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -366,9 +361,7 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                       <Button variant="outline" onClick={() => setResolutionDialogOpen(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleStatusUpdate}>
-                        Update Status
-                      </Button>
+                      <Button onClick={handleStatusUpdate}>Update Status</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -406,7 +399,10 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {alert.evidence.patternMatches.map((match, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    >
                       <div className="flex-1">
                         <div className="text-sm font-medium">{match.description}</div>
                         <div className="text-xs text-gray-600">{match.pattern}</div>
@@ -429,14 +425,17 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {alert.evidence.similarCases.map((case_, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    >
                       <div className="flex items-center space-x-2">
                         <span className="text-sm font-mono">{case_.proofId}</span>
                         <Badge variant="outline" className="text-xs">
                           {(case_.similarity * 100).toFixed(1)}% similar
                         </Badge>
                       </div>
-                      <Badge 
+                      <Badge
                         variant={case_.outcome === 'low' ? 'default' : 'destructive'}
                         className="text-xs"
                       >
@@ -463,7 +462,8 @@ const SuspiciousAlert: React.FC<SuspiciousAlertProps> = ({
                   )}
                   {alert.resolvedAt && (
                     <div>
-                      <span className="font-medium">Resolved at:</span> {new Date(alert.resolvedAt).toLocaleString()}
+                      <span className="font-medium">Resolved at:</span>{' '}
+                      {new Date(alert.resolvedAt).toLocaleString()}
                     </div>
                   )}
                   {alert.resolutionNotes && (

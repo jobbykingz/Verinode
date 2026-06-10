@@ -79,8 +79,6 @@ const analyticsRoutes  = require("./routes/analytics");
 const ipfsRoutes       = require("./routes/ipfs");
 const performanceRoutes = require("./routes/performance");
 const cacheRoutes      = require("./routes/cache");
-const cacheRoutes = require("./routes/cache");
-const { redisService } = require("./services/redisService");
 
 const app  = express();
 const PORT = config.server.port;

@@ -9,12 +9,12 @@ import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Progress } from '../ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-import { 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Users, 
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Users,
   Eye,
   EyeOff,
   Copy,
@@ -27,7 +27,7 @@ import {
   Timer,
   FileText,
   Shield,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { multiSigService } from '../../services/multiSigService';
 import { toast } from 'react-hot-toast';
@@ -42,7 +42,14 @@ interface SignatureRequestData {
   requestId: string;
   walletId: string;
   request: {
-    type: 'PROOF_CREATION' | 'PROOF_VERIFICATION' | 'CONTRACT_INTERACTION' | 'TOKEN_TRANSFER' | 'CONFIG_CHANGE' | 'SIGNER_MANAGEMENT' | 'EMERGENCY_ACTIONS';
+    type:
+      | 'PROOF_CREATION'
+      | 'PROOF_VERIFICATION'
+      | 'CONTRACT_INTERACTION'
+      | 'TOKEN_TRANSFER'
+      | 'CONFIG_CHANGE'
+      | 'SIGNER_MANAGEMENT'
+      | 'EMERGENCY_ACTIONS';
     title: string;
     description: string;
     payload: any;
@@ -84,10 +91,10 @@ interface SignatureRequestData {
   };
 }
 
-export const SignatureRequest: React.FC<SignatureRequestProps> = ({ 
-  requestId, 
+export const SignatureRequest: React.FC<SignatureRequestProps> = ({
+  requestId,
   walletId,
-  onRequestCreated 
+  onRequestCreated,
 }) => {
   const [request, setRequest] = useState<SignatureRequestData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -105,7 +112,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
     description: '',
     payload: '',
     priority: 'MEDIUM' as const,
-    expiresIn: 24
+    expiresIn: 24,
   });
 
   // Load request data
@@ -131,9 +138,14 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
   const handleCreateRequest = async () => {
     try {
       setLoading(true);
-      
+
       // Validate form
-      if (!createForm.walletId || !createForm.title || !createForm.description || !createForm.payload) {
+      if (
+        !createForm.walletId ||
+        !createForm.title ||
+        !createForm.description ||
+        !createForm.payload
+      ) {
         toast.error('Please fill all required fields');
         return;
       }
@@ -151,14 +163,13 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
         payload: parsedPayload,
         createdBy: 'current-user', // Replace with actual user ID
         ipAddress: '127.0.0.1', // Replace with actual IP
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
       });
 
       setRequest(newRequest);
       setShowCreateForm(false);
       onRequestCreated?.(newRequest.requestId);
       toast.success('Signature request created successfully');
-
     } catch (error) {
       toast.error('Failed to create signature request');
       console.error('Error creating request:', error);
@@ -170,22 +181,21 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
   const handleAddSignature = async () => {
     try {
       setLoading(true);
-      
+
       if (!signerAddress || !signature) {
         toast.error('Please provide signer address and signature');
         return;
       }
 
       await multiSigService.addSignature(request!.requestId, signerAddress, signature);
-      
+
       // Reload request to get updated state
       await loadRequest(request!.requestId);
-      
+
       setSigningDialog(false);
       setSignerAddress('');
       setSignature('');
       toast.success('Signature added successfully');
-
     } catch (error) {
       toast.error('Failed to add signature');
       console.error('Error adding signature:', error);
@@ -197,12 +207,11 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
   const handleExecuteRequest = async () => {
     try {
       setLoading(true);
-      
+
       const updatedRequest = await multiSigService.executeRequest(request!.requestId);
       setRequest(updatedRequest);
-      
-      toast.success('Request executed successfully');
 
+      toast.success('Request executed successfully');
     } catch (error) {
       toast.error('Failed to execute request');
       console.error('Error executing request:', error);
@@ -213,35 +222,54 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'yellow';
-      case 'APPROVED': return 'green';
-      case 'REJECTED': return 'red';
-      case 'EXPIRED': return 'gray';
-      case 'EXECUTED': return 'blue';
-      case 'FAILED': return 'red';
-      default: return 'gray';
+      case 'PENDING':
+        return 'yellow';
+      case 'APPROVED':
+        return 'green';
+      case 'REJECTED':
+        return 'red';
+      case 'EXPIRED':
+        return 'gray';
+      case 'EXECUTED':
+        return 'blue';
+      case 'FAILED':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING': return <Clock className="h-4 w-4" />;
-      case 'APPROVED': return <CheckCircle className="h-4 w-4" />;
-      case 'REJECTED': return <XCircle className="h-4 w-4" />;
-      case 'EXPIRED': return <Timer className="h-4 w-4" />;
-      case 'EXECUTED': return <Shield className="h-4 w-4" />;
-      case 'FAILED': return <AlertTriangle className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
+      case 'PENDING':
+        return <Clock className="h-4 w-4" />;
+      case 'APPROVED':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'REJECTED':
+        return <XCircle className="h-4 w-4" />;
+      case 'EXPIRED':
+        return <Timer className="h-4 w-4" />;
+      case 'EXECUTED':
+        return <Shield className="h-4 w-4" />;
+      case 'FAILED':
+        return <AlertTriangle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW': return 'secondary';
-      case 'MEDIUM': return 'default';
-      case 'HIGH': return 'destructive';
-      case 'CRITICAL': return 'destructive';
-      default: return 'default';
+      case 'LOW':
+        return 'secondary';
+      case 'MEDIUM':
+        return 'default';
+      case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
+        return 'destructive';
+      default:
+        return 'default';
     }
   };
 
@@ -254,12 +282,12 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
     const now = new Date();
     const expiry = new Date(expiresAt);
     const diff = expiry.getTime() - now.getTime();
-    
+
     if (diff <= 0) return 'Expired';
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    
+
     return `${hours}h ${minutes}m`;
   };
 
@@ -279,7 +307,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
               <Input
                 id="walletId"
                 value={createForm.walletId}
-                onChange={(e) => setCreateForm(prev => ({ ...prev, walletId: e.target.value }))}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, walletId: e.target.value }))}
                 placeholder="Enter wallet ID"
               />
             </div>
@@ -287,9 +315,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
               <Label htmlFor="type">Request Type *</Label>
               <Select
                 value={createForm.type}
-                onValueChange={(value: any) =>
-                  setCreateForm(prev => ({ ...prev, type: value }))
-                }
+                onValueChange={(value: any) => setCreateForm((prev) => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -313,7 +339,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
               <Input
                 id="title"
                 value={createForm.title}
-                onChange={(e) => setCreateForm(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, title: e.target.value }))}
                 placeholder="Enter request title"
               />
             </div>
@@ -322,7 +348,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
               <Select
                 value={createForm.priority}
                 onValueChange={(value: any) =>
-                  setCreateForm(prev => ({ ...prev, priority: value }))
+                  setCreateForm((prev) => ({ ...prev, priority: value }))
                 }
               >
                 <SelectTrigger>
@@ -343,7 +369,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
             <Textarea
               id="description"
               value={createForm.description}
-              onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Describe what this request does"
               rows={3}
             />
@@ -354,7 +380,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
             <Textarea
               id="payload"
               value={createForm.payload}
-              onChange={(e) => setCreateForm(prev => ({ ...prev, payload: e.target.value }))}
+              onChange={(e) => setCreateForm((prev) => ({ ...prev, payload: e.target.value }))}
               placeholder='{"key": "value"}'
               rows={6}
               className="font-mono"
@@ -369,25 +395,20 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
               min="1"
               max="168"
               value={createForm.expiresIn}
-              onChange={(e) => setCreateForm(prev => ({ 
-                ...prev, 
-                expiresIn: parseInt(e.target.value) || 24 
-              }))}
+              onChange={(e) =>
+                setCreateForm((prev) => ({
+                  ...prev,
+                  expiresIn: parseInt(e.target.value) || 24,
+                }))
+              }
             />
           </div>
 
           <div className="flex gap-4">
-            <Button 
-              onClick={handleCreateRequest}
-              disabled={loading}
-              className="flex-1"
-            >
+            <Button onClick={handleCreateRequest} disabled={loading} className="flex-1">
               {loading ? 'Creating...' : 'Create Request'}
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => setShowCreateForm(false)}
-            >
+            <Button variant="outline" onClick={() => setShowCreateForm(false)}>
               Cancel
             </Button>
           </div>
@@ -452,8 +473,8 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
                 {request.threshold.currentWeight}/{request.threshold.requiredWeight}
               </span>
             </div>
-            <Progress 
-              value={(request.threshold.currentWeight / request.threshold.requiredWeight) * 100} 
+            <Progress
+              value={(request.threshold.currentWeight / request.threshold.requiredWeight) * 100}
               className="mb-2"
             />
             <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -490,9 +511,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
-            <div className="text-sm font-mono truncate">
-              {request.requestId}
-            </div>
+            <div className="text-sm font-mono truncate">{request.requestId}</div>
             <div className="text-sm text-gray-500">
               Type: {request.request.type.replace('_', ' ')}
             </div>
@@ -541,17 +560,10 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
                       />
                     </div>
                     <div className="flex gap-4">
-                      <Button 
-                        onClick={handleAddSignature}
-                        disabled={loading}
-                        className="flex-1"
-                      >
+                      <Button onClick={handleAddSignature} disabled={loading} className="flex-1">
                         {loading ? 'Adding...' : 'Add Signature'}
                       </Button>
-                      <Button 
-                        variant="outline"
-                        onClick={() => setSigningDialog(false)}
-                      >
+                      <Button variant="outline" onClick={() => setSigningDialog(false)}>
                         Cancel
                       </Button>
                     </div>
@@ -561,7 +573,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
             )}
 
             {request.status === 'APPROVED' && (
-              <Button 
+              <Button
                 onClick={handleExecuteRequest}
                 disabled={loading}
                 className="bg-green-600 hover:bg-green-700"
@@ -593,11 +605,7 @@ export const SignatureRequest: React.FC<SignatureRequestProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label>Payload</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowPayload(!showPayload)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowPayload(!showPayload)}>
                 {showPayload ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>

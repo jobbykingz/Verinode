@@ -26,11 +26,11 @@ const PluginManager: React.FC = () => {
     try {
       setLoading(true);
       const installedPlugins = pluginManager.getInstalledPlugins();
-      const pluginsWithStatus = installedPlugins.map(plugin => ({
+      const pluginsWithStatus = installedPlugins.map((plugin) => ({
         ...plugin,
         isActive: true,
         canUpdate: true,
-        updateAvailable: false
+        updateAvailable: false,
       }));
       setPlugins(pluginsWithStatus);
     } catch (error) {
@@ -86,11 +86,16 @@ const PluginManager: React.FC = () => {
 
   const getPermissionIcon = (type: string) => {
     switch (type) {
-      case 'stellar': return <Shield className="w-4 h-4" />;
-      case 'network': return <Download className="w-4 h-4" />;
-      case 'ui': return <Settings className="w-4 h-4" />;
-      case 'storage': return <Package className="w-4 h-4" />;
-      default: return <Settings className="w-4 h-4" />;
+      case 'stellar':
+        return <Shield className="w-4 h-4" />;
+      case 'network':
+        return <Download className="w-4 h-4" />;
+      case 'ui':
+        return <Settings className="w-4 h-4" />;
+      case 'storage':
+        return <Package className="w-4 h-4" />;
+      default:
+        return <Settings className="w-4 h-4" />;
     }
   };
 
@@ -124,7 +129,9 @@ const PluginManager: React.FC = () => {
         <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
           <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No plugins installed</h3>
-          <p className="text-gray-600 mb-4">Install plugins from the marketplace to extend Verinode functionality</p>
+          <p className="text-gray-600 mb-4">
+            Install plugins from the marketplace to extend Verinode functionality
+          </p>
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Browse Marketplace
           </button>
@@ -157,9 +164,9 @@ const PluginManager: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   <p className="text-gray-600 mb-3">{plugin.description}</p>
-                  
+
                   <div className="flex items-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <Users className="w-4 h-4" />

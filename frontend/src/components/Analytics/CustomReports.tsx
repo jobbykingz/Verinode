@@ -1,5 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { FileText, Download, Calendar, Filter, Settings, Share2, Trash2, Plus } from 'lucide-react';
 
 interface ReportMetric {
@@ -39,13 +53,18 @@ interface CustomReport {
 
 const AVAILABLE_METRICS: ReportMetric[] = [
   { name: 'total_users', label: 'Total Users', type: 'number', defaultSelected: true },
-  { name: 'daily_active_users', label: 'Daily Active Users', type: 'number', defaultSelected: true },
+  {
+    name: 'daily_active_users',
+    label: 'Daily Active Users',
+    type: 'number',
+    defaultSelected: true,
+  },
   { name: 'revenue', label: 'Revenue', type: 'currency', defaultSelected: false },
   { name: 'proofs_verified', label: 'Proofs Verified', type: 'number', defaultSelected: true },
   { name: 'response_time', label: 'Response Time', type: 'number', defaultSelected: false },
   { name: 'error_rate', label: 'Error Rate', type: 'percentage', defaultSelected: false },
   { name: 'conversion_rate', label: 'Conversion Rate', type: 'percentage', defaultSelected: false },
-  { name: 'retention_rate', label: 'Retention Rate', type: 'percentage', defaultSelected: false }
+  { name: 'retention_rate', label: 'Retention Rate', type: 'percentage', defaultSelected: false },
 ];
 
 const TIMEFRAMES = [
@@ -53,7 +72,7 @@ const TIMEFRAMES = [
   { value: '7d', label: 'Last 7 Days' },
   { value: '30d', label: 'Last 30 Days' },
   { value: '90d', label: 'Last 90 Days' },
-  { value: '1y', label: 'Last Year' }
+  { value: '1y', label: 'Last Year' },
 ];
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -117,16 +136,16 @@ export const CustomReports: React.FC = () => {
         filters,
         visualization: {
           type: chartType,
-          config: {}
-        }
+          config: {},
+        },
       };
 
       const response = await fetch('/api/analytics/custom-reports', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(reportData)
+        body: JSON.stringify(reportData),
       });
 
       const newReport = await response.json();
@@ -146,9 +165,9 @@ export const CustomReports: React.FC = () => {
 
     try {
       await fetch(`/api/analytics/reports/${reportId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
-      setReports(reports.filter(report => report.id !== reportId));
+      setReports(reports.filter((report) => report.id !== reportId));
     } catch (error) {
       console.error('Error deleting report:', error);
       alert('Failed to delete report');
@@ -159,7 +178,7 @@ export const CustomReports: React.FC = () => {
     try {
       const response = await fetch(`/api/analytics/reports/${reportId}/export?format=${format}`);
       const data = await response.json();
-      
+
       // Create download link
       const link = document.createElement('a');
       link.href = data.downloadUrl;
@@ -223,7 +242,7 @@ export const CustomReports: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900">Custom Reports</h2>
           <p className="text-sm text-gray-600 mt-1">Create and manage custom analytics reports</p>
         </div>
-        
+
         <button
           onClick={() => setShowBuilder(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -249,9 +268,7 @@ export const CustomReports: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Report Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Report Name</label>
               <input
                 type="text"
                 value={reportName}
@@ -260,27 +277,25 @@ export const CustomReports: React.FC = () => {
                 placeholder="Enter report name"
               />
             </div>
-            
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Timeframe
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Timeframe</label>
               <select
                 value={selectedTimeframe}
                 onChange={(e) => setSelectedTimeframe(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {TIMEFRAMES.map(tf => (
-                  <option key={tf.value} value={tf.value}>{tf.label}</option>
+                {TIMEFRAMES.map((tf) => (
+                  <option key={tf.value} value={tf.value}>
+                    {tf.label}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea
               value={reportDescription}
               onChange={(e) => setReportDescription(e.target.value)}
@@ -291,11 +306,9 @@ export const CustomReports: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Metrics
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Metrics</label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {AVAILABLE_METRICS.map(metric => (
+              {AVAILABLE_METRICS.map((metric) => (
                 <label key={metric.name} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
@@ -304,7 +317,7 @@ export const CustomReports: React.FC = () => {
                       if (e.target.checked) {
                         setSelectedMetrics([...selectedMetrics, metric.name]);
                       } else {
-                        setSelectedMetrics(selectedMetrics.filter(m => m !== metric.name));
+                        setSelectedMetrics(selectedMetrics.filter((m) => m !== metric.name));
                       }
                     }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -316,11 +329,9 @@ export const CustomReports: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Chart Type
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Chart Type</label>
             <div className="flex gap-2">
-              {['line', 'bar', 'pie'].map(type => (
+              {['line', 'bar', 'pie'].map((type) => (
                 <button
                   key={type}
                   onClick={() => setChartType(type as any)}
@@ -338,17 +349,12 @@ export const CustomReports: React.FC = () => {
 
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Filters
-              </label>
-              <button
-                onClick={addFilter}
-                className="text-sm text-blue-600 hover:text-blue-700"
-              >
+              <label className="block text-sm font-medium text-gray-700">Filters</label>
+              <button onClick={addFilter} className="text-sm text-blue-600 hover:text-blue-700">
                 + Add Filter
               </button>
             </div>
-            
+
             {filters.map((filter, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <input
@@ -411,8 +417,11 @@ export const CustomReports: React.FC = () => {
         <div className="mb-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Report Templates</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {templates.map(template => (
-              <div key={template.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            {templates.map((template) => (
+              <div
+                key={template.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
                 <h4 className="font-medium text-gray-900 mb-2">{template.name}</h4>
                 <p className="text-sm text-gray-600 mb-3">{template.description}</p>
                 <div className="flex justify-between items-center">
@@ -442,8 +451,11 @@ export const CustomReports: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {reports.map(report => (
-              <div key={report.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            {reports.map((report) => (
+              <div
+                key={report.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              >
                 <div className="flex justify-between items-start mb-3">
                   <h4 className="font-medium text-gray-900">{report.name}</h4>
                   <div className="flex gap-1">
@@ -463,12 +475,15 @@ export const CustomReports: React.FC = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <p className="text-sm text-gray-600 mb-3">{report.description}</p>
-                
+
                 <div className="flex flex-wrap gap-1 mb-3">
-                  {report.metrics.slice(0, 3).map(metric => (
-                    <span key={metric} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
+                  {report.metrics.slice(0, 3).map((metric) => (
+                    <span
+                      key={metric}
+                      className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded"
+                    >
                       {metric}
                     </span>
                   ))}
@@ -478,7 +493,7 @@ export const CustomReports: React.FC = () => {
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex justify-between items-center text-xs text-gray-500">
                   <span>{report.timeframe}</span>
                   <span>{new Date(report.createdAt).toLocaleDateString()}</span>

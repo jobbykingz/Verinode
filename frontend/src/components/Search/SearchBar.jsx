@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const SearchBar = ({ 
-  onSearch, 
+const SearchBar = ({
+  onSearch,
   onFilterChange,
-  placeholder = "Search proofs, templates, or users...",
-  initialValue = "",
+  placeholder = 'Search proofs, templates, or users...',
+  initialValue = '',
   showFilters = true,
-  className = ""
+  className = '',
 }) => {
   const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -32,7 +32,9 @@ const SearchBar = ({
       setIsLoading(true);
       try {
         // Mock API call - replace with actual endpoint
-        const response = await fetch(`/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=8`);
+        const response = await fetch(
+          `/api/search/autocomplete?q=${encodeURIComponent(query)}&limit=8`,
+        );
         if (response.ok) {
           const data = await response.json();
           setSuggestions(data.data || []);
@@ -104,14 +106,24 @@ const SearchBar = ({
               placeholder={placeholder}
               className="w-full px-4 py-3 pl-12 text-gray-900 placeholder-gray-500 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            
+
             {/* Search Icon */}
             <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
-            
+
             {/* Loading Indicator */}
             {isLoading && (
               <div className="absolute inset-y-0 right-0 flex items-center pr-4">
@@ -119,7 +131,7 @@ const SearchBar = ({
               </div>
             )}
           </div>
-          
+
           {showFilters && (
             <button
               onClick={handleFilterToggle}
@@ -128,11 +140,16 @@ const SearchBar = ({
               title="Advanced Filters"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
             </button>
           )}
-          
+
           <button
             onClick={() => handleSearch()}
             className="ml-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

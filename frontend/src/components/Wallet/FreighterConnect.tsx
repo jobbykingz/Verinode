@@ -16,7 +16,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
   onDisconnect,
   className = '',
   showStatus = true,
-  compact = false
+  compact = false,
 }) => {
   const {
     isConnected,
@@ -26,7 +26,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
     account,
     connect,
     disconnect,
-    getErrorMessage
+    getErrorMessage,
   } = useFreighter();
 
   const [isHovered, setIsHovered] = useState(false);
@@ -90,9 +90,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
         <div className="flex items-start space-x-3">
           <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
-            <h3 className="text-sm font-medium text-yellow-800">
-              Freighter Wallet Not Found
-            </h3>
+            <h3 className="text-sm font-medium text-yellow-800">Freighter Wallet Not Found</h3>
             <p className="text-sm text-yellow-700 mt-1">
               Install Freighter wallet to connect to the Stellar network.
             </p>
@@ -126,7 +124,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
               )}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {showStatus && (
               <button
@@ -139,7 +137,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
                 {formatAddress(account.publicKey)}
               </button>
             )}
-            
+
             <button
               onClick={handleDisconnect}
               disabled={isConnecting}
@@ -169,7 +167,7 @@ const FreighterConnect: React.FC<FreighterConnectProps> = ({
             )}
           </div>
         </div>
-        
+
         <button
           onClick={handleConnect}
           disabled={isConnecting}

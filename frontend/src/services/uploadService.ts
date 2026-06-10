@@ -41,14 +41,14 @@ export class UploadService {
   async uploadFile(file: File, options: Partial<UploadOptions> = {}): Promise<UploadFile> {
     const uploadFile = this.createUploadFile(file, options);
     this.activeUploads.set(uploadFile.id, uploadFile);
-    
+
     try {
       // Validate file
       await this.validateFile(uploadFile);
-      
+
       // Start upload
       await this.startUpload(uploadFile);
-      
+
       return uploadFile;
     } catch (error) {
       this.handleUploadError(uploadFile, error as Error);
@@ -60,17 +60,17 @@ export class UploadService {
    * Upload multiple files
    */
   async uploadFiles(files: File[], options: Partial<UploadOptions> = {}): Promise<UploadFile[]> {
-    const uploadFiles = files.map(file => this.createUploadFile(file, options));
-    
+    const uploadFiles = files.map((file) => this.createUploadFile(file, options));
+
     // Add all files to active uploads
-    uploadFiles.forEach(file => this.activeUploads.set(file.id, file));
-    
+    uploadFiles.forEach((file) => this.activeUploads.set(file.id, file));
+
     // Add to queue
     this.uploadQueue.push(...uploadFiles);
-    
+
     // Process queue
     this.processQueue();
-    
+
     return uploadFiles;
   }
 
@@ -83,9 +83,9 @@ export class UploadService {
 
     uploadFile.status.state = 'paused';
     uploadFile.status.isPaused = true;
-    
+
     this.emitEvent('uploadPaused', { fileId });
-    
+
     return true;
   }
 
@@ -98,12 +98,12 @@ export class UploadService {
 
     uploadFile.status.state = 'uploading';
     uploadFile.status.isPaused = false;
-    
+
     this.emitEvent('uploadResumed', { fileId });
-    
+
     // Resume upload process
     this.resumeUploadProcess(uploadFile);
-    
+
     return true;
   }
 
@@ -116,19 +116,19 @@ export class UploadService {
 
     uploadFile.status.state = 'cancelled';
     uploadFile.status.canCancel = false;
-    
+
     // Clear retry timer
     const retryTimer = this.retryQueue.get(fileId);
     if (retryTimer) {
       clearTimeout(retryTimer);
       this.retryQueue.delete(fileId);
     }
-    
+
     this.emitEvent('uploadCancelled', { fileId });
-    
+
     // Remove from active uploads
     this.activeUploads.delete(fileId);
-    
+
     return true;
   }
 
@@ -142,7 +142,7 @@ export class UploadService {
     // Reset error
     uploadFile.error = undefined;
     uploadFile.status.state = 'pending';
-    
+
     // Reset progress
     uploadFile.progress = {
       bytesUploaded: 0,
@@ -153,12 +153,12 @@ export class UploadService {
       chunksCompleted: 0,
       totalChunks: uploadFile.chunks?.length || 0,
     };
-    
+
     this.emitEvent('uploadStarted', { fileId });
-    
+
     // Restart upload
     this.startUpload(uploadFile);
-    
+
     return true;
   }
 
@@ -173,15 +173,15 @@ export class UploadService {
     if (uploadFile.status.state === 'uploading' || uploadFile.status.state === 'paused') {
       this.cancelUpload(fileId);
     }
-    
+
     // Remove from queue
-    this.uploadQueue = this.uploadQueue.filter(f => f.id !== fileId);
-    
+    this.uploadQueue = this.uploadQueue.filter((f) => f.id !== fileId);
+
     // Remove from active uploads
     this.activeUploads.delete(fileId);
-    
+
     this.emitEvent('fileRemoved', { fileId });
-    
+
     return true;
   }
 
@@ -204,7 +204,7 @@ export class UploadService {
    */
   pauseAllUploads(): void {
     this.isPaused = true;
-    this.activeUploads.forEach(file => {
+    this.activeUploads.forEach((file) => {
       if (file.status.state === 'uploading') {
         this.pauseUpload(file.id);
       }
@@ -216,7 +216,7 @@ export class UploadService {
    */
   resumeAllUploads(): void {
     this.isPaused = false;
-    this.activeUploads.forEach(file => {
+    this.activeUploads.forEach((file) => {
       if (file.status.state === 'paused') {
         this.resumeUpload(file.id);
       }
@@ -227,7 +227,7 @@ export class UploadService {
    * Cancel all uploads
    */
   cancelAllUploads(): void {
-    this.activeUploads.forEach(file => {
+    this.activeUploads.forEach((file) => {
       this.cancelUpload(file.id);
     });
     this.uploadQueue = [];
@@ -237,10 +237,11 @@ export class UploadService {
    * Clear completed uploads
    */
   clearCompletedUploads(): void {
-    const completedUploads = Array.from(this.activeUploads.values())
-      .filter(file => file.status.state === 'completed' || file.status.state === 'failed');
-    
-    completedUploads.forEach(file => {
+    const completedUploads = Array.from(this.activeUploads.values()).filter(
+      (file) => file.status.state === 'completed' || file.status.state === 'failed',
+    );
+
+    completedUploads.forEach((file) => {
       this.activeUploads.delete(file.id);
     });
   }
@@ -250,15 +251,15 @@ export class UploadService {
    */
   addEventListener(event: UploadEventType, listener: (data: any) => void): string {
     const listenerId = `listener_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     this.listeners.set(listenerId, {
       onEvent: listener,
     });
-    
+
     this.eventEmitter.addEventListener(event, (event: any) => {
       listener(event.detail);
     });
-    
+
     return listenerId;
   }
 
@@ -277,14 +278,14 @@ export class UploadService {
    */
   getUploadStats() {
     const uploads = Array.from(this.activeUploads.values());
-    
+
     return {
       total: uploads.length,
-      uploading: uploads.filter(f => f.status.state === 'uploading').length,
-      paused: uploads.filter(f => f.status.state === 'paused').length,
-      completed: uploads.filter(f => f.status.state === 'completed').length,
-      failed: uploads.filter(f => f.status.state === 'failed').length,
-      cancelled: uploads.filter(f => f.status.state === 'cancelled').length,
+      uploading: uploads.filter((f) => f.status.state === 'uploading').length,
+      paused: uploads.filter((f) => f.status.state === 'paused').length,
+      completed: uploads.filter((f) => f.status.state === 'completed').length,
+      failed: uploads.filter((f) => f.status.state === 'failed').length,
+      cancelled: uploads.filter((f) => f.status.state === 'cancelled').length,
       totalBytes: uploads.reduce((sum, f) => sum + f.size, 0),
       uploadedBytes: uploads.reduce((sum, f) => sum + f.progress.bytesUploaded, 0),
       averageSpeed: uploads.reduce((sum, f) => sum + f.progress.speed, 0) / uploads.length || 0,
@@ -295,7 +296,7 @@ export class UploadService {
 
   private createUploadFile(file: File, options: Partial<UploadOptions>): UploadFile {
     const id = `upload_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const uploadFile: UploadFile = {
       id,
       file,
@@ -354,7 +355,7 @@ export class UploadService {
     for (let i = 0; i < totalChunks; i++) {
       const start = i * chunkSize;
       const end = Math.min(start + chunkSize, uploadFile.size);
-      
+
       chunks.push({
         id: `${uploadFile.id}_chunk_${i}`,
         index: i,
@@ -378,7 +379,10 @@ export class UploadService {
     }
 
     // File type validation
-    if (this.config.allowedTypes.length > 0 && !this.config.allowedTypes.includes(uploadFile.type)) {
+    if (
+      this.config.allowedTypes.length > 0 &&
+      !this.config.allowedTypes.includes(uploadFile.type)
+    ) {
       throw new Error(`File type ${uploadFile.type} is not allowed`);
     }
 
@@ -413,7 +417,7 @@ export class UploadService {
   private async startUpload(uploadFile: UploadFile): Promise<void> {
     uploadFile.status.state = 'uploading';
     uploadFile.progress.timeElapsed = Date.now();
-    
+
     this.emitEvent('uploadStarted', { fileId: uploadFile.id });
 
     try {
@@ -422,15 +426,14 @@ export class UploadService {
       } else {
         await this.uploadSingleFile(uploadFile);
       }
-      
+
       // Mark as completed
       uploadFile.status.state = 'completed';
       uploadFile.uploadedAt = new Date();
       uploadFile.progress.percentage = 100;
       uploadFile.progress.bytesUploaded = uploadFile.size;
-      
+
       this.emitEvent('uploadCompleted', { fileId: uploadFile.id, file: uploadFile });
-      
     } catch (error) {
       this.handleUploadError(uploadFile, error as Error);
     }
@@ -438,24 +441,24 @@ export class UploadService {
 
   private async uploadSingleFile(uploadFile: UploadFile): Promise<void> {
     const startTime = Date.now();
-    
+
     // Simulate upload progress
     const uploadInterval = setInterval(() => {
       if (uploadFile.status.state === 'cancelled') {
         clearInterval(uploadInterval);
         return;
       }
-      
+
       if (uploadFile.status.state === 'paused') {
         return;
       }
-      
+
       // Update progress
       const elapsed = Date.now() - startTime;
       const progress = Math.min((elapsed / 5000) * 100, 100); // 5 second upload
       const uploadedBytes = Math.floor((progress / 100) * uploadFile.size);
       const speed = uploadedBytes / (elapsed / 1000);
-      
+
       uploadFile.progress = {
         ...uploadFile.progress,
         bytesUploaded: uploadedBytes,
@@ -463,35 +466,35 @@ export class UploadService {
         speed,
         timeElapsed: elapsed,
       };
-      
+
       uploadFile.updatedAt = new Date();
-      
+
       this.emitEvent('uploadProgress', { fileId: uploadFile.id, progress: uploadFile.progress });
-      
+
       if (progress >= 100) {
         clearInterval(uploadInterval);
       }
     }, 100);
-    
+
     // Wait for upload to complete
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   private async uploadChunks(uploadFile: UploadFile): Promise<void> {
     if (!uploadFile.chunks) return;
 
     const startTime = Date.now();
-    
+
     for (let i = 0; i < uploadFile.chunks.length; i++) {
       const chunk = uploadFile.chunks[i];
-      
+
       if (uploadFile.status.state === 'cancelled') {
         break;
       }
-      
+
       if (uploadFile.status.state === 'paused') {
         // Wait for resume
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           const checkInterval = setInterval(() => {
             if (uploadFile.status.state !== 'paused') {
               clearInterval(checkInterval);
@@ -500,27 +503,27 @@ export class UploadService {
           }, 100);
         });
       }
-      
+
       if (uploadFile.status.state === 'cancelled') {
         break;
       }
-      
+
       try {
         // Upload chunk
         await this.uploadChunk(uploadFile, chunk);
-        
+
         chunk.uploaded = true;
         uploadFile.progress.chunksCompleted++;
-        
+
         // Update overall progress
         const uploadedBytes = uploadFile.chunks
-          .filter(c => c.uploaded)
+          .filter((c) => c.uploaded)
           .reduce((sum, c) => sum + c.size, 0);
-        
+
         const progress = (uploadedBytes / uploadFile.size) * 100;
         const elapsed = Date.now() - startTime;
         const speed = uploadedBytes / (elapsed / 1000);
-        
+
         uploadFile.progress = {
           ...uploadFile.progress,
           bytesUploaded: uploadedBytes,
@@ -529,12 +532,11 @@ export class UploadService {
           timeElapsed: elapsed,
           currentChunk: i,
         };
-        
+
         uploadFile.updatedAt = new Date();
-        
+
         this.emitEvent('chunkUploaded', { fileId: uploadFile.id, chunkIndex: i });
         this.emitEvent('uploadProgress', { fileId: uploadFile.id, progress: uploadFile.progress });
-        
       } catch (error) {
         chunk.retries++;
         chunk.error = {
@@ -545,13 +547,13 @@ export class UploadService {
           retryCount: chunk.retries,
           maxRetries: this.config.maxRetries,
         };
-        
+
         if (chunk.retries >= this.config.maxRetries) {
           throw new Error(`Failed to upload chunk ${i} after ${this.config.maxRetries} retries`);
         }
-        
+
         // Retry delay
-        await new Promise(resolve => setTimeout(resolve, this.config.retryDelay));
+        await new Promise((resolve) => setTimeout(resolve, this.config.retryDelay));
         i--; // Retry this chunk
       }
     }
@@ -559,10 +561,11 @@ export class UploadService {
 
   private async uploadChunk(uploadFile: UploadFile, chunk: UploadChunk): Promise<void> {
     // Simulate chunk upload
-    await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 200));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100 + Math.random() * 200));
+
     // Simulate occasional failures
-    if (Math.random() < 0.1) { // 10% failure rate
+    if (Math.random() < 0.1) {
+      // 10% failure rate
       throw new Error('Simulated chunk upload failure');
     }
   }
@@ -571,12 +574,12 @@ export class UploadService {
     // Resume from where we left off
     if (this.config.enableChunked && uploadFile.chunks) {
       // Find next unuploaded chunk
-      const nextChunkIndex = uploadFile.chunks.findIndex(chunk => !chunk.uploaded);
+      const nextChunkIndex = uploadFile.chunks.findIndex((chunk) => !chunk.uploaded);
       if (nextChunkIndex !== -1) {
         uploadFile.progress.currentChunk = nextChunkIndex;
       }
     }
-    
+
     // Resume upload
     this.startUpload(uploadFile);
   }
@@ -591,9 +594,9 @@ export class UploadService {
       retryCount: uploadFile.error?.retryCount || 0,
       maxRetries: this.config.maxRetries,
     };
-    
+
     this.emitEvent('uploadFailed', { fileId: uploadFile.id, error: uploadFile.error });
-    
+
     // Auto-retry if enabled
     if (uploadFile.status.canRetry && uploadFile.error.retryCount < this.config.maxRetries) {
       this.scheduleRetry(uploadFile);
@@ -602,28 +605,29 @@ export class UploadService {
 
   private scheduleRetry(uploadFile: UploadFile): void {
     const retryDelay = this.config.retryDelay * Math.pow(2, uploadFile.error?.retryCount || 0);
-    
+
     const retryTimer = setTimeout(() => {
       this.retryUpload(uploadFile.id);
     }, retryDelay);
-    
+
     this.retryQueue.set(uploadFile.id, retryTimer);
   }
 
   private processQueue(): void {
     if (this.isPaused) return;
-    
-    const currentUploads = Array.from(this.activeUploads.values())
-      .filter(file => file.status.state === 'uploading').length;
-    
+
+    const currentUploads = Array.from(this.activeUploads.values()).filter(
+      (file) => file.status.state === 'uploading',
+    ).length;
+
     if (currentUploads >= this.maxConcurrentUploads) return;
-    
+
     const availableSlots = this.maxConcurrentUploads - currentUploads;
-    const pendingFiles = this.uploadQueue.filter(file => file.status.state === 'pending');
-    
+    const pendingFiles = this.uploadQueue.filter((file) => file.status.state === 'pending');
+
     const filesToStart = pendingFiles.slice(0, availableSlots);
-    
-    filesToStart.forEach(file => {
+
+    filesToStart.forEach((file) => {
       this.startUpload(file);
     });
   }
@@ -634,7 +638,7 @@ export class UploadService {
       data,
       timestamp: new Date(),
     };
-    
+
     this.eventEmitter.dispatchEvent(new CustomEvent(event, { detail: uploadEvent }));
   }
 
@@ -643,11 +647,11 @@ export class UploadService {
     this.eventEmitter.addEventListener('uploadCompleted', () => {
       this.processQueue();
     });
-    
+
     this.eventEmitter.addEventListener('uploadFailed', () => {
       this.processQueue();
     });
-    
+
     this.eventEmitter.addEventListener('uploadCancelled', () => {
       this.processQueue();
     });
@@ -671,7 +675,7 @@ export const createUploadService = (config?: Partial<UploadConfig>): UploadServi
 
 export const uploadFile = async (
   file: File,
-  options?: Partial<UploadOptions>
+  options?: Partial<UploadOptions>,
 ): Promise<UploadFile> => {
   const service = getUploadService();
   return service.uploadFile(file, options);
@@ -679,7 +683,7 @@ export const uploadFile = async (
 
 export const uploadFiles = async (
   files: File[],
-  options?: Partial<UploadOptions>
+  options?: Partial<UploadOptions>,
 ): Promise<UploadFile[]> => {
   const service = getUploadService();
   return service.uploadFiles(files, options);

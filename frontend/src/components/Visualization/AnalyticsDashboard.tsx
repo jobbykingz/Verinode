@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import ChartLibrary, { ChartData } from './ChartLibrary';
-import { Calendar, Filter, Download, RefreshCw, TrendingUp, Users, Activity, DollarSign } from 'lucide-react';
+import {
+  Calendar,
+  Filter,
+  Download,
+  RefreshCw,
+  TrendingUp,
+  Users,
+  Activity,
+  DollarSign,
+} from 'lucide-react';
 
 interface DashboardMetrics {
   totalProofs: number;
@@ -52,7 +61,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     const data: TimeSeriesData[] = [];
     const now = new Date();
     const days = selectedTimeRange === '7d' ? 7 : selectedTimeRange === '30d' ? 30 : 90;
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
@@ -70,20 +79,24 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       const mockData = generateMockData;
       setTimeSeriesData(mockData);
-      
+
       // Calculate metrics from time series data
       const totalProofs = mockData.reduce((sum, day) => sum + day.proofs, 0);
       const totalUsers = mockData[mockData.length - 1]?.users || 0;
-      const avgSuccessRate = mockData.reduce((sum, day) => sum + day.successRate, 0) / mockData.length;
+      const avgSuccessRate =
+        mockData.reduce((sum, day) => sum + day.successRate, 0) / mockData.length;
       const totalRevenue = mockData.reduce((sum, day) => sum + day.revenue, 0);
-      const growthRate = ((mockData[mockData.length - 1]?.proofs || 0) - (mockData[0]?.proofs || 0)) / (mockData[0]?.proofs || 1) * 100;
-      
+      const growthRate =
+        (((mockData[mockData.length - 1]?.proofs || 0) - (mockData[0]?.proofs || 0)) /
+          (mockData[0]?.proofs || 1)) *
+        100;
+
       setMetrics({
         totalProofs,
         activeUsers: totalUsers,
@@ -92,7 +105,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         growthRate,
         avgProcessingTime: Math.random() * 5 + 2,
       });
-      
+
       setIsLoading(false);
     };
 
@@ -105,11 +118,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   }, [generateMockData, autoRefresh, refreshInterval]);
 
   const proofsChartData: ChartData = {
-    labels: timeSeriesData.map(d => d.date),
+    labels: timeSeriesData.map((d) => d.date),
     datasets: [
       {
         label: 'Proofs Generated',
-        data: timeSeriesData.map(d => d.proofs),
+        data: timeSeriesData.map((d) => d.proofs),
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderColor: 'rgba(59, 130, 246, 1)',
         borderWidth: 2,
@@ -120,11 +133,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   const usersChartData: ChartData = {
-    labels: timeSeriesData.map(d => d.date),
+    labels: timeSeriesData.map((d) => d.date),
     datasets: [
       {
         label: 'Active Users',
-        data: timeSeriesData.map(d => d.users),
+        data: timeSeriesData.map((d) => d.users),
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 2,
@@ -135,11 +148,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   const revenueChartData: ChartData = {
-    labels: timeSeriesData.map(d => d.date),
+    labels: timeSeriesData.map((d) => d.date),
     datasets: [
       {
         label: 'Revenue ($)',
-        data: timeSeriesData.map(d => d.revenue),
+        data: timeSeriesData.map((d) => d.revenue),
         backgroundColor: 'rgba(251, 146, 60, 0.1)',
         borderColor: 'rgba(251, 146, 60, 1)',
         borderWidth: 2,
@@ -150,11 +163,11 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   };
 
   const successRateChartData: ChartData = {
-    labels: timeSeriesData.map(d => d.date),
+    labels: timeSeriesData.map((d) => d.date),
     datasets: [
       {
         label: 'Success Rate (%)',
-        data: timeSeriesData.map(d => d.successRate),
+        data: timeSeriesData.map((d) => d.successRate),
         backgroundColor: 'rgba(147, 51, 234, 0.1)',
         borderColor: 'rgba(147, 51, 234, 1)',
         borderWidth: 2,
@@ -164,13 +177,13 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     ],
   };
 
-  const MetricCard: React.FC<{ title: string; value: string | number; icon: React.ReactNode; trend?: number; color?: string }> = ({
-    title,
-    value,
-    icon,
-    trend,
-    color = 'blue',
-  }) => (
+  const MetricCard: React.FC<{
+    title: string;
+    value: string | number;
+    icon: React.ReactNode;
+    trend?: number;
+    color?: string;
+  }> = ({ title, value, icon, trend, color = 'blue' }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -181,23 +194,26 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <div>
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
           <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-            {typeof value === 'number' ? (
-              title.includes('Rate') ? `${value.toFixed(1)}%` :
-              title.includes('Time') ? `${value.toFixed(1)}s` :
-              title.includes('$') ? `$${value.toLocaleString()}` :
-              value.toLocaleString()
-            ) : value}
+            {typeof value === 'number'
+              ? title.includes('Rate')
+                ? `${value.toFixed(1)}%`
+                : title.includes('Time')
+                  ? `${value.toFixed(1)}s`
+                  : title.includes('$')
+                    ? `$${value.toLocaleString()}`
+                    : value.toLocaleString()
+              : value}
           </p>
           {trend !== undefined && (
-            <div className={`flex items-center mt-2 text-sm ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <div
+              className={`flex items-center mt-2 text-sm ${trend >= 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
               <TrendingUp className={`w-4 h-4 mr-1 ${trend < 0 ? 'rotate-180' : ''}`} />
               {Math.abs(trend).toFixed(1)}%
             </div>
           )}
         </div>
-        <div className={`p-3 rounded-lg bg-${color}-100 dark:bg-${color}-900`}>
-          {icon}
-        </div>
+        <div className={`p-3 rounded-lg bg-${color}-100 dark:bg-${color}-900`}>{icon}</div>
       </div>
     </motion.div>
   );
@@ -228,8 +244,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              autoRefresh 
-                ? 'bg-blue-500 text-white' 
+              autoRefresh
+                ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
@@ -315,13 +331,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           transition={{ duration: 0.5 }}
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
         >
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Proof Generation Trend</h2>
-          <ChartLibrary
-            type="line"
-            data={proofsChartData}
-            height={300}
-            className="w-full"
-          />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Proof Generation Trend
+          </h2>
+          <ChartLibrary type="line" data={proofsChartData} height={300} className="w-full" />
         </motion.div>
 
         <motion.div
@@ -331,12 +344,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
         >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Active Users</h2>
-          <ChartLibrary
-            type="line"
-            data={usersChartData}
-            height={300}
-            className="w-full"
-          />
+          <ChartLibrary type="line" data={usersChartData} height={300} className="w-full" />
         </motion.div>
 
         <motion.div
@@ -345,13 +353,10 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           transition={{ duration: 0.5, delay: 0.1 }}
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
         >
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Revenue Overview</h2>
-          <ChartLibrary
-            type="bar"
-            data={revenueChartData}
-            height={300}
-            className="w-full"
-          />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Revenue Overview
+          </h2>
+          <ChartLibrary type="bar" data={revenueChartData} height={300} className="w-full" />
         </motion.div>
 
         <motion.div
@@ -361,12 +366,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
         >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Success Rate</h2>
-          <ChartLibrary
-            type="line"
-            data={successRateChartData}
-            height={300}
-            className="w-full"
-          />
+          <ChartLibrary type="line" data={successRateChartData} height={300} className="w-full" />
         </motion.div>
       </div>
     </div>

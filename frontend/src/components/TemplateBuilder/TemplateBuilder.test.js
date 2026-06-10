@@ -8,7 +8,7 @@ describe('TemplateBuilder Components', () => {
         name: 'firstName',
         label: 'First Name',
         type: 'text',
-        required: true
+        required: true,
       };
 
       // Test field structure
@@ -20,9 +20,17 @@ describe('TemplateBuilder Components', () => {
 
     test('should validate field types', () => {
       const validFieldTypes = [
-        'text', 'number', 'date', 'boolean', 
-        'email', 'url', 'phone', 'select', 
-        'multiselect', 'file', 'json'
+        'text',
+        'number',
+        'date',
+        'boolean',
+        'email',
+        'url',
+        'phone',
+        'select',
+        'multiselect',
+        'file',
+        'json',
       ];
 
       expect(validFieldTypes).toContain('text');
@@ -37,7 +45,7 @@ describe('TemplateBuilder Components', () => {
         type: 'number',
         minValue: 0,
         maxValue: 120,
-        required: true
+        required: true,
       };
 
       expect(fieldWithConstraints.minValue).toBe(0);
@@ -53,7 +61,7 @@ describe('TemplateBuilder Components', () => {
         fieldId: 'emailField',
         ruleType: 'required',
         errorMessage: 'Email is required',
-        severity: 'error'
+        severity: 'error',
       };
 
       expect(validationRule.name).toBe('Email Required');
@@ -65,9 +73,14 @@ describe('TemplateBuilder Components', () => {
 
     test('should support different rule types', () => {
       const ruleTypes = [
-        'required', 'minLength', 'maxLength', 
-        'minValue', 'maxValue', 'pattern', 
-        'custom', 'conditional'
+        'required',
+        'minLength',
+        'maxLength',
+        'minValue',
+        'maxValue',
+        'pattern',
+        'custom',
+        'conditional',
       ];
 
       expect(ruleTypes).toContain('required');
@@ -81,8 +94,8 @@ describe('TemplateBuilder Components', () => {
         name: 'Phone Pattern',
         ruleType: 'pattern',
         parameters: {
-          pattern: '^\\+?[1-9]\\d{1,14}$'
-        }
+          pattern: '^\\+?[1-9]\\d{1,14}$',
+        },
       };
 
       expect(patternRule.parameters.pattern).toBe('^\\+?[1-9]\\d{1,14}$');
@@ -103,9 +116,9 @@ describe('TemplateBuilder Components', () => {
             primaryColor: '#3b82f6',
             secondaryColor: '#6b7280',
             backgroundColor: '#ffffff',
-            textColor: '#1f2937'
-          }
-        }
+            textColor: '#1f2937',
+          },
+        },
       };
 
       expect(template.name).toBe('Employment Verification');
@@ -121,9 +134,9 @@ describe('TemplateBuilder Components', () => {
         title: 'Personal Information',
         fields: [
           { fieldId: 'firstName', width: 'half' },
-          { fieldId: 'lastName', width: 'half' }
+          { fieldId: 'lastName', width: 'half' },
         ],
-        order: 0
+        order: 0,
       };
 
       expect(section.id).toBe('personal-info');
@@ -141,7 +154,7 @@ describe('TemplateBuilder Components', () => {
         date: '<input type="date">',
         boolean: '<input type="checkbox">',
         email: '<input type="email">',
-        select: '<select></select>'
+        select: '<select></select>',
       };
 
       expect(fieldTypes.text).toContain('type="text"');
@@ -155,7 +168,7 @@ describe('TemplateBuilder Components', () => {
         id: 'hiddenField',
         label: 'Hidden Field',
         visible: false,
-        editable: true
+        editable: true,
       };
 
       expect(field.visible).toBe(false);
@@ -168,7 +181,7 @@ describe('TemplateBuilder Components', () => {
       const dragData = {
         fieldId: 'testField',
         sectionId: 'mainSection',
-        position: 0
+        position: 0,
       };
 
       expect(dragData.fieldId).toBe('testField');
@@ -181,7 +194,7 @@ describe('TemplateBuilder Components', () => {
         full: 'col-span-12',
         half: 'col-span-6',
         third: 'col-span-4',
-        quarter: 'col-span-3'
+        quarter: 'col-span-3',
       };
 
       expect(layoutWidths.full).toBe('col-span-12');

@@ -47,70 +47,96 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
     importTheme: importThemeFromContext,
   } = useThemeManager();
 
-  const allThemes = useMemo(() => ({
-    ...state.themes,
-    ...state.customThemes,
-  }), [state.themes, state.customThemes]);
+  const allThemes = useMemo(
+    () => ({
+      ...state.themes,
+      ...state.customThemes,
+    }),
+    [state.themes, state.customThemes],
+  );
 
   const currentTheme = useMemo(() => {
     return allThemes[state.currentTheme] || allThemes.light;
   }, [state.currentTheme, allThemes]);
 
   const isDarkTheme = useMemo(() => {
-    return currentTheme.id === 'dark' || 
-           (currentTheme.colors.background && currentTheme.colors.background === '#0f172a');
+    return (
+      currentTheme.id === 'dark' ||
+      (currentTheme.colors.background && currentTheme.colors.background === '#0f172a')
+    );
   }, [currentTheme]);
 
   const isLightTheme = useMemo(() => {
-    return currentTheme.id === 'light' || 
-           (currentTheme.colors.background && currentTheme.colors.background === '#ffffff');
+    return (
+      currentTheme.id === 'light' ||
+      (currentTheme.colors.background && currentTheme.colors.background === '#ffffff')
+    );
   }, [currentTheme]);
 
   const isHighContrastTheme = useMemo(() => {
     return currentTheme.id === 'highContrast';
   }, [currentTheme]);
 
-  const getColor = useCallback((colorKey: keyof ThemeColors): string => {
-    return currentTheme.colors[colorKey] || '#000000';
-  }, [currentTheme]);
+  const getColor = useCallback(
+    (colorKey: keyof ThemeColors): string => {
+      return currentTheme.colors[colorKey] || '#000000';
+    },
+    [currentTheme],
+  );
 
   const getCSSVariable = useCallback((variable: string): string => {
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(`--${variable}`)
-      .trim();
+    return getComputedStyle(document.documentElement).getPropertyValue(`--${variable}`).trim();
   }, []);
 
   const setCSSVariable = useCallback((variable: string, value: string) => {
     document.documentElement.style.setProperty(`--${variable}`, value);
   }, []);
 
-  const switchTheme = useCallback((themeId: string) => {
-    switchThemeFromContext(themeId);
-    
-    if (enableSystemTheme && followSystemTheme) {
-      localStorage.setItem(`${storageKey}-user-override`, themeId);
-    }
-  }, [switchThemeFromContext, enableSystemTheme, followSystemTheme, storageKey]);
+  const switchTheme = useCallback(
+    (themeId: string) => {
+      switchThemeFromContext(themeId);
 
-  const createCustomTheme = useCallback((theme: Omit<Theme, 'id'>) => {
-    createCustomThemeFromContext(theme);
-  }, [createCustomThemeFromContext]);
+      if (enableSystemTheme && followSystemTheme) {
+        localStorage.setItem(`${storageKey}-user-override`, themeId);
+      }
+    },
+    [switchThemeFromContext, enableSystemTheme, followSystemTheme, storageKey],
+  );
 
-  const updateTheme = useCallback((themeId: string, updates: Partial<Theme>) => {
-    updateThemeFromContext(themeId, updates);
-  }, [updateThemeFromContext]);
+  const createCustomTheme = useCallback(
+    (theme: Omit<Theme, 'id'>) => {
+      createCustomThemeFromContext(theme);
+    },
+    [createCustomThemeFromContext],
+  );
 
-  const deleteTheme = useCallback((themeId: string) => {
-    deleteThemeFromContext(themeId);
-  }, [deleteThemeFromContext]);
+  const updateTheme = useCallback(
+    (themeId: string, updates: Partial<Theme>) => {
+      updateThemeFromContext(themeId, updates);
+    },
+    [updateThemeFromContext],
+  );
 
-  const exportTheme = useCallback((themeId: string): string => {
-    return exportThemeFromContext(themeId);
-  }, [exportThemeFromContext]);
+  const deleteTheme = useCallback(
+    (themeId: string) => {
+      deleteThemeFromContext(themeId);
+    },
+    [deleteThemeFromContext],
+  );
 
-  const importTheme = useCallback((themeData: string) => {
-    importThemeFromContext(themeData);
-  }, [importThemeFromContext]);
+  const exportTheme = useCallback(
+    (themeId: string): string => {
+      return exportThemeFromContext(themeId);
+    },
+    [exportThemeFromContext],
+  );
+
+  const importTheme = useCallback(
+    (themeData: string) => {
+      importThemeFromContext(themeData);
+    },
+    [importThemeFromContext],
+  );
 
   const resetToDefaults = useCallback(() => {
     switchTheme('light');
@@ -128,7 +154,7 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
   useEffect(() => {
     if (enableSystemTheme && followSystemTheme) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      
+
       const handleSystemThemeChange = (e: MediaQueryListEvent) => {
         const userOverride = localStorage.getItem(`${storageKey}-user-override`);
         if (!userOverride) {
@@ -137,7 +163,7 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
       };
 
       mediaQuery.addEventListener('change', handleSystemThemeChange);
-      
+
       const userOverride = localStorage.getItem(`${storageKey}-user-override`);
       if (!userOverride) {
         switchTheme(mediaQuery.matches ? 'dark' : 'light');
@@ -157,7 +183,7 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
     };
 
     window.addEventListener('theme-change', handleThemeChange as EventListener);
-    
+
     return () => {
       window.removeEventListener('theme-change', handleThemeChange as EventListener);
     };
@@ -165,7 +191,7 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     if (prefersReducedMotion.matches) {
       document.documentElement.style.setProperty('--transition-duration', '0.01ms');
     }
@@ -186,7 +212,7 @@ export function useTheme(options: UseThemeOptions = {}): UseThemeReturn {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -227,7 +253,7 @@ export function useThemeCSSVariable(variable: string, fallbackValue = ''): strin
 
 export function useThemeContrast(
   backgroundColor?: keyof ThemeColors,
-  textColor?: keyof ThemeColors
+  textColor?: keyof ThemeColors,
 ): {
   ratio: number;
   isAACompliant: boolean;
@@ -236,28 +262,29 @@ export function useThemeContrast(
   isAAALargeCompliant: boolean;
 } {
   const { getColor } = useTheme();
-  
+
   const bg = backgroundColor ? getColor(backgroundColor) : '#ffffff';
   const text = textColor ? getColor(textColor) : '#000000';
-  
+
   const getLuminance = (hex: string): number => {
     const rgb = parseInt(hex.slice(1), 16);
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;
     const b = rgb & 0xff;
-    
-    const [lr, lg, lb] = [r, g, b].map(c => {
+
+    const [lr, lg, lb] = [r, g, b].map((c) => {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
-    
+
     return 0.2126 * lr + 0.7152 * lg + 0.0722 * lb;
   };
-  
+
   const bgLuminance = getLuminance(bg);
   const textLuminance = getLuminance(text);
-  const ratio = (Math.max(bgLuminance, textLuminance) + 0.05) / (Math.min(bgLuminance, textLuminance) + 0.05);
-  
+  const ratio =
+    (Math.max(bgLuminance, textLuminance) + 0.05) / (Math.min(bgLuminance, textLuminance) + 0.05);
+
   return {
     ratio,
     isAACompliant: ratio >= 4.5,
@@ -275,7 +302,7 @@ export function useThemeBreakpoints(): {
   currentBreakpoint: string;
 } {
   const [breakpoint, setBreakpoint] = useState('desktop');
-  
+
   useEffect(() => {
     const updateBreakpoint = () => {
       const width = window.innerWidth;
@@ -289,15 +316,15 @@ export function useThemeBreakpoints(): {
         setBreakpoint('large-desktop');
       }
     };
-    
+
     updateBreakpoint();
     window.addEventListener('resize', updateBreakpoint);
-    
+
     return () => {
       window.removeEventListener('resize', updateBreakpoint);
     };
   }, []);
-  
+
   return {
     isMobile: breakpoint === 'mobile',
     isTablet: breakpoint === 'tablet',
@@ -313,22 +340,22 @@ export function useThemeAnimation(): {
   enableAnimations: boolean;
 } {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  
+
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
-    
+
     const handleChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
-    
+
     mediaQuery.addEventListener('change', handleChange);
-    
+
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
     };
   }, []);
-  
+
   return {
     prefersReducedMotion,
     animationDuration: prefersReducedMotion ? '0.01ms' : '200ms',

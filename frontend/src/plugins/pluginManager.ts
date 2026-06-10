@@ -20,7 +20,7 @@ export class PluginManager {
   async installPlugin(pluginData: any): Promise<void> {
     try {
       const metadata = pluginData.metadata;
-      
+
       if (!metadata) {
         throw new PluginError('Plugin metadata is required', 'INVALID_METADATA');
       }
@@ -29,32 +29,34 @@ export class PluginManager {
         throw new PluginError(`Plugin ${metadata.id} is already installed`, 'ALREADY_INSTALLED');
       }
 
-      if (!await this.permissions.validatePermissions(metadata.permissions)) {
+      if (!(await this.permissions.validatePermissions(metadata.permissions))) {
         throw new PluginError('Plugin permissions are not allowed', 'INVALID_PERMISSIONS');
       }
 
-      if (!await this.versionManager.checkCompatibility(metadata)) {
-        throw new PluginError('Plugin is not compatible with current Verinode version', 'INCOMPATIBLE_VERSION');
+      if (!(await this.versionManager.checkCompatibility(metadata))) {
+        throw new PluginError(
+          'Plugin is not compatible with current Verinode version',
+          'INCOMPATIBLE_VERSION',
+        );
       }
 
       const plugin = await this.loadPlugin(pluginData);
       const context = await this.createPluginContext(metadata);
-      
+
       await this.sandbox.initializePlugin(metadata.id, pluginData);
       await plugin.initialize(context);
-      
+
       this.plugins.set(metadata.id, plugin);
       this.contexts.set(metadata.id, context);
 
       if (plugin.activate) {
         await plugin.activate();
       }
-
     } catch (error) {
       throw new PluginError(
         `Failed to install plugin: ${error instanceof Error ? error.message : String(error)}`,
         'INSTALLATION_FAILED',
-        pluginData.metadata?.id
+        pluginData.metadata?.id,
       );
     }
   }
@@ -77,22 +79,21 @@ export class PluginManager {
       }
 
       await this.sandbox.cleanupPlugin(pluginId);
-      
+
       this.plugins.delete(pluginId);
       this.contexts.delete(pluginId);
-
     } catch (error) {
       throw new PluginError(
         `Failed to uninstall plugin: ${error instanceof Error ? error.message : String(error)}`,
         'UNINSTALLATION_FAILED',
-        pluginId
+        pluginId,
       );
     }
   }
 
   async activatePlugin(pluginId: string): Promise<void> {
     const plugin = this.plugins.get(pluginId);
-    
+
     if (!plugin) {
       throw new PluginError(`Plugin ${pluginId} is not installed`, 'NOT_INSTALLED');
     }
@@ -104,7 +105,7 @@ export class PluginManager {
 
   async deactivatePlugin(pluginId: string): Promise<void> {
     const plugin = this.plugins.get(pluginId);
-    
+
     if (!plugin) {
       throw new PluginError(`Plugin ${pluginId} is not installed`, 'NOT_INSTALLED');
     }
@@ -115,7 +116,7 @@ export class PluginManager {
   }
 
   getInstalledPlugins(): PluginMetadata[] {
-    return Array.from(this.contexts.values()).map(context => context.metadata);
+    return Array.from(this.contexts.values()).map((context) => context.metadata);
   }
 
   getPlugin(pluginId: string): Plugin | undefined {
@@ -138,7 +139,7 @@ export class PluginManager {
       throw new PluginError(`Plugin ${pluginId} is not installed`, 'NOT_INSTALLED');
     }
 
-    if (!await this.versionManager.canUpdate(currentMetadata, newPluginData.metadata)) {
+    if (!(await this.versionManager.canUpdate(currentMetadata, newPluginData.metadata))) {
       throw new PluginError('Plugin update is not allowed', 'INVALID_UPDATE');
     }
 
@@ -154,7 +155,7 @@ export class PluginManager {
       throw new PluginError(
         `Failed to load plugin: ${error instanceof Error ? error.message : String(error)}`,
         'LOAD_FAILED',
-        pluginData.metadata?.id
+        pluginData.metadata?.id,
       );
     }
   }
@@ -170,7 +171,7 @@ export class PluginManager {
       storage,
       events,
       permissions: metadata.permissions,
-      api
+      api,
     };
   }
 
@@ -183,21 +184,30 @@ export class PluginManager {
         },
         getAccount: async (publicKey: string) => {
           await this.permissions.checkPermission(metadata.id, 'stellar', ['read']);
-          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'getAccount', [publicKey]);
+          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'getAccount', [
+            publicKey,
+          ]);
         },
         signTransaction: async (transaction: any) => {
           await this.permissions.checkPermission(metadata.id, 'stellar', ['sign']);
-          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'signTransaction', [transaction]);
+          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'signTransaction', [
+            transaction,
+          ]);
         },
         submitTransaction: async (transaction: any) => {
           await this.permissions.checkPermission(metadata.id, 'stellar', ['submit']);
-          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'submitTransaction', [transaction]);
-        }
+          return this.sandbox.executeWithPermission(metadata.id, 'stellar', 'submitTransaction', [
+            transaction,
+          ]);
+        },
       },
       ui: {
         showNotification: async (message: string, type: 'success' | 'error' | 'info') => {
           await this.permissions.checkPermission(metadata.id, 'ui', ['notifications']);
-          this.sandbox.executeWithPermission(metadata.id, 'ui', 'showNotification', [message, type]);
+          this.sandbox.executeWithPermission(metadata.id, 'ui', 'showNotification', [
+            message,
+            type,
+          ]);
         },
         showModal: async (component: React.ComponentType<any>, props?: any) => {
           await this.permissions.checkPermission(metadata.id, 'ui', ['modals']);
@@ -210,12 +220,15 @@ export class PluginManager {
         removeMenuItem: async (itemId: string) => {
           await this.permissions.checkPermission(metadata.id, 'ui', ['menu']);
           this.sandbox.executeWithPermission(metadata.id, 'ui', 'removeMenuItem', [itemId]);
-        }
+        },
       },
       network: {
         request: async (url: string, options?: RequestInit) => {
           await this.permissions.checkPermission(metadata.id, 'network', ['request']);
-          return this.sandbox.executeWithPermission(metadata.id, 'network', 'request', [url, options]);
+          return this.sandbox.executeWithPermission(metadata.id, 'network', 'request', [
+            url,
+            options,
+          ]);
         },
         get: async (url: string) => {
           await this.permissions.checkPermission(metadata.id, 'network', ['read']);
@@ -224,10 +237,10 @@ export class PluginManager {
         post: async (url: string, data: any) => {
           await this.permissions.checkPermission(metadata.id, 'network', ['write']);
           return this.sandbox.executeWithPermission(metadata.id, 'network', 'post', [url, data]);
-        }
+        },
       },
       storage: await this.sandbox.createStorage(metadata.id),
-      events: await this.sandbox.createEventEmitter(metadata.id)
+      events: await this.sandbox.createEventEmitter(metadata.id),
     };
   }
 }

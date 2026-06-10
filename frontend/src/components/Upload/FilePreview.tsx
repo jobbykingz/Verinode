@@ -54,16 +54,15 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoDuration, setVideoDuration] = useState(0);
   const [videoPosition, setVideoPosition] = useState(0);
-  
+
   const scrollViewRef = useRef<ScrollView>(null);
   const videoRef = useRef<Video>(null);
   const pdfRef = useRef<any>(null);
-  
+
   const panResponder = useRef(
-    Animated.event(
-      [{ nativeEvent: { translationX: 0, translationY: 0 } }],
-      { useNativeDriver: false }
-    )
+    Animated.event([{ nativeEvent: { translationX: 0, translationY: 0 } }], {
+      useNativeDriver: false,
+    }),
   ).current;
 
   const previewConfig = { ...DEFAULT_PREVIEW_CONFIG, ...config };
@@ -90,11 +89,11 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
-    
+
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
@@ -135,24 +134,20 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete File',
-      `Are you sure you want to delete "${file.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            if (onDelete) {
-              onDelete(file);
-            } else {
-              onClose?.();
-            }
-          },
+    Alert.alert('Delete File', `Are you sure you want to delete "${file.name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          if (onDelete) {
+            onDelete(file);
+          } else {
+            onClose?.();
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleRotate = () => {
@@ -174,10 +169,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 
   const renderImagePreview = () => {
     const imageStyle = {
-      transform: [
-        { rotate: `${rotation}deg` },
-        { scale },
-      ],
+      transform: [{ rotate: `${rotation}deg` }, { scale }],
       width: previewConfig.maxWidth,
       height: previewConfig.maxHeight,
       resizeMode: 'contain' as const,
@@ -189,34 +181,22 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
           source={{ uri: file.uri || file.preview }}
           style={[styles.previewImage, imageStyle]}
         />
-        
+
         {previewConfig.enableRotation && (
           <View style={styles.imageControls}>
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => handleZoom('out')}
-            >
+            <TouchableOpacity style={styles.controlButton} onPress={() => handleZoom('out')}>
               <Icon name="zoom-out" size={20} color="#FFFFFF" />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={handleRotate}
-            >
+
+            <TouchableOpacity style={styles.controlButton} onPress={handleRotate}>
               <Icon name="rotate-right" size={20} color="#FFFFFF" />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => handleZoom('in')}
-            >
+
+            <TouchableOpacity style={styles.controlButton} onPress={() => handleZoom('in')}>
               <Icon name="zoom-in" size={20} color="#FFFFFF" />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={handleReset}
-            >
+
+            <TouchableOpacity style={styles.controlButton} onPress={handleReset}>
               <Icon name="refresh" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
@@ -243,7 +223,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
           onPlayPress={() => setIsVideoPlaying(true)}
           onPausePress={() => setIsVideoPlaying(false)}
         />
-        
+
         <View style={styles.videoInfo}>
           <Text style={styles.videoTime}>
             {formatTime(videoPosition)} / {formatTime(videoDuration)}
@@ -267,7 +247,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             setCurrentPage(page);
           }}
         />
-        
+
         {totalPages > 1 && (
           <View style={styles.pdfControls}>
             <TouchableOpacity
@@ -281,11 +261,11 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             >
               <Icon name="chevron-left" size={20} color="#6C5CE7" />
             </TouchableOpacity>
-            
+
             <Text style={styles.pdfPageText}>
               {currentPage + 1} / {totalPages}
             </Text>
-            
+
             <TouchableOpacity
               style={styles.pdfControlButton}
               onPress={() => {
@@ -368,29 +348,27 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     return (
       <View style={styles.metadataContainer}>
         <Text style={styles.metadataTitle}>File Information</Text>
-        
+
         <View style={styles.metadataRow}>
           <Text style={styles.metadataLabel}>Name:</Text>
           <Text style={styles.metadataValue}>{file.name}</Text>
         </View>
-        
+
         <View style={styles.metadataRow}>
           <Text style={styles.metadataLabel}>Size:</Text>
           <Text style={styles.metadataValue}>{formatFileSize(file.size)}</Text>
         </View>
-        
+
         <View style={styles.metadataRow}>
           <Text style={styles.metadataLabel}>Type:</Text>
           <Text style={styles.metadataValue}>{file.type}</Text>
         </View>
-        
+
         <View style={styles.metadataRow}>
           <Text style={styles.metadataLabel}>Modified:</Text>
-          <Text style={styles.metadataValue}>
-            {formatDate(file.lastModified)}
-          </Text>
+          <Text style={styles.metadataValue}>{formatDate(file.lastModified)}</Text>
         </View>
-        
+
         {metadata.dimensions && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Dimensions:</Text>
@@ -399,25 +377,21 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </Text>
           </View>
         )}
-        
+
         {metadata.duration && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Duration:</Text>
-            <Text style={styles.metadataValue}>
-              {formatTime(metadata.duration * 1000)}
-            </Text>
+            <Text style={styles.metadataValue}>{formatTime(metadata.duration * 1000)}</Text>
           </View>
         )}
-        
+
         {metadata.bitrate && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Bitrate:</Text>
-            <Text style={styles.metadataValue}>
-              {metadata.bitrate} kbps
-            </Text>
+            <Text style={styles.metadataValue}>{metadata.bitrate} kbps</Text>
           </View>
         )}
-        
+
         {metadata.checksum && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Checksum:</Text>
@@ -426,7 +400,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </Text>
           </View>
         )}
-        
+
         {metadata.location && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Location:</Text>
@@ -435,7 +409,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </Text>
           </View>
         )}
-        
+
         {metadata.camera && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Camera:</Text>
@@ -444,7 +418,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             </Text>
           </View>
         )}
-        
+
         {metadata.deviceInfo && (
           <View style={styles.metadataRow}>
             <Text style={styles.metadataLabel}>Device:</Text>
@@ -461,7 +435,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     const seconds = Math.floor(milliseconds / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
-    
+
     if (hours > 0) {
       return `${hours}:${(minutes % 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
     } else {
@@ -470,26 +444,21 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   };
 
   return (
-    <Modal
-      visible={true}
-      animationType="slide"
-      presentationStyle="page"
-      onRequestClose={onClose}
-    >
+    <Modal visible={true} animationType="slide" presentationStyle="page" onRequestClose={onClose}>
       <View style={[styles.container, style]}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Icon name="close" size={24} color="#34495E" />
           </TouchableOpacity>
-          
+
           <View style={styles.headerCenter}>
             <Text style={styles.fileName} numberOfLines={1}>
               {file.name}
             </Text>
             <Text style={styles.fileSize}>{formatFileSize(file.size)}</Text>
           </View>
-          
+
           <View style={styles.headerActions}>
             {previewConfig.enableFullscreen && (
               <TouchableOpacity
@@ -503,15 +472,15 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
                 />
               </TouchableOpacity>
             )}
-            
+
             <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
               <Icon name="share" size={20} color="#7F8C8D" />
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionButton} onPress={handleDownload}>
               <Icon name="download" size={20} color="#7F8C8D" />
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.actionButton} onPress={handleDelete}>
               <Icon name="delete" size={20} color="#FF6B6B" />
             </TouchableOpacity>
@@ -536,16 +505,10 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             style={styles.footerButton}
             onPress={() => setShowMetadata(!showMetadata)}
           >
-            <Icon
-              name={showMetadata ? 'visibility-off' : 'visibility'}
-              size={20}
-              color="#6C5CE7"
-            />
-            <Text style={styles.footerButtonText}>
-              {showMetadata ? 'Hide' : 'Show'} Details
-            </Text>
+            <Icon name={showMetadata ? 'visibility-off' : 'visibility'} size={20} color="#6C5CE7" />
+            <Text style={styles.footerButtonText}>{showMetadata ? 'Hide' : 'Show'} Details</Text>
           </TouchableOpacity>
-          
+
           {file.status.state === 'completed' && (
             <TouchableOpacity style={styles.footerButton} onPress={handleShare}>
               <Icon name="share" size={20} color="#6C5CE7" />

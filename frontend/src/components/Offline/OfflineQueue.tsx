@@ -26,14 +26,15 @@ export const OfflineQueue: React.FC = () => {
       </div>
       <ul className="space-y-3 max-h-60 overflow-y-auto">
         {queue.map((op) => (
-          <li key={op.queueId} className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+          <li
+            key={op.queueId}
+            className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0"
+          >
             <div>
               <p className="text-sm font-medium text-gray-800">
                 {op.action} {op.entity}
               </p>
-              <p className="text-xs text-gray-500">
-                {new Date(op.timestamp).toLocaleString()}
-              </p>
+              <p className="text-xs text-gray-500">{new Date(op.timestamp).toLocaleString()}</p>
             </div>
             {op.retryCount > 0 && (
               <span className="text-xs text-red-500">Retries: {op.retryCount}</span>

@@ -31,7 +31,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
   rules,
   fields,
   onRuleAdd,
-  onRuleRemove
+  onRuleRemove,
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newRule, setNewRule] = useState<Omit<ValidationRule, 'id'>>({
@@ -40,7 +40,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
     ruleType: 'required',
     errorMessage: '',
     severity: 'error',
-    enabled: true
+    enabled: true,
   });
 
   const ruleTypes = [
@@ -51,13 +51,13 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
     { value: 'maxValue', label: 'Maximum Value' },
     { value: 'pattern', label: 'Pattern Match' },
     { value: 'custom', label: 'Custom Validation' },
-    { value: 'conditional', label: 'Conditional' }
+    { value: 'conditional', label: 'Conditional' },
   ];
 
   const severityOptions = [
     { value: 'error', label: 'Error', icon: AlertCircle, color: 'text-red-500' },
     { value: 'warning', label: 'Warning', icon: AlertTriangle, color: 'text-yellow-500' },
-    { value: 'info', label: 'Info', icon: Info, color: 'text-blue-500' }
+    { value: 'info', label: 'Info', icon: Info, color: 'text-blue-500' },
   ];
 
   const handleAddRule = () => {
@@ -69,19 +69,19 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
         ruleType: 'required',
         errorMessage: '',
         severity: 'error',
-        enabled: true
+        enabled: true,
       });
       setShowAddForm(false);
     }
   };
 
   const getSeverityIcon = (severity: string) => {
-    const option = severityOptions.find(opt => opt.value === severity);
+    const option = severityOptions.find((opt) => opt.value === severity);
     return option ? option.icon : AlertCircle;
   };
 
   const getSeverityColor = (severity: string) => {
-    const option = severityOptions.find(opt => opt.value === severity);
+    const option = severityOptions.find((opt) => opt.value === severity);
     return option ? option.color : 'text-gray-500';
   };
 
@@ -101,32 +101,28 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
       {showAddForm && (
         <div className="bg-gray-50 rounded-lg p-4 space-y-4">
           <h4 className="font-medium text-gray-900">Add Validation Rule</h4>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Rule Name *
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Rule Name *</label>
               <input
                 type="text"
                 value={newRule.name}
-                onChange={(e) => setNewRule(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setNewRule((prev) => ({ ...prev, name: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g., Email Required"
               />
             </div>
-            
+
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Field *
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Field *</label>
               <select
                 value={newRule.fieldId}
-                onChange={(e) => setNewRule(prev => ({ ...prev, fieldId: e.target.value }))}
+                onChange={(e) => setNewRule((prev) => ({ ...prev, fieldId: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select a field</option>
-                {fields.map(field => (
+                {fields.map((field) => (
                   <option key={field.id} value={field.id}>
                     {field.label} ({field.name})
                   </option>
@@ -137,32 +133,30 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Rule Type
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Rule Type</label>
               <select
                 value={newRule.ruleType}
-                onChange={(e) => setNewRule(prev => ({ ...prev, ruleType: e.target.value }))}
+                onChange={(e) => setNewRule((prev) => ({ ...prev, ruleType: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {ruleTypes.map(type => (
+                {ruleTypes.map((type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
                 ))}
               </select>
             </div>
-            
+
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Severity
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Severity</label>
               <select
                 value={newRule.severity}
-                onChange={(e) => setNewRule(prev => ({ ...prev, severity: e.target.value as any }))}
+                onChange={(e) =>
+                  setNewRule((prev) => ({ ...prev, severity: e.target.value as any }))
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {severityOptions.map(sev => (
+                {severityOptions.map((sev) => (
                   <option key={sev.value} value={sev.value}>
                     {sev.label}
                   </option>
@@ -172,13 +166,11 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Error Message *
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Error Message *</label>
             <input
               type="text"
               value={newRule.errorMessage}
-              onChange={(e) => setNewRule(prev => ({ ...prev, errorMessage: e.target.value }))}
+              onChange={(e) => setNewRule((prev) => ({ ...prev, errorMessage: e.target.value }))}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Please enter a valid value"
             />
@@ -186,16 +178,16 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
 
           {(newRule.ruleType === 'minLength' || newRule.ruleType === 'maxLength') && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Length
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Length</label>
               <input
                 type="number"
                 value={newRule.parameters?.length || ''}
-                onChange={(e) => setNewRule(prev => ({
-                  ...prev,
-                  parameters: { ...prev.parameters, length: parseInt(e.target.value) || 0 }
-                }))}
+                onChange={(e) =>
+                  setNewRule((prev) => ({
+                    ...prev,
+                    parameters: { ...prev.parameters, length: parseInt(e.target.value) || 0 },
+                  }))
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter length"
               />
@@ -204,16 +196,16 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
 
           {(newRule.ruleType === 'minValue' || newRule.ruleType === 'maxValue') && (
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Value
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Value</label>
               <input
                 type="number"
                 value={newRule.parameters?.value || ''}
-                onChange={(e) => setNewRule(prev => ({
-                  ...prev,
-                  parameters: { ...prev.parameters, value: parseInt(e.target.value) || 0 }
-                }))}
+                onChange={(e) =>
+                  setNewRule((prev) => ({
+                    ...prev,
+                    parameters: { ...prev.parameters, value: parseInt(e.target.value) || 0 },
+                  }))
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter value"
               />
@@ -228,10 +220,12 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
               <input
                 type="text"
                 value={newRule.parameters?.pattern || ''}
-                onChange={(e) => setNewRule(prev => ({
-                  ...prev,
-                  parameters: { ...prev.parameters, pattern: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setNewRule((prev) => ({
+                    ...prev,
+                    parameters: { ...prev.parameters, pattern: e.target.value },
+                  }))
+                }
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="^[a-zA-Z0-9]+$"
               />
@@ -245,17 +239,17 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
               </label>
               <textarea
                 value={newRule.parameters?.expression || ''}
-                onChange={(e) => setNewRule(prev => ({
-                  ...prev,
-                  parameters: { ...prev.parameters, expression: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setNewRule((prev) => ({
+                    ...prev,
+                    parameters: { ...prev.parameters, expression: e.target.value },
+                  }))
+                }
                 rows={3}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="value.length > 5 && value.includes('@')"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Use 'value' to reference the field value
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Use 'value' to reference the field value</p>
             </div>
           )}
 
@@ -264,7 +258,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
               <input
                 type="checkbox"
                 checked={newRule.enabled}
-                onChange={(e) => setNewRule(prev => ({ ...prev, enabled: e.target.checked }))}
+                onChange={(e) => setNewRule((prev) => ({ ...prev, enabled: e.target.checked }))}
                 className="w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Enabled</span>
@@ -291,16 +285,16 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
 
       <div className="space-y-2">
         {rules.map((rule) => {
-          const field = fields.find(f => f.id === rule.fieldId);
+          const field = fields.find((f) => f.id === rule.fieldId);
           const SeverityIcon = getSeverityIcon(rule.severity);
           const severityColor = getSeverityColor(rule.severity);
-          
+
           return (
             <div
               key={rule.id}
               className={`border rounded-lg p-3 transition-colors ${
-                rule.enabled 
-                  ? 'border-gray-200 hover:border-gray-300' 
+                rule.enabled
+                  ? 'border-gray-200 hover:border-gray-300'
                   : 'border-gray-100 bg-gray-50 opacity-75'
               }`}
             >
@@ -315,24 +309,20 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="mt-1 text-sm text-gray-600">
                     <span className="font-medium">{field?.label || 'Unknown Field'}</span>
                     <span className="mx-2">•</span>
                     <span>{rule.ruleType}</span>
                   </div>
-                  
-                  <div className="mt-2 text-sm text-gray-500">
-                    {rule.errorMessage}
-                  </div>
-                  
+
+                  <div className="mt-2 text-sm text-gray-500">{rule.errorMessage}</div>
+
                   {rule.description && (
-                    <div className="mt-1 text-xs text-gray-400">
-                      {rule.description}
-                    </div>
+                    <div className="mt-1 text-xs text-gray-400">{rule.description}</div>
                   )}
                 </div>
-                
+
                 <button
                   onClick={() => onRuleRemove(rule.id)}
                   className="p-1 text-gray-400 hover:text-red-500 ml-2"

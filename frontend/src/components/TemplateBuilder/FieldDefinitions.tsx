@@ -37,7 +37,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
   onFieldAdd,
   onFieldRemove,
   selectedField,
-  onFieldSelect
+  onFieldSelect,
 }) => {
   const [expandedField, setExpandedField] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -47,7 +47,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
     label: '',
     required: false,
     visible: true,
-    editable: true
+    editable: true,
   });
 
   const fieldTypes = [
@@ -61,7 +61,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
     { value: 'select', label: 'Select' },
     { value: 'multiselect', label: 'Multi Select' },
     { value: 'file', label: 'File' },
-    { value: 'json', label: 'JSON' }
+    { value: 'json', label: 'JSON' },
   ];
 
   const handleAddField = () => {
@@ -73,7 +73,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
         label: '',
         required: false,
         visible: true,
-        editable: true
+        editable: true,
       });
       setShowAddForm(false);
     }
@@ -85,16 +85,26 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
 
   const getFieldIcon = (type: string) => {
     switch (type) {
-      case 'text': return 'T';
-      case 'number': return '123';
-      case 'date': return '📅';
-      case 'boolean': return '☑';
-      case 'email': return '✉';
-      case 'url': return '🔗';
-      case 'phone': return '📞';
-      case 'select': return '⌄';
-      case 'file': return '📁';
-      default: return '📝';
+      case 'text':
+        return 'T';
+      case 'number':
+        return '123';
+      case 'date':
+        return '📅';
+      case 'boolean':
+        return '☑';
+      case 'email':
+        return '✉';
+      case 'url':
+        return '🔗';
+      case 'phone':
+        return '📞';
+      case 'select':
+        return '⌄';
+      case 'file':
+        return '📁';
+      default:
+        return '📝';
     }
   };
 
@@ -114,29 +124,25 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
       {showAddForm && (
         <div className="bg-gray-50 rounded-lg p-4 space-y-4">
           <h4 className="font-medium text-gray-900">Add New Field</h4>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Field Name *
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Field Name *</label>
               <input
                 type="text"
                 value={newField.name}
-                onChange={(e) => setNewField(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setNewField((prev) => ({ ...prev, name: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="e.g., firstName"
               />
             </div>
-            
+
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Label *
-              </label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Label *</label>
               <input
                 type="text"
                 value={newField.label}
-                onChange={(e) => setNewField(prev => ({ ...prev, label: e.target.value }))}
+                onChange={(e) => setNewField((prev) => ({ ...prev, label: e.target.value }))}
                 className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="First Name"
               />
@@ -144,15 +150,13 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
-              Type
-            </label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Type</label>
             <select
               value={newField.type}
-              onChange={(e) => setNewField(prev => ({ ...prev, type: e.target.value }))}
+              onChange={(e) => setNewField((prev) => ({ ...prev, type: e.target.value }))}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {fieldTypes.map(type => (
+              {fieldTypes.map((type) => (
                 <option key={type.value} value={type.value}>
                   {type.label}
                 </option>
@@ -165,17 +169,17 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
               <input
                 type="checkbox"
                 checked={newField.required}
-                onChange={(e) => setNewField(prev => ({ ...prev, required: e.target.checked }))}
+                onChange={(e) => setNewField((prev) => ({ ...prev, required: e.target.checked }))}
                 className="w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Required</span>
             </label>
-            
+
             <label className="flex items-center">
               <input
                 type="checkbox"
                 checked={newField.visible}
-                onChange={(e) => setNewField(prev => ({ ...prev, visible: e.target.checked }))}
+                onChange={(e) => setNewField((prev) => ({ ...prev, visible: e.target.checked }))}
                 className="w-3 h-3 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
               <span className="ml-2 text-sm text-gray-700">Visible</span>
@@ -205,8 +209,8 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
           <div
             key={field.id}
             className={`border rounded-lg transition-colors ${
-              selectedField === field.id 
-                ? 'border-blue-500 bg-blue-50' 
+              selectedField === field.id
+                ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
             }`}
           >
@@ -227,10 +231,12 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                 </div>
                 <div>
                   <div className="font-medium text-gray-900">{field.label}</div>
-                  <div className="text-xs text-gray-500">{field.name} • {field.type}</div>
+                  <div className="text-xs text-gray-500">
+                    {field.name} • {field.type}
+                  </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 {field.required && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -258,9 +264,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
               <div className="px-3 pb-3 border-t border-gray-100 pt-3 space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Label
-                    </label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Label</label>
                     <input
                       type="text"
                       value={field.label}
@@ -268,7 +272,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Placeholder
@@ -304,7 +308,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                     />
                     <span className="ml-2 text-sm text-gray-700">Required</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -314,7 +318,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                     />
                     <span className="ml-2 text-sm text-gray-700">Visible</span>
                   </label>
-                  
+
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -334,16 +338,21 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                     <input
                       type="text"
                       value={field.options?.join(', ') || ''}
-                      onChange={(e) => handleFieldUpdate(field.id, { 
-                        options: e.target.value.split(',').map(opt => opt.trim()).filter(opt => opt) 
-                      })}
+                      onChange={(e) =>
+                        handleFieldUpdate(field.id, {
+                          options: e.target.value
+                            .split(',')
+                            .map((opt) => opt.trim())
+                            .filter((opt) => opt),
+                        })
+                      }
                       className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Option 1, Option 2, Option 3"
                     />
                   </div>
                 ) : null}
 
-                {(field.type === 'text' || field.type === 'email' || field.type === 'url') ? (
+                {field.type === 'text' || field.type === 'email' || field.type === 'url' ? (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -352,9 +361,11 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                       <input
                         type="number"
                         value={field.minLength || ''}
-                        onChange={(e) => handleFieldUpdate(field.id, { 
-                          minLength: e.target.value ? parseInt(e.target.value) : undefined 
-                        })}
+                        onChange={(e) =>
+                          handleFieldUpdate(field.id, {
+                            minLength: e.target.value ? parseInt(e.target.value) : undefined,
+                          })
+                        }
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -365,9 +376,11 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                       <input
                         type="number"
                         value={field.maxLength || ''}
-                        onChange={(e) => handleFieldUpdate(field.id, { 
-                          maxLength: e.target.value ? parseInt(e.target.value) : undefined 
-                        })}
+                        onChange={(e) =>
+                          handleFieldUpdate(field.id, {
+                            maxLength: e.target.value ? parseInt(e.target.value) : undefined,
+                          })
+                        }
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -383,9 +396,11 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                       <input
                         type="number"
                         value={field.minValue || ''}
-                        onChange={(e) => handleFieldUpdate(field.id, { 
-                          minValue: e.target.value ? parseInt(e.target.value) : undefined 
-                        })}
+                        onChange={(e) =>
+                          handleFieldUpdate(field.id, {
+                            minValue: e.target.value ? parseInt(e.target.value) : undefined,
+                          })
+                        }
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -396,9 +411,11 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                       <input
                         type="number"
                         value={field.maxValue || ''}
-                        onChange={(e) => handleFieldUpdate(field.id, { 
-                          maxValue: e.target.value ? parseInt(e.target.value) : undefined 
-                        })}
+                        onChange={(e) =>
+                          handleFieldUpdate(field.id, {
+                            maxValue: e.target.value ? parseInt(e.target.value) : undefined,
+                          })
+                        }
                         className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
@@ -406,9 +423,7 @@ const FieldDefinitions: React.FC<FieldDefinitionsProps> = ({
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Help Text
-                  </label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Help Text</label>
                   <input
                     type="text"
                     value={field.helpText || ''}

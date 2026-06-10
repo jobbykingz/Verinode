@@ -33,23 +33,23 @@ const PWAProvider: React.FC<PWAProviderProps> = ({ children }) => {
   const contextValue: PWAContextType = {
     serviceWorker,
     offlineSync,
-    isPWAInstalled
+    isPWAInstalled,
   };
 
   return (
     <PWAContext.Provider value={contextValue}>
       {children}
-      
+
       {/* PWA UI Components */}
       <InstallPrompt />
-      
+
       {/* Status indicators - positioned at the top of the app */}
       <div className="fixed top-0 left-0 right-0 z-40 pointer-events-none">
         <div className="pointer-events-auto">
           <OfflineIndicator />
         </div>
       </div>
-      
+
       {/* Sync status - positioned in the corner */}
       <div className="fixed bottom-4 right-4 z-40">
         <SyncStatus showDetails={false} />

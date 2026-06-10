@@ -19,13 +19,16 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
           {...props}
         />
         {label && (
-          <label htmlFor={checkboxId} className="text-sm font-medium text-gray-700 cursor-pointer select-none">
+          <label
+            htmlFor={checkboxId}
+            className="text-sm font-medium text-gray-700 cursor-pointer select-none"
+          >
             {label}
           </label>
         )}
       </div>
     );
-  }
+  },
 );
 
 Checkbox.displayName = 'Checkbox';

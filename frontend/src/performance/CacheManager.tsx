@@ -12,7 +12,7 @@ export class CacheManager {
     const data = {
       value,
       expiry: Date.now() + ttl,
-      version: '1.0.0'
+      version: '1.0.0',
     };
     try {
       localStorage.setItem(`${this.STORAGE_KEY}_${key}`, JSON.stringify(data));
@@ -54,7 +54,7 @@ export class CacheManager {
   }
 
   private static clearOld(): void {
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(localStorage).forEach((key) => {
       if (key.startsWith(this.STORAGE_KEY)) {
         localStorage.removeItem(key);
       }

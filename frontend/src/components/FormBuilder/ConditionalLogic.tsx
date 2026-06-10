@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { FormField, ConditionalLogic, ConditionalOperator } from '../../types/formBuilder';
-import { 
-  Plus, 
-  X, 
-  Eye, 
-  EyeOff, 
-  Copy, 
-  Trash2, 
+import {
+  Plus,
+  X,
+  Eye,
+  EyeOff,
+  Copy,
+  Trash2,
   ArrowRight,
   Settings,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 
 interface ConditionalLogicProps {
@@ -121,17 +121,22 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
     { action: 'hide', label: 'Hide', description: 'Hide this field', icon: 'EyeOff' },
     { action: 'enable', label: 'Enable', description: 'Enable this field', icon: 'CheckCircle' },
     { action: 'disable', label: 'Disable', description: 'Disable this field', icon: 'XCircle' },
-    { action: 'require', label: 'Require', description: 'Make this field required', icon: 'AlertCircle' },
+    {
+      action: 'require',
+      label: 'Require',
+      description: 'Make this field required',
+      icon: 'AlertCircle',
+    },
   ];
 
   const getAvailableFields = () => {
-    return allFields.filter(f => f.id !== field.id);
+    return allFields.filter((f) => f.id !== field.id);
   };
 
   const getAvailableOperators = (targetFieldType: string) => {
-    return conditionalOperators.filter(op => 
-      op.applicableFieldTypes.includes('*') || 
-      op.applicableFieldTypes.includes(targetFieldType)
+    return conditionalOperators.filter(
+      (op) =>
+        op.applicableFieldTypes.includes('*') || op.applicableFieldTypes.includes(targetFieldType),
     );
   };
 
@@ -183,8 +188,8 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
   };
 
   const updateConditionalLogic = (index: number, updates: Partial<ConditionalLogic>) => {
-    const updatedLogic = (field.conditionalLogic || []).map((logic, i) => 
-      i === index ? { ...logic, ...updates } : logic
+    const updatedLogic = (field.conditionalLogic || []).map((logic, i) =>
+      i === index ? { ...logic, ...updates } : logic,
     );
     onUpdate(updatedLogic);
   };
@@ -204,19 +209,15 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
   };
 
   const renderValueInput = (logic: ConditionalLogic, index: number) => {
-    const targetField = allFields.find(f => f.id === logic.fieldId);
+    const targetField = allFields.find((f) => f.id === logic.fieldId);
     if (!targetField) return null;
 
-    const operatorConfig = conditionalOperators.find(op => op.operator === logic.operator);
+    const operatorConfig = conditionalOperators.find((op) => op.operator === logic.operator);
     const valueType = operatorConfig?.valueType || 'text';
 
     // Some operators don't need a value
     if (['is_empty', 'is_not_empty', 'is_checked', 'is_not_checked'].includes(logic.operator)) {
-      return (
-        <div className="text-sm text-gray-500 italic">
-          No value needed for this operator
-        </div>
-      );
+      return <div className="text-sm text-gray-500 italic">No value needed for this operator</div>;
     }
 
     switch (valueType) {
@@ -230,18 +231,20 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
             placeholder="Enter value..."
           />
         );
-      
+
       case 'number':
         return (
           <input
             type="number"
             value={logic.value || ''}
-            onChange={(e) => updateConditionalLogic(index, { value: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateConditionalLogic(index, { value: parseFloat(e.target.value) || 0 })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter number..."
           />
         );
-      
+
       case 'boolean':
         return (
           <select
@@ -253,7 +256,7 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
             <option value="false">False</option>
           </select>
         );
-      
+
       default:
         return (
           <input
@@ -268,9 +271,9 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
   };
 
   const getLogicDescription = (logic: ConditionalLogic): string => {
-    const targetField = allFields.find(f => f.id === logic.fieldId);
-    const operatorConfig = conditionalOperators.find(op => op.operator === logic.operator);
-    const actionConfig = conditionalActions.find(a => a.action === logic.action);
+    const targetField = allFields.find((f) => f.id === logic.fieldId);
+    const operatorConfig = conditionalOperators.find((op) => op.operator === logic.operator);
+    const actionConfig = conditionalActions.find((a) => a.action === logic.action);
 
     if (!targetField || !operatorConfig || !actionConfig) return '';
 
@@ -302,20 +305,18 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
       {(field.conditionalLogic || []).length > 0 && (
         <div className="space-y-3">
           {(field.conditionalLogic || []).map((logic, index) => {
-            const targetField = allFields.find(f => f.id === logic.fieldId);
-            
+            const targetField = allFields.find((f) => f.id === logic.fieldId);
+
             return (
               <div key={logic.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-gray-900">
-                      Rule {index + 1}
-                    </span>
+                    <span className="text-sm font-medium text-gray-900">Rule {index + 1}</span>
                     <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
                       {logic.action}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => duplicateConditionalLogic(index)}
@@ -349,7 +350,7 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
                       value={logic.fieldId}
                       onChange={(e) => {
                         const newFieldId = e.target.value;
-                        const newField = allFields.find(f => f.id === newFieldId);
+                        const newField = allFields.find((f) => f.id === newFieldId);
                         if (newField) {
                           const availableOperators = getAvailableOperators(newField.type);
                           const defaultOperator = availableOperators[0]?.operator || 'equals';
@@ -362,7 +363,7 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      {getAvailableFields().map(field => (
+                      {getAvailableFields().map((field) => (
                         <option key={field.id} value={field.id}>
                           {field.label} ({field.type})
                         </option>
@@ -387,7 +388,7 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
-                        {getAvailableOperators(targetField.type).map(op => (
+                        {getAvailableOperators(targetField.type).map((op) => (
                           <option key={op.operator} value={op.operator}>
                             {op.label}
                           </option>
@@ -399,23 +400,21 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
                   {/* Value Input */}
                   {targetField && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Value
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
                       {renderValueInput(logic, index)}
                     </div>
                   )}
 
                   {/* Action Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Then
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Then</label>
                     <div className="grid grid-cols-2 gap-2">
-                      {conditionalActions.map(action => (
+                      {conditionalActions.map((action) => (
                         <button
                           key={action.action}
-                          onClick={() => updateConditionalLogic(index, { action: action.action as any })}
+                          onClick={() =>
+                            updateConditionalLogic(index, { action: action.action as any })
+                          }
                           className={`p-2 border rounded-lg text-left transition-colors ${
                             logic.action === action.action
                               ? 'bg-blue-50 border-blue-300 text-blue-700'
@@ -445,7 +444,7 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
             </span>
           )}
         </div>
-        
+
         <button
           onClick={addConditionalLogic}
           disabled={getAvailableFields().length === 0}
@@ -497,8 +496,13 @@ const ConditionalLogic: React.FC<ConditionalLogicProps> = ({ field, allFields, o
             <h4 className="text-sm font-medium text-yellow-900">Logic Evaluation</h4>
           </div>
           <div className="text-xs text-yellow-700">
-            <p>Multiple rules are evaluated independently. This field will be affected if ANY rule condition is met.</p>
-            <p className="mt-1">For more complex logic (AND/OR conditions), consider using custom validation rules.</p>
+            <p>
+              Multiple rules are evaluated independently. This field will be affected if ANY rule
+              condition is met.
+            </p>
+            <p className="mt-1">
+              For more complex logic (AND/OR conditions), consider using custom validation rules.
+            </p>
           </div>
         </div>
       )}

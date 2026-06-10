@@ -13,7 +13,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   onClose,
   proofId,
   proofTitle,
-  proofDescription
+  proofDescription,
 }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<string>('');
   const [customMessage, setCustomMessage] = useState<string>('');
@@ -26,13 +26,13 @@ export const ShareModal: React.FC<ShareModalProps> = ({
     { id: 'reddit', name: 'Reddit', icon: '🤖', color: 'bg-orange-500' },
     { id: 'telegram', name: 'Telegram', icon: '✈️', color: 'bg-blue-400' },
     { id: 'whatsapp', name: 'WhatsApp', icon: '📱', color: 'bg-green-500' },
-    { id: 'email', name: 'Email', icon: '📧', color: 'bg-gray-500' }
+    { id: 'email', name: 'Email', icon: '📧', color: 'bg-gray-500' },
   ];
 
   const generateShareUrl = (platform: string): string => {
     const baseUrl = window.location.origin;
     const proofUrl = `${baseUrl}/proof/${proofId}`;
-    
+
     const message = customMessage || `Check out this verified proof: ${proofTitle}`;
     const encodedMessage = encodeURIComponent(message);
     const encodedUrl = encodeURIComponent(proofUrl);
@@ -59,10 +59,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const handleShare = async (platform: string) => {
     setSharing(true);
-    
+
     try {
       const shareUrl = generateShareUrl(platform);
-      
+
       if (platform === 'email') {
         window.location.href = shareUrl;
       } else {
@@ -77,8 +77,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
           event: 'proof_shared',
           platform,
           proofId,
-          timestamp: new Date().toISOString()
-        })
+          timestamp: new Date().toISOString(),
+        }),
       });
 
       onClose();
@@ -91,17 +91,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
 
   const copyToClipboard = async () => {
     const shareUrl = `${window.location.origin}/proof/${proofId}`;
-    
+
     try {
       await navigator.clipboard.writeText(shareUrl);
-      
+
       // Show success feedback
       const button = document.getElementById('copy-link-btn');
       if (button) {
         const originalText = button.textContent;
         button.textContent = 'Copied!';
         button.classList.add('bg-green-600');
-        
+
         setTimeout(() => {
           button.textContent = originalText;
           button.classList.remove('bg-green-600');
@@ -146,9 +146,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Share via
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Share via</label>
           <div className="grid grid-cols-2 gap-2">
             {platforms.map((platform) => (
               <button
@@ -175,7 +173,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
               Copy Link
             </button>
           </div>
-          
+
           <div className="bg-gray-50 p-3 rounded-md">
             <p className="text-xs text-gray-600 font-mono break-all">
               {window.location.origin}/proof/{proofId}

@@ -55,13 +55,13 @@ export class PluginStore {
   async searchPlugins(filters: SearchFilters = {}): Promise<SearchResult> {
     const cacheKey = this.generateCacheKey('search', filters);
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const params = new URLSearchParams();
-    
+
     if (filters.query) params.append('q', filters.query);
     if (filters.category) params.append('category', filters.category);
     if (filters.tags?.length) params.append('tags', filters.tags.join(','));
@@ -72,27 +72,27 @@ export class PluginStore {
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     const response = await fetch(`${this.baseUrl}/search?${params}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to search plugins: ${response.statusText}`);
     }
 
     const result = await response.json();
     this.setCache(cacheKey, result);
-    
+
     return result;
   }
 
   async getPluginDetails(pluginId: string): Promise<PluginListing> {
     const cacheKey = `plugin-${pluginId}`;
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/plugins/${pluginId}`);
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         throw new Error(`Plugin not found: ${pluginId}`);
@@ -102,14 +102,14 @@ export class PluginStore {
 
     const plugin = await response.json();
     this.setCache(cacheKey, plugin);
-    
+
     return plugin;
   }
 
   async getPluginDownload(pluginId: string, version?: string): Promise<Blob> {
     const params = version ? `?version=${version}` : '';
     const response = await fetch(`${this.baseUrl}/plugins/${pluginId}/download${params}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to download plugin: ${response.statusText}`);
     }
@@ -120,108 +120,111 @@ export class PluginStore {
   async getPluginVersions(pluginId: string): Promise<string[]> {
     const cacheKey = `versions-${pluginId}`;
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/plugins/${pluginId}/versions`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get plugin versions: ${response.statusText}`);
     }
 
     const versions = await response.json();
     this.setCache(cacheKey, versions);
-    
+
     return versions;
   }
 
   async getPopularPlugins(limit = 10): Promise<PluginListing[]> {
     const cacheKey = `popular-${limit}`;
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/popular?limit=${limit}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get popular plugins: ${response.statusText}`);
     }
 
     const plugins = await response.json();
     this.setCache(cacheKey, plugins);
-    
+
     return plugins;
   }
 
   async getRecentPlugins(limit = 10): Promise<PluginListing[]> {
     const cacheKey = `recent-${limit}`;
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/recent?limit=${limit}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get recent plugins: ${response.statusText}`);
     }
 
     const plugins = await response.json();
     this.setCache(cacheKey, plugins);
-    
+
     return plugins;
   }
 
   async getCategories(): Promise<string[]> {
     const cacheKey = 'categories';
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/categories`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get categories: ${response.statusText}`);
     }
 
     const categories = await response.json();
     this.setCache(cacheKey, categories);
-    
+
     return categories;
   }
 
   async getTags(): Promise<string[]> {
     const cacheKey = 'tags';
     const cached = this.getFromCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
 
     const response = await fetch(`${this.baseUrl}/tags`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get tags: ${response.statusText}`);
     }
 
     const tags = await response.json();
     this.setCache(cacheKey, tags);
-    
+
     return tags;
   }
 
-  async submitReview(pluginId: string, review: {
-    rating: number;
-    title: string;
-    content: string;
-  }): Promise<void> {
+  async submitReview(
+    pluginId: string,
+    review: {
+      rating: number;
+      title: string;
+      content: string;
+    },
+  ): Promise<void> {
     const response = await fetch(`${this.baseUrl}/plugins/${pluginId}/reviews`, {
       method: 'POST',
       headers: {
@@ -237,7 +240,11 @@ export class PluginStore {
     this.clearCache(`plugin-${pluginId}`);
   }
 
-  async getReviews(pluginId: string, page = 1, pageSize = 10): Promise<{
+  async getReviews(
+    pluginId: string,
+    page = 1,
+    pageSize = 10,
+  ): Promise<{
     reviews: any[];
     total: number;
     page: number;
@@ -246,7 +253,7 @@ export class PluginStore {
   }> {
     const params = `?page=${page}&pageSize=${pageSize}`;
     const response = await fetch(`${this.baseUrl}/plugins/${pluginId}/reviews${params}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to get reviews: ${response.statusText}`);
     }

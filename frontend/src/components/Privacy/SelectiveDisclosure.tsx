@@ -14,9 +14,9 @@ interface DisclosureField {
   sensitive: boolean;
 }
 
-const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({ 
+const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
   proofData,
-  onDisclosureChange 
+  onDisclosureChange,
 }) => {
   const [fields, setFields] = useState<DisclosureField[]>(() => {
     return Object.entries(proofData)
@@ -25,7 +25,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
         name,
         value,
         disclosed: false,
-        sensitive: typeof value === 'string' && value.length > 50
+        sensitive: typeof value === 'string' && value.length > 50,
       }));
   });
 
@@ -34,29 +34,27 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
   const [showPreview, setShowPreview] = useState(false);
 
   const toggleFieldDisclosure = (fieldName: string) => {
-    setFields(prev => 
-      prev.map(field => 
-        field.name === fieldName 
-          ? { ...field, disclosed: !field.disclosed }
-          : field
-      )
+    setFields((prev) =>
+      prev.map((field) =>
+        field.name === fieldName ? { ...field, disclosed: !field.disclosed } : field,
+      ),
     );
   };
 
   const selectTemplate = (templateName: string) => {
     const templates: Record<string, string[]> = {
-      'verification_only': ['verified'],
-      'basic_identity': ['issuer'],
-      'timestamp_validation': ['timestamp'],
-      'compliance_check': ['verified', 'issuer', 'timestamp']
+      verification_only: ['verified'],
+      basic_identity: ['issuer'],
+      timestamp_validation: ['timestamp'],
+      compliance_check: ['verified', 'issuer', 'timestamp'],
     };
 
     const templateFields = templates[templateName] || [];
-    setFields(prev => 
-      prev.map(field => ({
+    setFields((prev) =>
+      prev.map((field) => ({
         ...field,
-        disclosed: templateFields.includes(field.name)
-      }))
+        disclosed: templateFields.includes(field.name),
+      })),
     );
 
     toast.success(`Applied ${templateName.replace('_', ' ')} template`);
@@ -65,8 +63,8 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
   const getDisclosedData = () => {
     const disclosed: Record<string, any> = {};
     fields
-      .filter(field => field.disclosed)
-      .forEach(field => {
+      .filter((field) => field.disclosed)
+      .forEach((field) => {
         disclosed[field.name] = field.value;
       });
     return disclosed;
@@ -78,7 +76,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
       return;
     }
 
-    const disclosedCount = fields.filter(f => f.disclosed).length;
+    const disclosedCount = fields.filter((f) => f.disclosed).length;
     if (disclosedCount === 0) {
       toast.error('Please select at least one field to disclose');
       return;
@@ -94,7 +92,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
 
   const getDisclosurePercentage = () => {
     const totalFields = fields.length;
-    const disclosedFields = fields.filter(f => f.disclosed).length;
+    const disclosedFields = fields.filter((f) => f.disclosed).length;
     return totalFields > 0 ? Math.round((disclosedFields / totalFields) * 100) : 0;
   };
 
@@ -112,16 +110,21 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-medium text-blue-900">Disclosure Summary</h3>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-              disclosurePercentage <= 25 ? 'bg-green-100 text-green-800' :
-              disclosurePercentage <= 50 ? 'bg-yellow-100 text-yellow-800' :
-              'bg-red-100 text-red-800'
-            }`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                disclosurePercentage <= 25
+                  ? 'bg-green-100 text-green-800'
+                  : disclosurePercentage <= 50
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-red-100 text-red-800'
+              }`}
+            >
               {disclosurePercentage}% disclosed
             </span>
           </div>
           <p className="text-sm text-blue-700">
-            {fields.filter(f => f.disclosed).length} of {fields.length} fields selected for disclosure
+            {fields.filter((f) => f.disclosed).length} of {fields.length} fields selected for
+            disclosure
           </p>
         </div>
 
@@ -133,7 +136,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
               { name: 'verification_only', label: 'Verification Only' },
               { name: 'basic_identity', label: 'Basic Identity' },
               { name: 'timestamp_validation', label: 'Timestamp Only' },
-              { name: 'compliance_check', label: 'Compliance Check' }
+              { name: 'compliance_check', label: 'Compliance Check' },
             ].map((template) => (
               <button
                 key={template.name}
@@ -151,16 +154,16 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
           <h3 className="font-medium text-gray-900 mb-3">Select Fields to Disclose</h3>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {fields.map((field) => (
-              <div 
-                key={field.name} 
+              <div
+                key={field.name}
                 className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center">
                   <button
                     onClick={() => toggleFieldDisclosure(field.name)}
                     className={`mr-3 p-1 rounded ${
-                      field.disclosed 
-                        ? 'text-green-600 bg-green-100' 
+                      field.disclosed
+                        ? 'text-green-600 bg-green-100'
                         : 'text-gray-400 hover:text-gray-600'
                     }`}
                   >
@@ -198,9 +201,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Recipient
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Recipient</label>
             <input
               type="text"
               value={recipient}
@@ -222,7 +223,7 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
               {showPreview ? 'Hide' : 'Show'} Preview
             </button>
           </div>
-          
+
           {showPreview && (
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="font-mono text-sm">
@@ -244,15 +245,15 @@ const SelectiveDisclosure: React.FC<SelectiveDisclosureProps> = ({
         <div className="flex gap-3">
           <button
             onClick={handleShare}
-            disabled={fields.filter(f => f.disclosed).length === 0 || !purpose || !recipient}
+            disabled={fields.filter((f) => f.disclosed).length === 0 || !purpose || !recipient}
             className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             <CheckCircle className="h-5 w-5 mr-2" />
             Share Selectively
           </button>
-          
+
           <button
-            onClick={() => setFields(prev => prev.map(f => ({ ...f, disclosed: false })))}
+            onClick={() => setFields((prev) => prev.map((f) => ({ ...f, disclosed: false })))}
             className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Clear All

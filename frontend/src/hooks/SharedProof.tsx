@@ -9,7 +9,10 @@ interface SharedProofProps {
 }
 
 export const SharedProof: React.FC<SharedProofProps> = ({ proofId, initialData, readOnly }) => {
-  const { documentState, updateDocument, setCursor, conflictMsg, version } = useCollaboration(proofId, initialData);
+  const { documentState, updateDocument, setCursor, conflictMsg, version } = useCollaboration(
+    proofId,
+    initialData,
+  );
 
   const handleChange = (field: string, value: string) => {
     if (readOnly) return;
@@ -24,12 +27,12 @@ export const SharedProof: React.FC<SharedProofProps> = ({ proofId, initialData, 
           <span className="block sm:inline">{conflictMsg}</span>
         </div>
       )}
-      
+
       <div className="mb-4 space-y-4 flex-1">
         <div>
           <label className="block text-sm font-medium text-gray-700">Proof Title</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
             value={documentState.title || ''}
             onChange={(e) => handleChange('title', e.target.value)}
@@ -39,7 +42,7 @@ export const SharedProof: React.FC<SharedProofProps> = ({ proofId, initialData, 
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Description</label>
-          <textarea 
+          <textarea
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border h-32"
             value={documentState.description || ''}
             onChange={(e) => handleChange('description', e.target.value)}

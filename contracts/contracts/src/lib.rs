@@ -7,7 +7,6 @@ mod chainVerifier;
 mod atomicSwap;
 mod messagePassing;
 
-pub mod optimization;
 pub mod security;
 pub mod storage;
 pub mod events;

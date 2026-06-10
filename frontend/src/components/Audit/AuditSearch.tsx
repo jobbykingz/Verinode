@@ -1,22 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import {
@@ -34,7 +22,15 @@ import {
   X,
   Save,
 } from 'lucide-react';
-import { auditService, AuditLog, AuditQueryFilters, AuditQueryOptions, AuditEventType, AuditSeverity, AuditStatus } from '../../services/auditService';
+import {
+  auditService,
+  AuditLog,
+  AuditQueryFilters,
+  AuditQueryOptions,
+  AuditEventType,
+  AuditSeverity,
+  AuditStatus,
+} from '../../services/auditService';
 
 /**
  * Search Props
@@ -58,7 +54,7 @@ interface SavedSearch {
 
 /**
  * Advanced Search Component
- * 
+ *
  * Provides comprehensive search capabilities for audit logs:
  * - Full-text search
  * - Advanced filtering by multiple criteria
@@ -66,17 +62,17 @@ interface SavedSearch {
  * - Real-time search suggestions
  * - Export functionality
  */
-export const AuditSearch: React.FC<AuditSearchProps> = ({ 
-  className, 
-  onResults, 
-  initialFilters 
+export const AuditSearch: React.FC<AuditSearchProps> = ({
+  className,
+  onResults,
+  initialFilters,
 }) => {
   const [filters, setFilters] = useState<AuditQueryFilters>(initialFilters || {});
   const [options, setOptions] = useState<AuditQueryOptions>({
     page: 1,
     limit: 50,
     sortBy: 'timestamp',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
   });
   const [results, setResults] = useState<AuditLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -100,7 +96,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
       setLoading(true);
       const searchFilters = {
         ...filters,
-        ...(searchQuery && { searchText: searchQuery })
+        ...(searchQuery && { searchText: searchQuery }),
       };
 
       const response = await auditService.searchLogs(searchFilters, options);
@@ -136,7 +132,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
       name,
       description,
       filters: { ...filters, searchText: searchQuery },
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     const updated = [...savedSearches, newSearch];
@@ -152,7 +148,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
 
   // Delete saved search
   const deleteSavedSearch = (id: string) => {
-    const updated = savedSearches.filter(search => search.id !== id);
+    const updated = savedSearches.filter((search) => search.id !== id);
     setSavedSearches(updated);
     localStorage.setItem('audit-saved-searches', JSON.stringify(updated));
   };
@@ -190,9 +186,9 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
 
   // Update filter
   const updateFilter = (key: keyof AuditQueryFilters, value: any) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -215,9 +211,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
             <Search className="h-5 w-5 mr-2" />
             Audit Log Search
           </CardTitle>
-          <CardDescription>
-            Search and filter audit logs with advanced criteria
-          </CardDescription>
+          <CardDescription>Search and filter audit logs with advanced criteria</CardDescription>
         </CardHeader>
         <CardContent>
           {/* Main Search Bar */}
@@ -288,7 +282,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Label htmlFor="eventTypes">Event Types</Label>
                       <Select
                         value={filters.eventTypes?.[0] || ''}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                           updateFilter('eventTypes', value ? [value as AuditEventType] : [])
                         }
                       >
@@ -309,7 +303,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Label htmlFor="severity">Severity</Label>
                       <Select
                         value={filters.severity?.[0] || ''}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                           updateFilter('severity', value ? [value as AuditSeverity] : [])
                         }
                       >
@@ -330,7 +324,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Label htmlFor="status">Status</Label>
                       <Select
                         value={filters.status?.[0] || ''}
-                        onValueChange={(value) => 
+                        onValueChange={(value) =>
                           updateFilter('status', value ? [value as AuditStatus] : [])
                         }
                       >
@@ -352,7 +346,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter user ID"
                         value={filters.userIds?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('userIds', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -429,7 +423,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter IP address"
                         value={filters.ipAddresses?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('ipAddresses', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -440,7 +434,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter resource type"
                         value={filters.resourceTypes?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('resourceTypes', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -454,7 +448,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                         AuditEventType.SECURITY_BREACH,
                         AuditEventType.SUSPICIOUS_ACTIVITY,
                         AuditEventType.BLOCKED_REQUEST,
-                        AuditEventType.RATE_LIMIT_EXCEEDED
+                        AuditEventType.RATE_LIMIT_EXCEEDED,
                       ].map((eventType) => (
                         <div key={eventType} className="flex items-center space-x-2">
                           <Checkbox
@@ -465,7 +459,10 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                               if (checked) {
                                 updateFilter('eventTypes', [...current, eventType]);
                               } else {
-                                updateFilter('eventTypes', current.filter(t => t !== eventType));
+                                updateFilter(
+                                  'eventTypes',
+                                  current.filter((t) => t !== eventType),
+                                );
                               }
                             }}
                           />
@@ -486,7 +483,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter request ID"
                         value={filters.requestIds?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('requestIds', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -497,7 +494,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter correlation ID"
                         value={filters.correlationIds?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('correlationIds', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -508,7 +505,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Input
                         placeholder="Enter endpoint"
                         value={filters.endpoints?.[0] || ''}
-                        onChange={(e) => 
+                        onChange={(e) =>
                           updateFilter('endpoints', e.target.value ? [e.target.value] : [])
                         }
                       />
@@ -518,9 +515,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <Label htmlFor="method">HTTP Method</Label>
                       <Select
                         value={filters.methods?.[0] || ''}
-                        onValueChange={(value) => 
-                          updateFilter('methods', value ? [value] : [])
-                        }
+                        onValueChange={(value) => updateFilter('methods', value ? [value] : [])}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select method" />
@@ -545,15 +540,21 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                           checked={filters.processed === true}
                           onCheckedChange={(checked) => updateFilter('processed', checked)}
                         />
-                        <Label htmlFor="processed" className="text-sm">Processed</Label>
+                        <Label htmlFor="processed" className="text-sm">
+                          Processed
+                        </Label>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="unprocessed"
                           checked={filters.processed === false}
-                          onCheckedChange={(checked) => updateFilter('processed', checked ? false : undefined)}
+                          onCheckedChange={(checked) =>
+                            updateFilter('processed', checked ? false : undefined)
+                          }
                         />
-                        <Label htmlFor="unprocessed" className="text-sm">Unprocessed</Label>
+                        <Label htmlFor="unprocessed" className="text-sm">
+                          Unprocessed
+                        </Label>
                       </div>
                     </div>
                   </div>
@@ -602,21 +603,13 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                 <div key={saved.id} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium">{saved.name}</h4>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => deleteSavedSearch(saved.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => deleteSavedSearch(saved.id)}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                   <p className="text-sm text-gray-600 mb-3">{saved.description}</p>
                   <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => loadSavedSearch(saved)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => loadSavedSearch(saved)}>
                       Load
                     </Button>
                     <Button
@@ -645,7 +638,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
               <div className="flex items-center space-x-2">
                 <Select
                   value={options.sortBy}
-                  onValueChange={(value) => setOptions(prev => ({ ...prev, sortBy: value }))}
+                  onValueChange={(value) => setOptions((prev) => ({ ...prev, sortBy: value }))}
                 >
                   <SelectTrigger className="w-40">
                     <SelectValue />
@@ -659,7 +652,9 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                 </Select>
                 <Select
                   value={options.sortOrder}
-                  onValueChange={(value) => setOptions(prev => ({ ...prev, sortOrder: value as 'asc' | 'desc' }))}
+                  onValueChange={(value) =>
+                    setOptions((prev) => ({ ...prev, sortOrder: value as 'asc' | 'desc' }))
+                  }
                 >
                   <SelectTrigger className="w-24">
                     <SelectValue />
@@ -683,14 +678,14 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <Badge 
+                        <Badge
                           style={{ backgroundColor: getSeverityColor(event.severity) }}
                           className="text-white"
                         >
                           {event.severity}
                         </Badge>
                         <Badge variant="outline">{event.eventType}</Badge>
-                        <Badge 
+                        <Badge
                           style={{ backgroundColor: getStatusColor(event.status) }}
                           className="text-white"
                         >
@@ -742,7 +737,9 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                     variant="outline"
                     size="sm"
                     disabled={(options.page || 1) <= 1}
-                    onClick={() => setOptions(prev => ({ ...prev, page: Math.max(1, (prev.page || 1) - 1) }))}
+                    onClick={() =>
+                      setOptions((prev) => ({ ...prev, page: Math.max(1, (prev.page || 1) - 1) }))
+                    }
                   >
                     Previous
                   </Button>
@@ -750,7 +747,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                     variant="outline"
                     size="sm"
                     disabled={(options.page || 1) * (options.limit || 50) >= total}
-                    onClick={() => setOptions(prev => ({ ...prev, page: (prev.page || 1) + 1 }))}
+                    onClick={() => setOptions((prev) => ({ ...prev, page: (prev.page || 1) + 1 }))}
                   >
                     Next
                   </Button>
@@ -793,7 +790,7 @@ const SaveSearchDialog: React.FC<SaveSearchDialogProps> = ({ onSave, filters, se
         <Save className="h-4 w-4 mr-2" />
         Save Search
       </Button>
-      
+
       {open && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96">

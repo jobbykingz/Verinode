@@ -26,18 +26,20 @@ interface AccessRequest {
   status: 'pending' | 'approved' | 'rejected';
 }
 
-const PrivacyControls: React.FC<PrivacyControlsProps> = ({ 
-  proofId, 
+const PrivacyControls: React.FC<PrivacyControlsProps> = ({
+  proofId,
   currentSettings,
-  onSettingsChange 
+  onSettingsChange,
 }) => {
-  const [settings, setSettings] = useState<PrivacySettings>(currentSettings || {
-    visibility: 'private',
-    allowedViewers: [],
-    allowedActions: ['view'],
-    requireConsent: true,
-    dataMinimization: true
-  });
+  const [settings, setSettings] = useState<PrivacySettings>(
+    currentSettings || {
+      visibility: 'private',
+      allowedViewers: [],
+      allowedActions: ['view'],
+      requireConsent: true,
+      dataMinimization: true,
+    },
+  );
 
   const [newViewer, setNewViewer] = useState('');
   const [accessRequests, setAccessRequests] = useState<AccessRequest[]>([
@@ -47,8 +49,8 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
       requestedActions: ['view', 'verify'],
       reason: 'Employment verification',
       timestamp: new Date(Date.now() - 3600000).toISOString(),
-      status: 'pending'
-    }
+      status: 'pending',
+    },
   ]);
 
   const handleSettingsChange = (key: keyof PrivacySettings, value: any) => {
@@ -69,20 +71,18 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
   };
 
   const removeAllowedViewer = (viewer: string) => {
-    const updatedViewers = settings.allowedViewers.filter(v => v !== viewer);
+    const updatedViewers = settings.allowedViewers.filter((v) => v !== viewer);
     handleSettingsChange('allowedViewers', updatedViewers);
     toast.success('Viewer removed');
   };
 
   const handleAccessRequest = (requestId: string, approved: boolean) => {
-    setAccessRequests(prev => 
-      prev.map(req => 
-        req.id === requestId 
-          ? { ...req, status: approved ? 'approved' : 'rejected' }
-          : req
-      )
+    setAccessRequests((prev) =>
+      prev.map((req) =>
+        req.id === requestId ? { ...req, status: approved ? 'approved' : 'rejected' } : req,
+      ),
     );
-    
+
     toast.success(`Access request ${approved ? 'approved' : 'rejected'}`);
   };
 
@@ -135,7 +135,7 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
                   onChange={(e) => {
                     const updatedActions = e.target.checked
                       ? [...settings.allowedActions, action]
-                      : settings.allowedActions.filter(a => a !== action);
+                      : settings.allowedActions.filter((a) => a !== action);
                     handleSettingsChange('allowedActions', updatedActions);
                   }}
                   className="mr-2 rounded"
@@ -214,11 +214,14 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
                 Add
               </button>
             </div>
-            
+
             {settings.allowedViewers.length > 0 && (
               <div className="space-y-2">
                 {settings.allowedViewers.map((viewer, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center">
                       <UserCheck className="h-5 w-5 text-green-500 mr-2" />
                       <span className="font-mono text-sm">{viewer}</span>
@@ -253,16 +256,12 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
                         Requested: {request.requestedActions.join(', ')}
                       </div>
                       {request.reason && (
-                        <div className="text-sm text-gray-600 mt-1">
-                          Reason: {request.reason}
-                        </div>
+                        <div className="text-sm text-gray-600 mt-1">Reason: {request.reason}</div>
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {formatDate(request.timestamp)}
-                    </div>
+                    <div className="text-xs text-gray-500">{formatDate(request.timestamp)}</div>
                   </div>
-                  
+
                   {request.status === 'pending' ? (
                     <div className="flex gap-2">
                       <button
@@ -281,11 +280,13 @@ const PrivacyControls: React.FC<PrivacyControlsProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
-                      request.status === 'approved' 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-red-100 text-red-700'
-                    }`}>
+                    <div
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm ${
+                        request.status === 'approved'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
                       {request.status === 'approved' ? 'Approved' : 'Rejected'}
                     </div>
                   )}

@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 
 interface UserActivityData {
   timestamp: string;
@@ -35,7 +47,7 @@ export const UserActivity: React.FC = () => {
       setLoading(true);
       const response = await fetch(`/api/analytics/user-activity?timeRange=${timeRange}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setStats(data.data);
       }
@@ -62,17 +74,13 @@ export const UserActivity: React.FC = () => {
   }
 
   if (!stats) {
-    return (
-      <div className="text-center text-gray-500 p-8">
-        No user activity data available
-      </div>
-    );
+    return <div className="text-center text-gray-500 p-8">No user activity data available</div>;
   }
 
   const userDistribution = [
     { name: 'Active Users', value: stats.activeUsers },
     { name: 'New Users', value: stats.newUsers },
-    { name: 'Returning Users', value: stats.returningUsers }
+    { name: 'Returning Users', value: stats.returningUsers },
   ];
 
   return (
@@ -98,7 +106,9 @@ export const UserActivity: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.activeUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -122,7 +132,9 @@ export const UserActivity: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Returning Users</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.returningUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-yellow-600">
+                {stats.returningUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>

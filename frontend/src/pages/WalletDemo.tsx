@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { FreighterConnect, TransactionSigner, AccountManager, BalanceDisplay } from '../components/Wallet';
+import {
+  FreighterConnect,
+  TransactionSigner,
+  AccountManager,
+  BalanceDisplay,
+} from '../components/Wallet';
 import { useFreighter } from '../hooks/useFreighter';
 import toast from 'react-hot-toast';
 
@@ -26,7 +31,8 @@ const WalletDemo: React.FC = () => {
             Freighter Wallet Integration Demo
           </h1>
           <p className="text-gray-600">
-            Complete demonstration of Freighter wallet integration for Stellar blockchain authentication and transaction signing.
+            Complete demonstration of Freighter wallet integration for Stellar blockchain
+            authentication and transaction signing.
           </p>
         </div>
 
@@ -153,13 +159,15 @@ const WalletDemo: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">Connected:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {isConnected ? 'Yes' : 'No'}
                     </span>
                   </div>
-                  
+
                   {account && (
                     <>
                       <div className="flex items-center justify-between">
@@ -188,19 +196,24 @@ const WalletDemo: React.FC = () => {
               <CardContent>
                 <div className="space-y-3 text-sm text-gray-600">
                   <div>
-                    <strong>1. Install Freighter:</strong> Download and install the Freighter wallet browser extension.
+                    <strong>1. Install Freighter:</strong> Download and install the Freighter wallet
+                    browser extension.
                   </div>
                   <div>
-                    <strong>2. Connect Wallet:</strong> Click "Connect" to authorize the application.
+                    <strong>2. Connect Wallet:</strong> Click "Connect" to authorize the
+                    application.
                   </div>
                   <div>
-                    <strong>3. View Balance:</strong> Your XLM and token balances will appear automatically.
+                    <strong>3. View Balance:</strong> Your XLM and token balances will appear
+                    automatically.
                   </div>
                   <div>
-                    <strong>4. Sign Transactions:</strong> Create and sign transactions using the transaction signer.
+                    <strong>4. Sign Transactions:</strong> Create and sign transactions using the
+                    transaction signer.
                   </div>
                   <div>
-                    <strong>5. Manage Account:</strong> Switch networks and manage your account settings.
+                    <strong>5. Manage Account:</strong> Switch networks and manage your account
+                    settings.
                   </div>
                 </div>
               </CardContent>

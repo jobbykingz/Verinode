@@ -8,17 +8,17 @@ export class SyncManager {
 
   static async startSync(): Promise<void> {
     if (this.isSyncing || !navigator.onLine) return;
-    
+
     this.isSyncing = true;
     offlineStore.setState({ syncStatus: 'syncing' });
 
     try {
       const queue = await QueueManager.getQueue();
-      
+
       for (const operation of queue) {
         await this.processOperation(operation);
       }
-      
+
       offlineStore.setState({ syncStatus: 'synced' });
       setTimeout(() => offlineStore.setState({ syncStatus: 'idle' }), 3000);
     } catch (error) {
@@ -41,10 +41,10 @@ export class SyncManager {
       // Placeholder for actual API dispatch
       // e.g., await apiCall(operation.action, operation.entity, operation.data);
       console.log(`[Sync] Processing ${operation.action} for ${operation.entity}`, operation.data);
-      
+
       // Simulate network request
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // If successful, remove from queue
       await QueueManager.dequeue(operation.queueId!);
     } catch (error) {

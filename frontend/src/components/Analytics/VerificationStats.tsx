@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
 
 interface VerificationData {
   timestamp: string;
@@ -30,7 +41,7 @@ export const VerificationStats: React.FC = () => {
       setLoading(true);
       const response = await fetch(`/api/analytics/verification-stats?timeRange=${timeRange}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setStats(data.data);
       }
@@ -59,11 +70,7 @@ export const VerificationStats: React.FC = () => {
   }
 
   if (!stats) {
-    return (
-      <div className="text-center text-gray-500 p-8">
-        No verification data available
-      </div>
-    );
+    return <div className="text-center text-gray-500 p-8">No verification data available</div>;
   }
 
   const successRate = ((stats.successfulVerifications / stats.totalVerifications) * 100).toFixed(1);
@@ -96,7 +103,9 @@ export const VerificationStats: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Verifications</p>
-              <p className="text-2xl font-bold text-gray-900">{formatNumber(stats.totalVerifications)}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {formatNumber(stats.totalVerifications)}
+              </p>
             </div>
           </div>
         </div>
@@ -124,7 +133,9 @@ export const VerificationStats: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg. Verification Time</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.averageVerificationTime.toFixed(1)}s</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {stats.averageVerificationTime.toFixed(1)}s
+              </p>
             </div>
           </div>
         </div>
@@ -138,7 +149,9 @@ export const VerificationStats: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Failed Verifications</p>
-              <p className="text-2xl font-bold text-red-600">{formatNumber(stats.failedVerifications)}</p>
+              <p className="text-2xl font-bold text-red-600">
+                {formatNumber(stats.failedVerifications)}
+              </p>
             </div>
           </div>
         </div>
@@ -152,26 +165,21 @@ export const VerificationStats: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={stats.verificationsOverTime}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="timestamp" 
-                tickFormatter={formatTime}
-              />
+              <XAxis dataKey="timestamp" tickFormatter={formatTime} />
               <YAxis />
-              <Tooltip 
-                labelFormatter={(value) => `Time: ${formatTime(value as string)}`}
-              />
+              <Tooltip labelFormatter={(value) => `Time: ${formatTime(value as string)}`} />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="count" 
-                stroke="#3b82f6" 
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#3b82f6"
                 name="Verifications"
                 strokeWidth={2}
               />
-              <Line 
-                type="monotone" 
-                dataKey="successRate" 
-                stroke="#10b981" 
+              <Line
+                type="monotone"
+                dataKey="successRate"
+                stroke="#10b981"
                 name="Success Rate (%)"
                 strokeWidth={2}
               />
@@ -183,10 +191,12 @@ export const VerificationStats: React.FC = () => {
         <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Verifications by Type</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={Object.entries(stats.verificationsByType).map(([type, count]) => ({
-              type: type.charAt(0).toUpperCase() + type.slice(1),
-              count
-            }))}>
+            <BarChart
+              data={Object.entries(stats.verificationsByType).map(([type, count]) => ({
+                type: type.charAt(0).toUpperCase() + type.slice(1),
+                count,
+              }))}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="type" />
               <YAxis />

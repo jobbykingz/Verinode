@@ -35,7 +35,7 @@ interface VerificationStats {
 
 export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
   proofId,
-  onVerificationComplete
+  onVerificationComplete,
 }) => {
   const { user } = useAuth();
   const [verificationData, setVerificationData] = useState('');
@@ -68,10 +68,11 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
     try {
       const history = await encryptionService.getProofVerifications(proofId);
       if (history.length > 0) {
-        const successful = history.filter(v => v.result).length;
-        const averageConfidence = history.reduce((sum, v) => sum + v.confidenceScore, 0) / history.length;
+        const successful = history.filter((v) => v.result).length;
+        const averageConfidence =
+          history.reduce((sum, v) => sum + v.confidenceScore, 0) / history.length;
         const averageGasUsed = history.reduce((sum, v) => sum + v.gasUsed, 0) / history.length;
-        const lastVerification = Math.max(...history.map(v => v.verifiedAt));
+        const lastVerification = Math.max(...history.map((v) => v.verifiedAt));
 
         setStats({
           totalVerifications: history.length,
@@ -155,7 +156,8 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
               className="mt-1"
             />
             <p className="text-xs text-gray-500 mt-1">
-              This data will be used in homomorphic computations to verify the proof without decryption.
+              This data will be used in homomorphic computations to verify the proof without
+              decryption.
             </p>
           </div>
 
@@ -177,11 +179,7 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
                 </>
               )}
             </Button>
-            <Button
-              onClick={handleBatchVerify}
-              variant="outline"
-              disabled
-            >
+            <Button onClick={handleBatchVerify} variant="outline" disabled>
               <Zap className="h-4 w-4 mr-2" />
               Batch Verify
             </Button>
@@ -223,12 +221,17 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
               <div>
                 <label className="text-sm font-medium text-gray-500">Confidence Score</label>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-lg font-bold ${getConfidenceColor(verificationResult.confidenceScore)}`}>
+                  <span
+                    className={`text-lg font-bold ${getConfidenceColor(verificationResult.confidenceScore)}`}
+                  >
                     {verificationResult.confidenceScore}%
                   </span>
                   <Badge variant={getConfidenceBadgeVariant(verificationResult.confidenceScore)}>
-                    {verificationResult.confidenceScore >= 90 ? 'High' :
-                     verificationResult.confidenceScore >= 70 ? 'Medium' : 'Low'}
+                    {verificationResult.confidenceScore >= 90
+                      ? 'High'
+                      : verificationResult.confidenceScore >= 70
+                        ? 'Medium'
+                        : 'Low'}
                   </Badge>
                 </div>
               </div>
@@ -268,11 +271,15 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
                 <div className="text-sm text-gray-500">Total Verifications</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{stats.successfulVerifications}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {stats.successfulVerifications}
+                </div>
                 <div className="text-sm text-gray-500">Successful</div>
               </div>
               <div className="text-center">
-                <div className={`text-2xl font-bold ${getConfidenceColor(stats.averageConfidence)}`}>
+                <div
+                  className={`text-2xl font-bold ${getConfidenceColor(stats.averageConfidence)}`}
+                >
                   {stats.averageConfidence.toFixed(1)}%
                 </div>
                 <div className="text-sm text-gray-500">Avg Confidence</div>
@@ -324,12 +331,15 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
                         <Badge variant={verification.result ? 'default' : 'destructive'}>
                           {verification.result ? 'Valid' : 'Invalid'}
                         </Badge>
-                        <span className={`text-sm font-medium ${getConfidenceColor(verification.confidenceScore)}`}>
+                        <span
+                          className={`text-sm font-medium ${getConfidenceColor(verification.confidenceScore)}`}
+                        >
                           {verification.confidenceScore}% confidence
                         </span>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {formatTimestamp(verification.verifiedAt)} • Gas: {verification.gasUsed.toLocaleString()}
+                        {formatTimestamp(verification.verifiedAt)} • Gas:{' '}
+                        {verification.gasUsed.toLocaleString()}
                       </div>
                     </div>
                   </div>
@@ -345,9 +355,7 @@ export const EncryptedVerification: React.FC<EncryptedVerificationProps> = ({
               )}
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-8">
-              No verification history available
-            </div>
+            <div className="text-center text-gray-500 py-8">No verification history available</div>
           )}
         </CardContent>
       </Card>

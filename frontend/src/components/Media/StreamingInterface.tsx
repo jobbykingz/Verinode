@@ -17,7 +17,7 @@ import {
   VideoOff,
   MessageSquare,
   Heart,
-  MoreVertical
+  MoreVertical,
 } from 'lucide-react';
 
 interface StreamingInterfaceProps {
@@ -54,7 +54,7 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
   hlsUrl,
   onStartStream,
   onStopStream,
-  onError
+  onError,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -69,7 +69,7 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
     bitrate: 0,
     fps: 30,
     resolution: '1920x1080',
-    audioLevel: 0
+    audioLevel: 0,
   });
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
@@ -85,7 +85,7 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
   const qualitySettings = {
     '480p': { width: 854, height: 480, bitrate: 2500000 },
     '720p': { width: 1280, height: 720, bitrate: 5000000 },
-    '1080p': { width: 1920, height: 1080, bitrate: 8000000 }
+    '1080p': { width: 1920, height: 1080, bitrate: 8000000 },
   };
 
   // Initialize stream
@@ -100,13 +100,13 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
         video: {
           width: { ideal: settings.width },
           height: { ideal: settings.height },
-          frameRate: { ideal: 30 }
+          frameRate: { ideal: 30 },
         },
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 44100
-        }
+          sampleRate: 44100,
+        },
       });
 
       streamRef.current = stream;
@@ -146,11 +146,11 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
 
     const checkLevel = () => {
       if (streamStatus !== 'live') return;
-      
+
       analyser.getByteFrequencyData(dataArray);
       const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-      setStreamStats(prev => ({ ...prev, audioLevel: average / 255 }));
-      
+      setStreamStats((prev) => ({ ...prev, audioLevel: average / 255 }));
+
       requestAnimationFrame(checkLevel);
     };
 
@@ -160,10 +160,10 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
   // Start stats collection
   const startStatsCollection = () => {
     statsIntervalRef.current = setInterval(() => {
-      setStreamStats(prev => ({
+      setStreamStats((prev) => ({
         ...prev,
         duration: prev.duration + 1,
-        viewers: prev.viewers + Math.floor(Math.random() * 3) - 1 // Simulate viewer changes
+        viewers: prev.viewers + Math.floor(Math.random() * 3) - 1, // Simulate viewer changes
       }));
     }, 1000);
   };
@@ -173,7 +173,7 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
     // Mock chat messages
     const mockMessages: ChatMessage[] = [
       { id: '1', username: 'User1', message: 'Hello! Great stream!', timestamp: new Date() },
-      { id: '2', username: 'User2', message: 'Looking good!', timestamp: new Date() }
+      { id: '2', username: 'User2', message: 'Looking good!', timestamp: new Date() },
     ];
     setChatMessages(mockMessages);
   };
@@ -181,7 +181,7 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
   // Stop stream
   const stopStream = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
 
@@ -220,21 +220,24 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
   }, [isAudioEnabled]);
 
   // Send chat message
-  const sendMessage = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim()) return;
+  const sendMessage = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newMessage.trim()) return;
 
-    const message: ChatMessage = {
-      id: Date.now().toString(),
-      username: 'You',
-      message: newMessage,
-      timestamp: new Date(),
-      isModerator: true
-    };
+      const message: ChatMessage = {
+        id: Date.now().toString(),
+        username: 'You',
+        message: newMessage,
+        timestamp: new Date(),
+        isModerator: true,
+      };
 
-    setChatMessages(prev => [...prev, message]);
-    setNewMessage('');
-  }, [newMessage]);
+      setChatMessages((prev) => [...prev, message]);
+      setNewMessage('');
+    },
+    [newMessage],
+  );
 
   // Copy stream link
   const copyStreamLink = useCallback(() => {
@@ -264,7 +267,9 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
       {/* Header */}
       <div className="bg-gray-800 text-white px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Radio className={`h-5 w-5 ${streamStatus === 'live' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
+          <Radio
+            className={`h-5 w-5 ${streamStatus === 'live' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`}
+          />
           <div>
             <h2 className="font-semibold">Live Stream</h2>
             {streamStatus === 'live' && (
@@ -335,7 +340,11 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
                 <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-2 rounded-lg text-xs space-y-1">
                   <div className="flex items-center gap-2">
                     <Signal className="h-3 w-3" />
-                    <span>{streamStats.bitrate > 0 ? `${(streamStats.bitrate / 1000000).toFixed(1)} Mbps` : 'Connecting...'}</span>
+                    <span>
+                      {streamStats.bitrate > 0
+                        ? `${(streamStats.bitrate / 1000000).toFixed(1)} Mbps`
+                        : 'Connecting...'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Video className="h-3 w-3" />
@@ -414,7 +423,11 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
                     isVideoEnabled ? 'bg-gray-700 text-white' : 'bg-red-600 text-white'
                   }`}
                 >
-                  {isVideoEnabled ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+                  {isVideoEnabled ? (
+                    <Video className="h-5 w-5" />
+                  ) : (
+                    <VideoOff className="h-5 w-5" />
+                  )}
                 </button>
 
                 <button
@@ -451,7 +464,11 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
                   onClick={copyStreamLink}
                   className="p-3 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-colors flex items-center gap-2"
                 >
-                  {copiedLink ? <CheckCircle className="h-5 w-5 text-green-400" /> : <Copy className="h-5 w-5" />}
+                  {copiedLink ? (
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <Copy className="h-5 w-5" />
+                  )}
                   <span className="hidden sm:inline">{copiedLink ? 'Copied!' : 'Copy Link'}</span>
                 </button>
 
@@ -481,7 +498,9 @@ const StreamingInterface: React.FC<StreamingInterfaceProps> = ({
               {chatMessages.map((msg) => (
                 <div key={msg.id} className="text-sm">
                   <div className="flex items-center gap-2">
-                    <span className={`font-semibold ${msg.isModerator ? 'text-blue-400' : 'text-gray-300'}`}>
+                    <span
+                      className={`font-semibold ${msg.isModerator ? 'text-blue-400' : 'text-gray-300'}`}
+                    >
                       {msg.username}
                     </span>
                     {msg.isModerator && (

@@ -11,12 +11,36 @@ interface ColorPickerProps {
 }
 
 const defaultPresetColors = [
-  '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
-  '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff',
-  '#00ff88', '#ff0088', '#88ff00', '#0088ff', '#888888',
-  '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57',
-  '#ff9ff3', '#54a0ff', '#48dbfb', '#1dd1a1', '#feca57',
-  '#ff6348', '#ff9ff3', '#00d2d3', '#5f27cd', '#00b894',
+  '#000000',
+  '#ffffff',
+  '#ff0000',
+  '#00ff00',
+  '#0000ff',
+  '#ffff00',
+  '#ff00ff',
+  '#00ffff',
+  '#ff8800',
+  '#8800ff',
+  '#00ff88',
+  '#ff0088',
+  '#88ff00',
+  '#0088ff',
+  '#888888',
+  '#ff6b6b',
+  '#4ecdc4',
+  '#45b7d1',
+  '#96ceb4',
+  '#feca57',
+  '#ff9ff3',
+  '#54a0ff',
+  '#48dbfb',
+  '#1dd1a1',
+  '#feca57',
+  '#ff6348',
+  '#ff9ff3',
+  '#00d2d3',
+  '#5f27cd',
+  '#00b894',
 ];
 
 export default function ColorPicker({
@@ -65,15 +89,17 @@ export default function ColorPicker({
 
   const hexToRgb = (hex: string) => {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    return result
+      ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16),
+        }
+      : null;
   };
 
   const rgbToHex = (r: number, g: number, b: number) => {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   };
 
   const currentRgb = hexToRgb(value);

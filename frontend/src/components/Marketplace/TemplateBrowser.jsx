@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import TemplateCard from './TemplateCard';
 import SearchFilter from './SearchFilter';
 
-const TemplateBrowser = ({ 
-  templates = [], 
-  isLoading = false, 
-  onTemplatePreview, 
+const TemplateBrowser = ({
+  templates = [],
+  isLoading = false,
+  onTemplatePreview,
   onTemplatePurchase,
   onTemplateRate,
   onSearch,
   onFilterChange,
-  categories = []
+  categories = [],
 }) => {
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState('createdAt');
@@ -83,7 +83,7 @@ const TemplateBrowser = ({
               Discover and purchase proof templates from the community
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {/* View Mode Toggle */}
             <div className="flex items-center space-x-1">
@@ -136,8 +136,18 @@ const TemplateBrowser = ({
           {sortedTemplates.length === 0 ? (
             <div className="bg-white rounded-xl shadow-md border border-gray-200 p-12 text-center">
               <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47.881-6.08 2.32M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47.881-6.08 2.32M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
@@ -155,12 +165,14 @@ const TemplateBrowser = ({
               </div>
 
               {/* Templates Grid/List */}
-              <div className={
-                viewMode === 'grid'
-                  ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
-                  : 'space-y-4'
-              }>
-                {sortedTemplates.map(template => (
+              <div
+                className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                    : 'space-y-4'
+                }
+              >
+                {sortedTemplates.map((template) => (
                   <div key={template._id} className={viewMode === 'list' ? 'w-full' : ''}>
                     <TemplateCard
                       template={template}

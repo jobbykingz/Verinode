@@ -11,13 +11,15 @@ export interface SyncOperation {
 }
 
 export class QueueManager {
-  static async enqueue(operation: Omit<SyncOperation, 'queueId' | 'timestamp' | 'retryCount'>): Promise<void> {
+  static async enqueue(
+    operation: Omit<SyncOperation, 'queueId' | 'timestamp' | 'retryCount'>,
+  ): Promise<void> {
     const newOp: SyncOperation = {
       ...operation,
       timestamp: Date.now(),
       retryCount: 0,
     };
-    
+
     await dbOp('sync_queue', 'readwrite', (store) => store.add(newOp));
     await this.updatePendingCount();
   }

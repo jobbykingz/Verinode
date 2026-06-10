@@ -10,7 +10,7 @@ interface OfflineIndicatorProps {
 const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
   className = '',
   showRefreshButton = true,
-  onRefresh
+  onRefresh,
 }) => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showOfflineMessage, setShowOfflineMessage] = useState(false);
@@ -20,7 +20,7 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
     const updateConnectionStatus = () => {
       const online = navigator.onLine;
       setIsOnline(online);
-      
+
       if (!online) {
         setShowOfflineMessage(true);
       } else {
@@ -29,10 +29,11 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
       }
 
       // Get connection type if available
-      const connection = (navigator as any).connection || 
-                        (navigator as any).mozConnection || 
-                        (navigator as any).webkitConnection;
-      
+      const connection =
+        (navigator as any).connection ||
+        (navigator as any).mozConnection ||
+        (navigator as any).webkitConnection;
+
       if (connection) {
         setConnectionType(connection.effectiveType || 'unknown');
       }
@@ -94,9 +95,7 @@ const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
         <Wifi size={16} className="text-green-500" />
         <span className="text-green-500">Online</span>
         {connectionType !== 'unknown' && (
-          <span className={`text-xs ${connectionQuality.color}`}>
-            ({connectionQuality.label})
-          </span>
+          <span className={`text-xs ${connectionQuality.color}`}>({connectionQuality.label})</span>
         )}
       </div>
     );

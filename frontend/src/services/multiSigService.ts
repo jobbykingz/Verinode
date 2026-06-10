@@ -33,7 +33,14 @@ export interface CreateWalletRequest {
 
 export interface CreateSignatureRequest {
   walletId: string;
-  type: 'PROOF_CREATION' | 'PROOF_VERIFICATION' | 'CONTRACT_INTERACTION' | 'TOKEN_TRANSFER' | 'CONFIG_CHANGE' | 'SIGNER_MANAGEMENT' | 'EMERGENCY_ACTIONS';
+  type:
+    | 'PROOF_CREATION'
+    | 'PROOF_VERIFICATION'
+    | 'CONTRACT_INTERACTION'
+    | 'TOKEN_TRANSFER'
+    | 'CONFIG_CHANGE'
+    | 'SIGNER_MANAGEMENT'
+    | 'EMERGENCY_ACTIONS';
   title: string;
   description: string;
   payload: any;
@@ -170,7 +177,7 @@ class MultiSigService {
           window.location.href = '/login';
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -185,11 +192,14 @@ class MultiSigService {
     return response.data.data;
   }
 
-  async listWallets(userId: string, options?: {
-    page?: number;
-    limit?: number;
-    network?: string;
-  }): Promise<{
+  async listWallets(
+    userId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      network?: string;
+    },
+  ): Promise<{
     wallets: Wallet[];
     page: number;
     limit: number;
@@ -208,28 +218,46 @@ class MultiSigService {
 
   async updateWalletConfig(walletId: string, updates: any, userId: string): Promise<Wallet> {
     const response = await this.api.put(`/multisig/wallets/${walletId}/config`, updates, {
-      headers: { 'X-User-ID': userId }
+      headers: { 'X-User-ID': userId },
     });
     return response.data.data;
   }
 
-  async manageSigners(walletId: string, action: 'add' | 'remove', signers: any[], userId: string): Promise<Wallet> {
-    const response = await this.api.put(`/multisig/wallets/${walletId}/signers`, {
-      action,
-      signers
-    }, {
-      headers: { 'X-User-ID': userId }
-    });
+  async manageSigners(
+    walletId: string,
+    action: 'add' | 'remove',
+    signers: any[],
+    userId: string,
+  ): Promise<Wallet> {
+    const response = await this.api.put(
+      `/multisig/wallets/${walletId}/signers`,
+      {
+        action,
+        signers,
+      },
+      {
+        headers: { 'X-User-ID': userId },
+      },
+    );
     return response.data.data;
   }
 
-  async freezeWallet(walletId: string, freeze: boolean, reason?: string, userId?: string): Promise<Wallet> {
-    const response = await this.api.put(`/multisig/wallets/${walletId}/freeze`, {
-      freeze,
-      reason
-    }, {
-      headers: { 'X-User-ID': userId }
-    });
+  async freezeWallet(
+    walletId: string,
+    freeze: boolean,
+    reason?: string,
+    userId?: string,
+  ): Promise<Wallet> {
+    const response = await this.api.put(
+      `/multisig/wallets/${walletId}/freeze`,
+      {
+        freeze,
+        reason,
+      },
+      {
+        headers: { 'X-User-ID': userId },
+      },
+    );
     return response.data.data;
   }
 
@@ -244,12 +272,15 @@ class MultiSigService {
     return response.data.data;
   }
 
-  async listSignatureRequests(walletId: string, options?: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    type?: string;
-  }): Promise<{
+  async listSignatureRequests(
+    walletId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      type?: string;
+    },
+  ): Promise<{
     requests: SignatureRequest[];
     page: number;
     limit: number;
@@ -263,15 +294,22 @@ class MultiSigService {
     if (options?.status) params.append('status', options.status);
     if (options?.type) params.append('type', options.type);
 
-    const response = await this.api.get(`/multisig/wallets/${walletId}/signature-requests?${params}`);
+    const response = await this.api.get(
+      `/multisig/wallets/${walletId}/signature-requests?${params}`,
+    );
     return response.data;
   }
 
-  async addSignature(requestId: string, signerAddress: string, signature: string, metadata?: any): Promise<SignatureRequest> {
+  async addSignature(
+    requestId: string,
+    signerAddress: string,
+    signature: string,
+    metadata?: any,
+  ): Promise<SignatureRequest> {
     const response = await this.api.post(`/multisig/signature-requests/${requestId}/signatures`, {
       signerAddress,
       signature,
-      metadata
+      metadata,
     });
     return response.data.data;
   }
@@ -282,24 +320,35 @@ class MultiSigService {
   }
 
   // Challenge Verification
-  async generateSignatureChallenge(requestId: string, signerAddress: string, metadata?: any): Promise<{
+  async generateSignatureChallenge(
+    requestId: string,
+    signerAddress: string,
+    metadata?: any,
+  ): Promise<{
     challenge: string;
     expiresAt: string;
   }> {
     const response = await this.api.post(`/multisig/signature-requests/${requestId}/challenge`, {
       signerAddress,
-      metadata
+      metadata,
     });
     return response.data.data;
   }
 
-  async verifyChallengeSignature(requestId: string, signerAddress: string, challengeSignature: string): Promise<{
+  async verifyChallengeSignature(
+    requestId: string,
+    signerAddress: string,
+    challengeSignature: string,
+  ): Promise<{
     isValid: boolean;
   }> {
-    const response = await this.api.post(`/multisig/signature-requests/${requestId}/verify-challenge`, {
-      signerAddress,
-      challengeSignature
-    });
+    const response = await this.api.post(
+      `/multisig/signature-requests/${requestId}/verify-challenge`,
+      {
+        signerAddress,
+        challengeSignature,
+      },
+    );
     return response.data.data;
   }
 
@@ -315,36 +364,49 @@ class MultiSigService {
   }
 
   // Batch Operations
-  async createBatchSignatureRequests(requests: CreateSignatureRequest[]): Promise<SignatureRequest[]> {
+  async createBatchSignatureRequests(
+    requests: CreateSignatureRequest[],
+  ): Promise<SignatureRequest[]> {
     const response = await this.api.post('/multisig/signature-requests/batch', { requests });
     return response.data.data;
   }
 
-  async addBatchSignatures(requestId: string, signatures: Array<{
-    signerAddress: string;
-    signature: string;
-    metadata?: any;
-  }>): Promise<SignatureRequest> {
+  async addBatchSignatures(
+    requestId: string,
+    signatures: Array<{
+      signerAddress: string;
+      signature: string;
+      metadata?: any;
+    }>,
+  ): Promise<SignatureRequest> {
     const response = await this.api.post(`/multisig/signature-requests/batch-signatures`, {
       requestId,
-      signatures
+      signatures,
     });
     return response.data.data;
   }
 
   async executeBatchRequests(requestIds: string[]): Promise<SignatureRequest[]> {
-    const response = await this.api.post('/multisig/signature-requests/batch-execute', { requestIds });
+    const response = await this.api.post('/multisig/signature-requests/batch-execute', {
+      requestIds,
+    });
     return response.data.data;
   }
 
   // Recovery Operations
   async initiateRecovery(walletId: string, recoveryData: any): Promise<any> {
-    const response = await this.api.post(`/multisig/wallets/${walletId}/initiate-recovery`, recoveryData);
+    const response = await this.api.post(
+      `/multisig/wallets/${walletId}/initiate-recovery`,
+      recoveryData,
+    );
     return response.data.data;
   }
 
   async completeRecovery(walletId: string, recoveryProof: any): Promise<Wallet> {
-    const response = await this.api.post(`/multisig/wallets/${walletId}/complete-recovery`, recoveryProof);
+    const response = await this.api.post(
+      `/multisig/wallets/${walletId}/complete-recovery`,
+      recoveryProof,
+    );
     return response.data.data;
   }
 
@@ -355,22 +417,31 @@ class MultiSigService {
 
   // Notification Management
   async sendNotification(requestId: string, notificationData: any): Promise<any> {
-    const response = await this.api.post(`/multisig/signature-requests/${requestId}/notify`, notificationData);
+    const response = await this.api.post(
+      `/multisig/signature-requests/${requestId}/notify`,
+      notificationData,
+    );
     return response.data.data;
   }
 
   async updateNotificationPreferences(requestId: string, preferences: any): Promise<any> {
-    const response = await this.api.put(`/multisig/signature-requests/${requestId}/notification-preferences`, preferences);
+    const response = await this.api.put(
+      `/multisig/signature-requests/${requestId}/notification-preferences`,
+      preferences,
+    );
     return response.data.data;
   }
 
   // Audit and Compliance
-  async getAuditLog(walletId: string, options?: {
-    page?: number;
-    limit?: number;
-    startDate?: string;
-    endDate?: string;
-  }): Promise<any> {
+  async getAuditLog(
+    walletId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      startDate?: string;
+      endDate?: string;
+    },
+  ): Promise<any> {
     const params = new URLSearchParams();
     if (options?.page) params.append('page', options.page.toString());
     if (options?.limit) params.append('limit', options.limit.toString());
@@ -387,9 +458,10 @@ class MultiSigService {
   }
 
   async exportAuditData(walletId: string, format: 'json' | 'csv' | 'pdf' = 'json'): Promise<Blob> {
-    const response = await this.api.post(`/multisig/wallets/${walletId}/export-audit`, 
+    const response = await this.api.post(
+      `/multisig/wallets/${walletId}/export-audit`,
       { format },
-      { responseType: 'blob' }
+      { responseType: 'blob' },
     );
     return response.data;
   }
@@ -412,7 +484,10 @@ class MultiSigService {
   }
 
   // Utility Methods
-  async validateSignerAddress(address: string, network: 'STELLAR' | 'ETHEREUM' | 'POLYGON'): Promise<{
+  async validateSignerAddress(
+    address: string,
+    network: 'STELLAR' | 'ETHEREUM' | 'POLYGON',
+  ): Promise<{
     isValid: boolean;
     normalizedAddress?: string;
     error?: string;
@@ -420,7 +495,7 @@ class MultiSigService {
     try {
       const response = await this.api.post('/multisig/utils/validate-address', {
         address,
-        network
+        network,
       });
       return response.data.data;
     } catch (error) {
@@ -428,7 +503,11 @@ class MultiSigService {
     }
   }
 
-  async estimateTransactionFee(walletId: string, payload: any, network: 'STELLAR' | 'ETHEREUM' | 'POLYGON'): Promise<{
+  async estimateTransactionFee(
+    walletId: string,
+    payload: any,
+    network: 'STELLAR' | 'ETHEREUM' | 'POLYGON',
+  ): Promise<{
     estimatedFee: number;
     estimatedGas?: number;
     currency: string;
@@ -436,7 +515,7 @@ class MultiSigService {
     const response = await this.api.post('/multisig/utils/estimate-fee', {
       walletId,
       payload,
-      network
+      network,
     });
     return response.data.data;
   }

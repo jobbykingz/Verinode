@@ -17,7 +17,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
   placeholder = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==',
   threshold = 100,
   onLoad,
-  onError
+  onError,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
@@ -34,7 +34,7 @@ const LazyImage: React.FC<LazyImageProps> = ({
       },
       {
         rootMargin: `${threshold}px`,
-      }
+      },
     );
 
     if (imgRef.current) {
@@ -61,17 +61,13 @@ const LazyImage: React.FC<LazyImageProps> = ({
         src={isInView ? src : placeholder}
         alt={alt}
         loading="lazy"
-        className={`transition-opacity duration-300 ${
-          isLoaded ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         onLoad={handleLoad}
         onError={handleError}
       />
-      
-      {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-      )}
-      
+
+      {!isLoaded && !hasError && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+
       {hasError && (
         <div className="absolute inset-0 bg-gray-300 flex items-center justify-center">
           <span className="text-gray-500 text-sm">Failed to load image</span>

@@ -4,7 +4,7 @@
  */
 export const resolveConflict = <T extends { updatedAt?: string | number }>(
   localData: T,
-  serverData: T | null
+  serverData: T | null,
 ): T => {
   if (!serverData) return localData;
   if (!localData.updatedAt || !serverData.updatedAt) return localData;
@@ -20,7 +20,7 @@ export const resolveConflict = <T extends { updatedAt?: string | number }>(
  */
 export const validateIntegrity = (data: any, requiredFields: string[]): boolean => {
   if (!data || typeof data !== 'object') return false;
-  
+
   return requiredFields.every((field) => {
     const value = data[field];
     return value !== null && value !== undefined && value !== '';

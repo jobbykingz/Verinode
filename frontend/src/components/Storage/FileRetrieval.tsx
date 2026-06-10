@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Download, 
-  File, 
-  Search, 
-  Filter, 
-  Eye, 
-  ExternalLink, 
-  Copy, 
-  CheckCircle, 
-  AlertCircle, 
-  RefreshCw, 
+import {
+  Download,
+  File,
+  Search,
+  Filter,
+  Eye,
+  ExternalLink,
+  Copy,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
   DownloadCloud,
   FileText,
   Image,
@@ -20,7 +20,7 @@ import {
   Clock,
   Shield,
   Network,
-  HardDrive
+  HardDrive,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -80,11 +80,11 @@ interface FileRetrievalProps {
   showPreview?: boolean;
 }
 
-export const FileRetrieval: React.FC<FileRetrievalProps> = ({ 
-  userId, 
+export const FileRetrieval: React.FC<FileRetrievalProps> = ({
+  userId,
   onFileSelect,
   allowDownload = true,
-  showPreview = true
+  showPreview = true,
 }) => {
   const [storageReferences, setStorageReferences] = useState<StorageReference[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,9 +102,9 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
   const fetchStorageData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const response = await fetch(`/api/storage/users/${userId}/references`);
-      
+
       if (response.ok) {
         const references = await response.json();
         setStorageReferences(references);
@@ -126,7 +126,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
   // Handle file download
   const handleDownload = async (storage: StorageReference, options?: RetrievalOptions) => {
     setDownloading(storage.id);
-    
+
     try {
       const response = await fetch(`/api/storage/${storage.id}/download`, {
         method: 'POST',
@@ -146,7 +146,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-        
+
         toast.success('File downloaded successfully');
       } else {
         throw new Error('Download failed');
@@ -162,10 +162,10 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
   // Handle file preview
   const handlePreview = async (storage: StorageReference) => {
     if (!showPreview) return;
-    
+
     setPreviewLoading(true);
     setSelectedFile(storage);
-    
+
     try {
       const response = await fetch(`/api/storage/${storage.id}/preview`, {
         method: 'POST',
@@ -199,14 +199,21 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
   // Get file icon based on MIME type
   const getFileIcon = (mimeType?: string) => {
     if (!mimeType) return <File className="w-5 h-5 text-gray-400" />;
-    
+
     if (mimeType.startsWith('image/')) return <Image className="w-5 h-5 text-green-500" />;
     if (mimeType.startsWith('video/')) return <Video className="w-5 h-5 text-purple-500" />;
     if (mimeType.startsWith('audio/')) return <Music className="w-5 h-5 text-pink-500" />;
-    if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar')) return <Archive className="w-5 h-5 text-orange-500" />;
-    if (mimeType.includes('json') || mimeType.includes('javascript') || mimeType.includes('typescript')) return <Code className="w-5 h-5 text-blue-500" />;
-    if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) return <FileText className="w-5 h-5 text-red-500" />;
-    
+    if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar'))
+      return <Archive className="w-5 h-5 text-orange-500" />;
+    if (
+      mimeType.includes('json') ||
+      mimeType.includes('javascript') ||
+      mimeType.includes('typescript')
+    )
+      return <Code className="w-5 h-5 text-blue-500" />;
+    if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text'))
+      return <FileText className="w-5 h-5 text-red-500" />;
+
     return <File className="w-5 h-5 text-gray-400" />;
   };
 
@@ -240,20 +247,22 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
 
   // Filter and sort storage references
   const filteredAndSortedReferences = storageReferences
-    .filter(ref => {
-      const matchesSearch = searchTerm === '' || 
+    .filter((ref) => {
+      const matchesSearch =
+        searchTerm === '' ||
         ref.metadata.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        ref.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        ref.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
       const matchesType = filterType === 'all' || ref.storageType === filterType;
-      const matchesMimeType = filterMimeType === 'all' || 
+      const matchesMimeType =
+        filterMimeType === 'all' ||
         (ref.metadata.mimeType && ref.metadata.mimeType.startsWith(filterMimeType));
-      
+
       return matchesSearch && matchesType && matchesMimeType;
     })
     .sort((a, b) => {
       let comparison = 0;
-      
+
       switch (sortBy) {
         case 'name':
           comparison = (a.metadata.name || '').localeCompare(b.metadata.name || '');
@@ -268,16 +277,14 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
           comparison = (a.metadata.mimeType || '').localeCompare(b.metadata.mimeType || '');
           break;
       }
-      
+
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
   // Get unique MIME type prefixes for filter
-  const mimeTypeOptions = Array.from(new Set(
-    storageReferences
-      .map(ref => ref.metadata.mimeType?.split('/')[0])
-      .filter(Boolean)
-  ));
+  const mimeTypeOptions = Array.from(
+    new Set(storageReferences.map((ref) => ref.metadata.mimeType?.split('/')[0]).filter(Boolean)),
+  );
 
   if (loading) {
     return (
@@ -292,7 +299,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">File Retrieval</h2>
-        
+
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
@@ -305,7 +312,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          
+
           {/* Filters */}
           <div className="flex gap-2">
             <select
@@ -318,18 +325,20 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
               <option value="arweave">Arweave</option>
               <option value="hybrid">Hybrid</option>
             </select>
-            
+
             <select
               value={filterMimeType}
               onChange={(e) => setFilterMimeType(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All File Types</option>
-              {mimeTypeOptions.map(type => (
-                <option key={type} value={type}>{type}</option>
+              {mimeTypeOptions.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
-            
+
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
@@ -340,7 +349,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
               <option value="size">Sort by Size</option>
               <option value="type">Sort by Type</option>
             </select>
-            
+
             <button
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -358,15 +367,12 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
             <h3 className="text-lg font-semibold text-gray-900">
               Files ({filteredAndSortedReferences.length})
             </h3>
-            <button
-              onClick={fetchStorageData}
-              className="p-2 text-gray-600 hover:text-gray-900"
-            >
+            <button onClick={fetchStorageData} className="p-2 text-gray-600 hover:text-gray-900">
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
           {filteredAndSortedReferences.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
@@ -374,14 +380,11 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
             </div>
           ) : (
             filteredAndSortedReferences.map((ref) => (
-              <div
-                key={ref.id}
-                className="p-6 hover:bg-gray-50"
-              >
+              <div key={ref.id} className="p-6 hover:bg-gray-50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4 flex-1">
                     {getFileIcon(ref.metadata.mimeType)}
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <h3 className="font-medium text-gray-900">
@@ -394,17 +397,13 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                           <AlertCircle className="w-4 h-4 text-yellow-500" />
                         )}
                       </div>
-                      
+
                       <div className="flex items-center space-x-4 mt-1">
                         <span className="text-sm text-gray-500">
                           {ref.metadata.mimeType || 'Unknown type'}
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {formatBytes(ref.size)}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(ref.createdAt)}
-                        </span>
+                        <span className="text-sm text-gray-500">{formatBytes(ref.size)}</span>
+                        <span className="text-sm text-gray-500">{formatDate(ref.createdAt)}</span>
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3 text-gray-400" />
                           <span className="text-xs text-gray-400">
@@ -412,7 +411,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                           </span>
                         </div>
                       </div>
-                      
+
                       {ref.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {ref.tags.map((tag, index) => (
@@ -427,7 +426,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     {showPreview && (
                       <button
@@ -438,7 +437,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                         <Eye className="w-4 h-4" />
                       </button>
                     )}
-                    
+
                     {allowDownload && (
                       <button
                         onClick={() => handleDownload(ref)}
@@ -452,14 +451,14 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                         )}
                       </button>
                     )}
-                    
+
                     <button
                       onClick={() => copyToClipboard(ref.id)}
                       className="p-2 text-gray-600 hover:text-gray-900"
                     >
                       <Copy className="w-4 h-4" />
                     </button>
-                    
+
                     {ref.ipfsRef && (
                       <a
                         href={ref.ipfsRef.gatewayUrl}
@@ -470,7 +469,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
-                    
+
                     {ref.arweaveRef && (
                       <a
                         href={ref.arweaveRef.gatewayUrl}
@@ -481,7 +480,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}
-                    
+
                     <button
                       onClick={() => {
                         setSelectedFile(ref);
@@ -519,7 +518,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                 </button>
               </div>
             </div>
-            
+
             <div className="p-6">
               {previewLoading ? (
                 <div className="flex items-center justify-center h-64">
@@ -536,13 +535,15 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                       <span className="text-gray-600">Size:</span> {formatBytes(selectedFile.size)}
                     </div>
                     <div>
-                      <span className="text-gray-600">Storage:</span> {selectedFile.storageType.toUpperCase()}
+                      <span className="text-gray-600">Storage:</span>{' '}
+                      {selectedFile.storageType.toUpperCase()}
                     </div>
                     <div>
-                      <span className="text-gray-600">Created:</span> {formatDate(selectedFile.createdAt)}
+                      <span className="text-gray-600">Created:</span>{' '}
+                      {formatDate(selectedFile.createdAt)}
                     </div>
                   </div>
-                  
+
                   {/* Preview Content */}
                   <div className="border border-gray-200 rounded-lg overflow-hidden">
                     {previewData.type.startsWith('image/') ? (
@@ -552,23 +553,12 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                         className="w-full h-auto max-h-96 object-contain"
                       />
                     ) : previewData.type.startsWith('video/') ? (
-                      <video
-                        src={previewData.url}
-                        controls
-                        className="w-full max-h-96"
-                      />
+                      <video src={previewData.url} controls className="w-full max-h-96" />
                     ) : previewData.type.startsWith('audio/') ? (
-                      <audio
-                        src={previewData.url}
-                        controls
-                        className="w-full"
-                      />
-                    ) : previewData.type.startsWith('text/') || previewData.type.includes('json') ? (
-                      <iframe
-                        src={previewData.url}
-                        className="w-full h-96"
-                        title="File Preview"
-                      />
+                      <audio src={previewData.url} controls className="w-full" />
+                    ) : previewData.type.startsWith('text/') ||
+                      previewData.type.includes('json') ? (
+                      <iframe src={previewData.url} className="w-full h-96" title="File Preview" />
                     ) : (
                       <div className="p-8 text-center text-gray-500">
                         <File className="w-16 h-16 mx-auto mb-4 text-gray-400" />
@@ -584,9 +574,7 @@ export const FileRetrieval: React.FC<FileRetrievalProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-gray-500">
-                  Failed to load preview
-                </div>
+                <div className="text-center text-gray-500">Failed to load preview</div>
               )}
             </div>
           </div>

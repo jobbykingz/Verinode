@@ -38,21 +38,21 @@ export enum AuditEventType {
   ROLE_CHANGE = 'ROLE_CHANGE',
   PERMISSION_CHANGE = 'PERMISSION_CHANGE',
   USER_SUSPENDED = 'USER_SUSPENDED',
-  USER_REACTIVATED = 'USER_REACTIVATED'
+  USER_REACTIVATED = 'USER_REACTIVATED',
 }
 
 export enum AuditSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export enum AuditStatus {
   SUCCESS = 'success',
   FAILURE = 'failure',
   PENDING = 'pending',
-  WARNING = 'warning'
+  WARNING = 'warning',
 }
 
 export enum ComplianceFramework {
@@ -61,7 +61,7 @@ export enum ComplianceFramework {
   HIPAA = 'HIPAA',
   PCI_DSS = 'PCI-DSS',
   ISO_27001 = 'ISO-27001',
-  NIST = 'NIST'
+  NIST = 'NIST',
 }
 
 /**
@@ -265,7 +265,7 @@ export interface AuditServiceConfig {
 
 /**
  * Frontend Audit Service
- * 
+ *
  * Provides a comprehensive API for interacting with the audit system:
  * - Search and query audit logs
  * - Get analytics and statistics
@@ -284,7 +284,7 @@ export class AuditService {
       timeout: 30000,
       retries: 3,
       retryDelay: 1000,
-      ...config
+      ...config,
     };
 
     this.client = axios.create({
@@ -292,8 +292,8 @@ export class AuditService {
       timeout: this.config.timeout,
       headers: {
         'Content-Type': 'application/json',
-        ...(this.config.authToken && { Authorization: `Bearer ${this.config.authToken}` })
-      }
+        ...(this.config.authToken && { Authorization: `Bearer ${this.config.authToken}` }),
+      },
     });
 
     this.setupInterceptors();
@@ -304,12 +304,12 @@ export class AuditService {
    */
   async searchLogs(
     filters: AuditQueryFilters = {},
-    options: AuditQueryOptions = {}
+    options: AuditQueryOptions = {},
   ): Promise<AuditQueryResult> {
     try {
       const response = await this.client.post('/api/audit/search', {
         filters,
-        options
+        options,
       });
 
       return response.data;
@@ -324,12 +324,12 @@ export class AuditService {
    */
   async getAnalytics(
     filters: AuditQueryFilters = {},
-    timeGrouping: 'hour' | 'day' | 'week' | 'month' = 'day'
+    timeGrouping: 'hour' | 'day' | 'week' | 'month' = 'day',
   ): Promise<AuditAnalytics> {
     try {
       const response = await this.client.post('/api/audit/analytics', {
         filters,
-        timeGrouping
+        timeGrouping,
       });
 
       return response.data;
@@ -386,16 +386,20 @@ export class AuditService {
     options: {
       format?: 'pdf' | 'json' | 'csv' | 'html';
       includeRawData?: boolean;
-    } = {}
+    } = {},
   ): Promise<Blob> {
     try {
-      const response = await this.client.post('/api/audit/reports', {
-        period,
-        framework,
-        ...options
-      }, {
-        responseType: 'blob'
-      });
+      const response = await this.client.post(
+        '/api/audit/reports',
+        {
+          period,
+          framework,
+          ...options,
+        },
+        {
+          responseType: 'blob',
+        },
+      );
 
       return response.data;
     } catch (error) {
@@ -413,16 +417,20 @@ export class AuditService {
     options: {
       maxRecords?: number;
       includeMetadata?: boolean;
-    } = {}
+    } = {},
   ): Promise<Blob> {
     try {
-      const response = await this.client.post('/api/audit/export', {
-        filters,
-        format,
-        ...options
-      }, {
-        responseType: 'blob'
-      });
+      const response = await this.client.post(
+        '/api/audit/export',
+        {
+          filters,
+          format,
+          ...options,
+        },
+        {
+          responseType: 'blob',
+        },
+      );
 
       return response.data;
     } catch (error) {
@@ -434,11 +442,13 @@ export class AuditService {
   /**
    * Verify audit log integrity
    */
-  async verifyIntegrity(options: {
-    fromDate?: string;
-    toDate?: string;
-    sampleSize?: number;
-  } = {}): Promise<{
+  async verifyIntegrity(
+    options: {
+      fromDate?: string;
+      toDate?: string;
+      sampleSize?: number;
+    } = {},
+  ): Promise<{
     verified: number;
     failed: number;
     failedIds: string[];
@@ -469,7 +479,9 @@ export class AuditService {
    */
   async getQuerySuggestions(partial: string): Promise<string[]> {
     try {
-      const response = await this.client.get(`/api/audit/suggestions?q=${encodeURIComponent(partial)}`);
+      const response = await this.client.get(
+        `/api/audit/suggestions?q=${encodeURIComponent(partial)}`,
+      );
       return response.data;
     } catch (error) {
       this.handleError('Failed to get query suggestions', error);
@@ -545,7 +557,7 @@ export class AuditService {
   private emit(event: string, data: any): void {
     const listeners = this.eventListeners.get(event);
     if (listeners) {
-      listeners.forEach(callback => {
+      listeners.forEach((callback) => {
         try {
           callback(data);
         } catch (error) {
@@ -568,7 +580,7 @@ export class AuditService {
       },
       (error) => {
         return Promise.reject(error);
-      }
+      },
     );
 
     // Response interceptor
@@ -594,7 +606,7 @@ export class AuditService {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
@@ -614,7 +626,7 @@ export class AuditService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private generateCorrelationId(): string {
@@ -634,7 +646,7 @@ export class AuditService {
       [AuditSeverity.LOW]: '#10b981',
       [AuditSeverity.MEDIUM]: '#3b82f6',
       [AuditSeverity.HIGH]: '#f59e0b',
-      [AuditSeverity.CRITICAL]: '#ef4444'
+      [AuditSeverity.CRITICAL]: '#ef4444',
     };
     return colors[severity] || '#64748b';
   }
@@ -644,7 +656,7 @@ export class AuditService {
       [AuditStatus.SUCCESS]: '#10b981',
       [AuditStatus.FAILURE]: '#ef4444',
       [AuditStatus.PENDING]: '#f59e0b',
-      [AuditStatus.WARNING]: '#f97316'
+      [AuditStatus.WARNING]: '#f97316',
     };
     return colors[status] || '#64748b';
   }
@@ -665,8 +677,10 @@ export class AuditService {
   }
 
   static getEventTypeLabel(eventType: AuditEventType): string {
-    return eventType.replace(/_/g, ' ').toLowerCase()
-      .replace(/\b\w/g, l => l.toUpperCase());
+    return eventType
+      .replace(/_/g, ' ')
+      .toLowerCase()
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }
 
   static getSeverityLabel(severity: AuditSeverity): string {
@@ -680,7 +694,7 @@ export class AuditService {
 
 // Create default instance
 export const auditService = new AuditService({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001'
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
 });
 
 export default auditService;

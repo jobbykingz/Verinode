@@ -14,10 +14,7 @@ interface SyncItem {
   error?: string;
 }
 
-const SyncStatus: React.FC<SyncStatusProps> = ({
-  className = '',
-  showDetails = false
-}) => {
+const SyncStatus: React.FC<SyncStatusProps> = ({ className = '', showDetails = false }) => {
   const [syncItems, setSyncItems] = useState<SyncItem[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showSyncPanel, setShowSyncPanel] = useState(false);
@@ -42,7 +39,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
 
   useEffect(() => {
     // Auto-sync when coming back online
-    if (isOnline && syncItems.some(item => item.status === 'pending')) {
+    if (isOnline && syncItems.some((item) => item.status === 'pending')) {
       syncPendingItems();
     }
   }, [isOnline]);
@@ -51,7 +48,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
     try {
       const items = await getSyncItemsFromDB();
       setSyncItems(items);
-      
+
       // Get last sync time
       const lastSync = localStorage.getItem('last-sync-time');
       if (lastSync) {
@@ -63,29 +60,28 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
   };
 
   const syncPendingItems = async () => {
-    const pendingItems = syncItems.filter(item => item.status === 'pending');
-    
+    const pendingItems = syncItems.filter((item) => item.status === 'pending');
+
     for (const item of pendingItems) {
       try {
         // Update item status to syncing
         updateSyncItemStatus(item.id, 'syncing');
-        
+
         // Perform the actual sync based on item type
         await performSync(item);
-        
+
         // Update to completed
         updateSyncItemStatus(item.id, 'completed');
-        
+
         // Remove completed items after a delay
         setTimeout(() => {
           removeSyncItem(item.id);
         }, 3000);
-        
       } catch (error) {
         updateSyncItemStatus(item.id, 'failed', error.message);
       }
     }
-    
+
     // Update last sync time
     const now = Date.now();
     setLastSyncTime(now);
@@ -93,23 +89,21 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
   };
 
   const updateSyncItemStatus = (id: string, status: SyncItem['status'], error?: string) => {
-    setSyncItems(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { ...item, status, error, timestamp: Date.now() }
-          : item
-      )
+    setSyncItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, status, error, timestamp: Date.now() } : item,
+      ),
     );
   };
 
   const removeSyncItem = (id: string) => {
-    setSyncItems(prev => prev.filter(item => item.id !== id));
+    setSyncItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const performSync = async (item: SyncItem): Promise<void> => {
     // Simulate sync delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000 + Math.random() * 2000));
+
     // In a real implementation, this would make actual API calls
     switch (item.type) {
       case 'proof':
@@ -125,7 +119,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
         console.log('Syncing update:', item.id);
         break;
     }
-    
+
     // Simulate occasional failures for demo
     if (Math.random() < 0.1) {
       throw new Error('Network error during sync');
@@ -140,38 +134,38 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
         id: '1',
         type: 'proof',
         status: 'pending',
-        timestamp: Date.now() - 5000
+        timestamp: Date.now() - 5000,
       },
       {
         id: '2',
         type: 'verification',
         status: 'completed',
-        timestamp: Date.now() - 10000
-      }
+        timestamp: Date.now() - 10000,
+      },
     ];
   };
 
-  const pendingCount = syncItems.filter(item => item.status === 'pending').length;
-  const syncingCount = syncItems.filter(item => item.status === 'syncing').length;
-  const failedCount = syncItems.filter(item => item.status === 'failed').length;
+  const pendingCount = syncItems.filter((item) => item.status === 'pending').length;
+  const syncingCount = syncItems.filter((item) => item.status === 'syncing').length;
+  const failedCount = syncItems.filter((item) => item.status === 'failed').length;
 
   const getStatusIcon = () => {
     if (!isOnline) {
       return <CloudOff size={16} className="text-red-500" />;
     }
-    
+
     if (syncingCount > 0) {
       return <RefreshCw size={16} className="text-blue-500 animate-spin" />;
     }
-    
+
     if (pendingCount > 0) {
       return <Cloud size={16} className="text-yellow-500" />;
     }
-    
+
     if (failedCount > 0) {
       return <AlertCircle size={16} className="text-orange-500" />;
     }
-    
+
     return <CheckCircle size={16} className="text-green-500" />;
   };
 
@@ -179,28 +173,28 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
     if (!isOnline) {
       return 'Offline';
     }
-    
+
     if (syncingCount > 0) {
       return `Syncing (${syncingCount})`;
     }
-    
+
     if (pendingCount > 0) {
       return `Pending (${pendingCount})`;
     }
-    
+
     if (failedCount > 0) {
       return `Failed (${failedCount})`;
     }
-    
+
     return 'Synced';
   };
 
   const formatLastSync = () => {
     if (!lastSyncTime) return 'Never';
-    
+
     const now = Date.now();
     const diff = now - lastSyncTime;
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
@@ -217,9 +211,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
         {getStatusIcon()}
         <span>{getStatusText()}</span>
         {showDetails && (
-          <span className="text-xs text-gray-500">
-            Last sync: {formatLastSync()}
-          </span>
+          <span className="text-xs text-gray-500">Last sync: {formatLastSync()}</span>
         )}
       </button>
 
@@ -249,32 +241,44 @@ const SyncStatus: React.FC<SyncStatusProps> = ({
             {syncItems.length > 0 ? (
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-gray-700">Items to Sync</h4>
-                {syncItems.map(item => (
-                  <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                {syncItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                  >
                     <div className="flex items-center space-x-2">
                       {item.status === 'pending' && <Cloud size={14} className="text-yellow-500" />}
-                      {item.status === 'syncing' && <RefreshCw size={14} className="text-blue-500 animate-spin" />}
-                      {item.status === 'completed' && <CheckCircle size={14} className="text-green-500" />}
-                      {item.status === 'failed' && <AlertCircle size={14} className="text-red-500" />}
-                      
+                      {item.status === 'syncing' && (
+                        <RefreshCw size={14} className="text-blue-500 animate-spin" />
+                      )}
+                      {item.status === 'completed' && (
+                        <CheckCircle size={14} className="text-green-500" />
+                      )}
+                      {item.status === 'failed' && (
+                        <AlertCircle size={14} className="text-red-500" />
+                      )}
+
                       <span className="text-sm capitalize">{item.type}</span>
                     </div>
-                    
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                      item.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
-                      item.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      'bg-red-100 text-red-700'
-                    }`}>
+
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        item.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : item.status === 'syncing'
+                            ? 'bg-blue-100 text-blue-700'
+                            : item.status === 'completed'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                      }`}
+                    >
                       {item.status}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-gray-500 text-center py-4">
-                All items are synced
-              </p>
+              <p className="text-sm text-gray-500 text-center py-4">All items are synced</p>
             )}
 
             {/* Actions */}

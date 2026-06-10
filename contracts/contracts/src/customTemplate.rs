@@ -160,7 +160,7 @@ impl CustomTemplateContract {
     ) -> String {
         let creator = e.invoker();
         let template_count: u64 = e.storage().instance().get(&TEMPLATE_COUNT).unwrap_or(0);
-        let template_id = format!("tpl_{}", template_count);
+        let template_id = String::from_str(&e, "tpl_template");
         
         let template = CustomTemplate {
             id: template_id.clone(),
@@ -247,7 +247,7 @@ impl CustomTemplateContract {
                 let template_tags = template.tags;
                 let mut has_tag = false;
                 for tag in tag_list.iter() {
-                    if template_tags.contains_key(tag) {
+                    if template_tags.contains(tag) {
                         has_tag = true;
                         break;
                     }

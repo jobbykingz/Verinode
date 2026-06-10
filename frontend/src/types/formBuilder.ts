@@ -1,4 +1,4 @@
-export type FieldType = 
+export type FieldType =
   | 'text'
   | 'number'
   | 'email'
@@ -19,7 +19,7 @@ export type FieldType =
   | 'rating'
   | 'range';
 
-export type ValidationRule = 
+export type ValidationRule =
   | 'required'
   | 'minLength'
   | 'maxLength'
@@ -30,7 +30,7 @@ export type ValidationRule =
   | 'url'
   | 'custom';
 
-export type ConditionalOperator = 
+export type ConditionalOperator =
   | 'equals'
   | 'not_equals'
   | 'contains'
@@ -153,12 +153,15 @@ export interface FormAnalytics {
   totalSubmissions: number;
   completionRate: number;
   averageTimeToComplete: number;
-  fieldAnalytics: Record<string, {
-    views: number;
-    interactions: number;
-    errors: number;
-    skipRate: number;
-  }>;
+  fieldAnalytics: Record<
+    string,
+    {
+      views: number;
+      interactions: number;
+      errors: number;
+      skipRate: number;
+    }
+  >;
   deviceBreakdown: Record<string, number>;
   timeSeriesData: Array<{
     date: string;

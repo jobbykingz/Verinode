@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { FormTemplate } from '../types/formBuilder';
 import FormBuilderService from '../services/formBuilderService';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Copy, 
-  Trash2, 
-  Eye, 
-  Download, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Copy,
+  Trash2,
+  Eye,
+  Download,
   Upload,
   Filter,
   Grid,
@@ -18,7 +18,7 @@ import {
   Users,
   Tag,
   Calendar,
-  MoreHorizontal
+  MoreHorizontal,
 } from 'lucide-react';
 
 const FormTemplatesPage: React.FC = () => {
@@ -29,7 +29,7 @@ const FormTemplatesPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
-  
+
   const formBuilderService = new FormBuilderService();
 
   useEffect(() => {
@@ -50,10 +50,11 @@ const FormTemplatesPage: React.FC = () => {
     }
   };
 
-  const filteredTemplates = templates.filter(template => {
-    const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.metadata.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredTemplates = templates.filter((template) => {
+    const matchesSearch =
+      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.metadata.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesSearch;
   });
 
@@ -67,10 +68,13 @@ const FormTemplatesPage: React.FC = () => {
 
   const handleDuplicateTemplate = async (templateId: string) => {
     try {
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
       if (template) {
-        const duplicated = await formBuilderService.duplicateTemplate(templateId, `${template.name} (Copy)`);
-        setTemplates(prev => [duplicated, ...prev]);
+        const duplicated = await formBuilderService.duplicateTemplate(
+          templateId,
+          `${template.name} (Copy)`,
+        );
+        setTemplates((prev) => [duplicated, ...prev]);
       }
     } catch (error) {
       console.error('Failed to duplicate template:', error);
@@ -81,7 +85,7 @@ const FormTemplatesPage: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this template?')) {
       try {
         await formBuilderService.deleteTemplate(templateId);
-        setTemplates(prev => prev.filter(t => t.id !== templateId));
+        setTemplates((prev) => prev.filter((t) => t.id !== templateId));
       } catch (error) {
         console.error('Failed to delete template:', error);
       }
@@ -94,7 +98,7 @@ const FormTemplatesPage: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const template = templates.find(t => t.id === templateId);
+      const template = templates.find((t) => t.id === templateId);
       a.download = `${template?.name || 'form-template'}.json`;
       document.body.appendChild(a);
       a.click();
@@ -108,7 +112,7 @@ const FormTemplatesPage: React.FC = () => {
   const handleImportTemplate = async (file: File) => {
     try {
       const imported = await formBuilderService.importTemplate(file);
-      setTemplates(prev => [imported, ...prev]);
+      setTemplates((prev) => [imported, ...prev]);
     } catch (error) {
       console.error('Failed to import template:', error);
     }
@@ -170,11 +174,8 @@ const FormTemplatesPage: React.FC = () => {
 
         {template.metadata.tags.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
-            {template.metadata.tags.slice(0, 3).map(tag => (
-              <span
-                key={tag}
-                className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
-              >
+            {template.metadata.tags.slice(0, 3).map((tag) => (
+              <span key={tag} className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">
                 {tag}
               </span>
             ))}
@@ -355,7 +356,7 @@ const FormTemplatesPage: React.FC = () => {
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <option key={category.value} value={category.value}>
                       {category.label}
                     </option>
@@ -375,7 +376,9 @@ const FormTemplatesPage: React.FC = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No templates found</h3>
           <p className="text-gray-500 mb-6">
-            {searchQuery ? 'Try adjusting your search terms' : 'Create your first form template to get started'}
+            {searchQuery
+              ? 'Try adjusting your search terms'
+              : 'Create your first form template to get started'}
           </p>
           {!searchQuery && (
             <button
@@ -391,13 +394,13 @@ const FormTemplatesPage: React.FC = () => {
         <>
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredTemplates.map(template => (
+              {filteredTemplates.map((template) => (
                 <TemplateCard key={template.id} template={template} />
               ))}
             </div>
           ) : (
             <div className="space-y-4">
-              {filteredTemplates.map(template => (
+              {filteredTemplates.map((template) => (
                 <TemplateListItem key={template.id} template={template} />
               ))}
             </div>
@@ -430,7 +433,7 @@ const FormTemplatesPage: React.FC = () => {
               <span className="text-sm text-gray-600">Public Templates</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-1">
-              {templates.filter(t => t.metadata.isPublic).length}
+              {templates.filter((t) => t.metadata.isPublic).length}
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -439,7 +442,9 @@ const FormTemplatesPage: React.FC = () => {
               <span className="text-sm text-gray-600">Last Updated</span>
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-1">
-              {new Date(Math.max(...templates.map(t => new Date(t.metadata.updatedAt).getTime()))).toLocaleDateString()}
+              {new Date(
+                Math.max(...templates.map((t) => new Date(t.metadata.updatedAt).getTime())),
+              ).toLocaleDateString()}
             </p>
           </div>
         </div>

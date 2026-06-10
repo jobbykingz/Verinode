@@ -6,10 +6,10 @@ interface SkeletonLoaderProps {
   className?: string;
 }
 
-export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({ 
-  type = 'text', 
-  lines = 3, 
-  className = '' 
+export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
+  type = 'text',
+  lines = 3,
+  className = '',
 }) => {
   const renderSkeleton = () => {
     switch (type) {
@@ -68,9 +68,5 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
     }
   };
 
-  return (
-    <div className={`skeleton-loader ${className}`}>
-      {renderSkeleton()}
-    </div>
-  );
+  return <div className={`skeleton-loader ${className}`}>{renderSkeleton()}</div>;
 };

@@ -28,65 +28,61 @@ export class PluginInstaller {
     this.pluginStore = pluginStore;
   }
 
-  async installPlugin(
-    pluginId: string, 
-    options: InstallationOptions = {}
-  ): Promise<void> {
+  async installPlugin(pluginId: string, options: InstallationOptions = {}): Promise<void> {
     const progressId = `${pluginId}-${Date.now()}`;
-    
+
     try {
       this.updateProgress(progressId, {
         pluginId,
         status: 'downloading',
         progress: 0,
-        message: 'Starting installation...'
+        message: 'Starting installation...',
       });
 
       const pluginData = await this.downloadPlugin(pluginId, options);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'extracting',
         progress: 25,
-        message: 'Extracting plugin package...'
+        message: 'Extracting plugin package...',
       });
 
       const extractedPlugin = await this.extractPlugin(pluginData);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'validating',
         progress: 50,
-        message: 'Validating plugin...'
+        message: 'Validating plugin...',
       });
 
       if (!options.skipValidation) {
         await this.validatePlugin(extractedPlugin);
       }
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'installing',
         progress: 75,
-        message: 'Installing plugin...'
+        message: 'Installing plugin...',
       });
 
       await this.pluginManager.installPlugin(extractedPlugin);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'completed',
         progress: 100,
-        message: 'Plugin installed successfully!'
+        message: 'Plugin installed successfully!',
       });
-
     } catch (error) {
       this.updateProgress(progressId, {
         pluginId,
         status: 'error',
         progress: 0,
         message: 'Installation failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -94,31 +90,30 @@ export class PluginInstaller {
 
   async uninstallPlugin(pluginId: string): Promise<void> {
     const progressId = `${pluginId}-${Date.now()}`;
-    
+
     try {
       this.updateProgress(progressId, {
         pluginId,
         status: 'installing',
         progress: 50,
-        message: 'Uninstalling plugin...'
+        message: 'Uninstalling plugin...',
       });
 
       await this.pluginManager.uninstallPlugin(pluginId);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'completed',
         progress: 100,
-        message: 'Plugin uninstalled successfully!'
+        message: 'Plugin uninstalled successfully!',
       });
-
     } catch (error) {
       this.updateProgress(progressId, {
         pluginId,
         status: 'error',
         progress: 0,
         message: 'Uninstallation failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -126,13 +121,13 @@ export class PluginInstaller {
 
   async updatePlugin(pluginId: string, options: InstallationOptions = {}): Promise<void> {
     const progressId = `${pluginId}-update-${Date.now()}`;
-    
+
     try {
       this.updateProgress(progressId, {
         pluginId,
         status: 'downloading',
         progress: 0,
-        message: 'Checking for updates...'
+        message: 'Checking for updates...',
       });
 
       const currentPlugin = this.pluginManager.getPlugin(pluginId);
@@ -142,59 +137,61 @@ export class PluginInstaller {
 
       const pluginListing = await this.pluginStore.getPluginDetails(pluginId);
       const latestVersion = pluginListing.metadata.version;
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'downloading',
         progress: 25,
-        message: `Downloading version ${latestVersion}...`
+        message: `Downloading version ${latestVersion}...`,
       });
 
-      const pluginData = await this.downloadPlugin(pluginId, { ...options, version: latestVersion });
-      
+      const pluginData = await this.downloadPlugin(pluginId, {
+        ...options,
+        version: latestVersion,
+      });
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'extracting',
         progress: 50,
-        message: 'Extracting updated plugin...'
+        message: 'Extracting updated plugin...',
       });
 
       const extractedPlugin = await this.extractPlugin(pluginData);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'validating',
         progress: 75,
-        message: 'Validating updated plugin...'
+        message: 'Validating updated plugin...',
       });
 
       if (!options.skipValidation) {
         await this.validatePlugin(extractedPlugin);
       }
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'installing',
         progress: 90,
-        message: 'Installing updated plugin...'
+        message: 'Installing updated plugin...',
       });
 
       await this.pluginManager.updatePlugin(pluginId, extractedPlugin);
-      
+
       this.updateProgress(progressId, {
         pluginId,
         status: 'completed',
         progress: 100,
-        message: 'Plugin updated successfully!'
+        message: 'Plugin updated successfully!',
       });
-
     } catch (error) {
       this.updateProgress(progressId, {
         pluginId,
         status: 'error',
         progress: 0,
         message: 'Update failed',
-        error: error instanceof Error ? error.message : String(error)
+        error: error instanceof Error ? error.message : String(error),
       });
       throw error;
     }
@@ -202,28 +199,23 @@ export class PluginInstaller {
 
   async batchInstall(pluginIds: string[], options: InstallationOptions = {}): Promise<void> {
     const results = await Promise.allSettled(
-      pluginIds.map(id => this.installPlugin(id, options))
+      pluginIds.map((id) => this.installPlugin(id, options)),
     );
 
-    const failed = results.filter(result => result.status === 'rejected');
+    const failed = results.filter((result) => result.status === 'rejected');
     if (failed.length > 0) {
-      throw new PluginError(
-        `Failed to install ${failed.length} plugins`,
-        'BATCH_INSTALL_FAILED'
-      );
+      throw new PluginError(`Failed to install ${failed.length} plugins`, 'BATCH_INSTALL_FAILED');
     }
   }
 
   async batchUninstall(pluginIds: string[]): Promise<void> {
-    const results = await Promise.allSettled(
-      pluginIds.map(id => this.uninstallPlugin(id))
-    );
+    const results = await Promise.allSettled(pluginIds.map((id) => this.uninstallPlugin(id)));
 
-    const failed = results.filter(result => result.status === 'rejected');
+    const failed = results.filter((result) => result.status === 'rejected');
     if (failed.length > 0) {
       throw new PluginError(
         `Failed to uninstall ${failed.length} plugins`,
-        'BATCH_UNINSTALL_FAILED'
+        'BATCH_UNINSTALL_FAILED',
       );
     }
   }
@@ -241,14 +233,17 @@ export class PluginInstaller {
     return Array.from(this.installations.values());
   }
 
-  onProgressUpdate(pluginId: string, listener: (progress: InstallationProgress) => void): () => void {
+  onProgressUpdate(
+    pluginId: string,
+    listener: (progress: InstallationProgress) => void,
+  ): () => void {
     if (!this.eventListeners.has(pluginId)) {
       this.eventListeners.set(pluginId, new Set());
     }
-    
+
     const listeners = this.eventListeners.get(pluginId)!;
     listeners.add(listener);
-    
+
     return () => {
       listeners.delete(listener);
       if (listeners.size === 0) {
@@ -264,12 +259,12 @@ export class PluginInstaller {
   private async extractPlugin(pluginData: Blob): Promise<any> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
+
       reader.onload = async () => {
         try {
           const arrayBuffer = reader.result as ArrayBuffer;
           const uint8Array = new Uint8Array(arrayBuffer);
-          
+
           if (this.isZipFile(uint8Array)) {
             const extracted = await this.extractZipFile(uint8Array);
             resolve(extracted);
@@ -278,13 +273,15 @@ export class PluginInstaller {
             resolve(json);
           }
         } catch (error) {
-          reject(new PluginError(
-            `Failed to extract plugin: ${error instanceof Error ? error.message : String(error)}`,
-            'EXTRACTION_FAILED'
-          ));
+          reject(
+            new PluginError(
+              `Failed to extract plugin: ${error instanceof Error ? error.message : String(error)}`,
+              'EXTRACTION_FAILED',
+            ),
+          );
         }
       };
-      
+
       reader.onerror = () => reject(new Error('Failed to read plugin data'));
       reader.readAsArrayBuffer(pluginData);
     });
@@ -296,7 +293,7 @@ export class PluginInstaller {
     }
 
     const metadata = pluginData.metadata;
-    
+
     if (!metadata.id || !metadata.name || !metadata.version) {
       throw new PluginError('Required metadata fields are missing', 'INVALID_METADATA');
     }
@@ -311,10 +308,13 @@ export class PluginInstaller {
   }
 
   private isZipFile(data: Uint8Array): boolean {
-    return data.length >= 4 && 
-           data[0] === 0x50 && data[1] === 0x4B && 
-           (data[2] === 0x03 || data[2] === 0x05 || data[2] === 0x07) &&
-           (data[3] === 0x04 || data[3] === 0x06 || data[3] === 0x08);
+    return (
+      data.length >= 4 &&
+      data[0] === 0x50 &&
+      data[1] === 0x4b &&
+      (data[2] === 0x03 || data[2] === 0x05 || data[2] === 0x07) &&
+      (data[3] === 0x04 || data[3] === 0x06 || data[3] === 0x08)
+    );
   }
 
   private async extractZipFile(data: Uint8Array): Promise<any> {
@@ -323,10 +323,10 @@ export class PluginInstaller {
 
   private updateProgress(id: string, progress: InstallationProgress): void {
     this.installations.set(id, progress);
-    
+
     const listeners = this.eventListeners.get(progress.pluginId);
     if (listeners) {
-      listeners.forEach(listener => {
+      listeners.forEach((listener) => {
         try {
           listener(progress);
         } catch (error) {
@@ -351,7 +351,8 @@ export class PluginInstaller {
   }
 
   getInstallationHistory(): InstallationProgress[] {
-    return Array.from(this.installations.values())
-      .sort((a, b) => b.pluginId.localeCompare(a.pluginId));
+    return Array.from(this.installations.values()).sort((a, b) =>
+      b.pluginId.localeCompare(a.pluginId),
+    );
   }
 }

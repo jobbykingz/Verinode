@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   AlertTriangle,
   CheckCircle,
@@ -25,7 +14,7 @@ import {
   Brain,
   Shield,
   Eye,
-  Download
+  Download,
 } from 'lucide-react';
 
 interface ValidationScoreProps {
@@ -56,7 +45,7 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
   proofId,
   validationData,
   onReview,
-  onExport
+  onExport,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [animatingScore, setAnimatingScore] = useState(false);
@@ -111,12 +100,12 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
 
   const getPatternDescription = (pattern: string) => {
     const descriptions: { [key: string]: string } = {
-      'unusual_timestamp': 'Proof submitted at unusual time',
-      'high_frequency_activity': 'High frequency of submissions',
-      'regular_submission_pattern': 'Regular intervals suggest automation',
-      'low_issuer_reputation': 'Issuer has suspicious history',
-      'suspicious_hash_pattern': 'Hash pattern indicates manipulation',
-      'unusual_content_size': 'Content size deviates from normal'
+      unusual_timestamp: 'Proof submitted at unusual time',
+      high_frequency_activity: 'High frequency of submissions',
+      regular_submission_pattern: 'Regular intervals suggest automation',
+      low_issuer_reputation: 'Issuer has suspicious history',
+      suspicious_hash_pattern: 'Hash pattern indicates manipulation',
+      unusual_content_size: 'Content size deviates from normal',
     };
     return descriptions[pattern] || pattern;
   };
@@ -138,9 +127,7 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
                 {getRiskIcon(validationData.riskLevel)}
                 <span className="ml-1">{validationData.riskLevel.toUpperCase()}</span>
               </Badge>
-              <Badge variant="outline">
-                v{validationData.modelVersion}
-              </Badge>
+              <Badge variant="outline">v{validationData.modelVersion}</Badge>
             </div>
           </div>
         </CardHeader>
@@ -150,7 +137,9 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
           <div className="text-center space-y-4">
             <div className="relative inline-flex items-center justify-center">
               <div className="text-6xl font-bold">
-                <span className={`transition-all duration-1000 ${animatingScore ? 'scale-110' : 'scale-100'}`}>
+                <span
+                  className={`transition-all duration-1000 ${animatingScore ? 'scale-110' : 'scale-100'}`}
+                >
                   {(validationData.validationScore * 100).toFixed(1)}%
                 </span>
               </div>
@@ -160,15 +149,15 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
                 </div>
               )}
             </div>
-            
+
             <div className="w-full max-w-md mx-auto">
-              <Progress 
-                value={validationData.validationScore * 100} 
+              <Progress
+                value={validationData.validationScore * 100}
                 className="h-3"
                 indicatorClassName={getScoreColor(validationData.validationScore)}
               />
             </div>
-            
+
             <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
               <span>Confidence: {(validationData.confidenceLevel * 100).toFixed(1)}%</span>
               <span>•</span>
@@ -190,9 +179,9 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
                 <span>Export Report</span>
               </Button>
             )}
-            <Button 
-              onClick={() => setExpanded(!expanded)} 
-              variant="outline" 
+            <Button
+              onClick={() => setExpanded(!expanded)}
+              variant="outline"
               className="flex items-center space-x-2"
             >
               <Info className="h-4 w-4" />
@@ -253,7 +242,7 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
                 </h4>
                 <div className="space-y-3">
                   {Object.entries(validationData.explainability.featureImportance)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([, a], [, b]) => b - a)
                     .slice(0, 5)
                     .map(([feature, importance], index) => (
                       <div key={feature} className="flex items-center space-x-3">
@@ -280,14 +269,17 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
                   </h4>
                   <div className="space-y-2">
                     {validationData.explainability.similarCases.slice(0, 3).map((case_, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                      >
                         <div className="flex items-center space-x-2">
                           <span className="text-sm font-mono">{case_.proofId}</span>
                           <Badge variant="outline" className="text-xs">
                             {(case_.similarity * 100).toFixed(1)}% similar
                           </Badge>
                         </div>
-                        <Badge 
+                        <Badge
                           variant={case_.outcome === 'low' ? 'default' : 'destructive'}
                           className="text-xs"
                         >
@@ -303,7 +295,9 @@ const ValidationScore: React.FC<ValidationScoreProps> = ({
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between text-sm text-gray-600">
                   <span>Model Version: {validationData.modelVersion}</span>
-                  <span>Processing Time: {formatProcessingTime(validationData.processingTime)}</span>
+                  <span>
+                    Processing Time: {formatProcessingTime(validationData.processingTime)}
+                  </span>
                 </div>
               </div>
             </div>

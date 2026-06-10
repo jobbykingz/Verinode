@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Upload, 
-  File, 
-  HardDrive, 
-  Network, 
-  Shield, 
-  CheckCircle, 
-  AlertCircle, 
-  RefreshCw, 
+import {
+  Upload,
+  File,
+  HardDrive,
+  Network,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
   Download,
   Trash2,
   Search,
@@ -17,7 +17,7 @@ import {
   Eye,
   EyeOff,
   Copy,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -77,10 +77,7 @@ interface StorageManagerProps {
   onStorageSelect?: (storage: StorageReference) => void;
 }
 
-export const StorageManager: React.FC<StorageManagerProps> = ({ 
-  userId, 
-  onStorageSelect 
-}) => {
+export const StorageManager: React.FC<StorageManagerProps> = ({ userId, onStorageSelect }) => {
   const [storageReferences, setStorageReferences] = useState<StorageReference[]>([]);
   const [metrics, setMetrics] = useState<StorageMetrics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -96,17 +93,17 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
   const fetchStorageData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Mock API calls - replace with actual API
       const [referencesResponse, metricsResponse] = await Promise.all([
         fetch(`/api/storage/users/${userId}/references`),
-        fetch(`/api/storage/metrics`)
+        fetch(`/api/storage/metrics`),
       ]);
 
       if (referencesResponse.ok && metricsResponse.ok) {
         const references = await referencesResponse.json();
         const metrics = await metricsResponse.json();
-        
+
         setStorageReferences(references);
         setMetrics(metrics);
       } else {
@@ -125,7 +122,10 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
   }, [fetchStorageData]);
 
   // Handle file upload
-  const handleFileUpload = async (files: FileList, storageType: 'ipfs' | 'arweave' | 'hybrid' = 'ipfs') => {
+  const handleFileUpload = async (
+    files: FileList,
+    storageType: 'ipfs' | 'arweave' | 'hybrid' = 'ipfs',
+  ) => {
     if (files.length === 0) return;
 
     setUploading(true);
@@ -174,7 +174,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFileUpload(e.dataTransfer.files);
     }
@@ -191,12 +191,14 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
   const handleVerifyStorage = async (storageId: string) => {
     try {
       const response = await fetch(`/api/storage/${storageId}/verify`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       if (response.ok) {
         const result = await response.json();
-        toast.success(result.verified ? 'Storage verified successfully' : 'Storage verification failed');
+        toast.success(
+          result.verified ? 'Storage verified successfully' : 'Storage verification failed',
+        );
         await fetchStorageData();
       } else {
         throw new Error('Verification failed');
@@ -211,7 +213,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
   const handleRepairStorage = async (storageId: string) => {
     try {
       const response = await fetch(`/api/storage/${storageId}/repair`, {
-        method: 'POST'
+        method: 'POST',
       });
 
       if (response.ok) {
@@ -234,7 +236,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
 
     try {
       const response = await fetch(`/api/storage/${storageId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       });
 
       if (response.ok) {
@@ -257,13 +259,14 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
   };
 
   // Filter storage references
-  const filteredReferences = storageReferences.filter(ref => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredReferences = storageReferences.filter((ref) => {
+    const matchesSearch =
+      searchTerm === '' ||
       ref.metadata.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ref.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+      ref.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
     const matchesType = filterType === 'all' || ref.storageType === filterType;
-    
+
     return matchesSearch && matchesType;
   });
 
@@ -317,7 +320,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
               <File className="w-8 h-8 text-blue-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -327,22 +330,26 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
               <HardDrive className="w-8 h-8 text-green-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Verification Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{(metrics.verificationRate * 100).toFixed(1)}%</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {(metrics.verificationRate * 100).toFixed(1)}%
+                </p>
               </div>
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
           </div>
-          
+
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Cache Hit Rate</p>
-                <p className="text-2xl font-bold text-gray-900">{(metrics.cacheHitRate * 100).toFixed(1)}%</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {(metrics.cacheHitRate * 100).toFixed(1)}%
+                </p>
               </div>
               <BarChart3 className="w-8 h-8 text-purple-500" />
             </div>
@@ -353,7 +360,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
       {/* Upload Section */}
       <div className="bg-white rounded-lg shadow p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Upload Files</h2>
-        
+
         <div
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'
@@ -365,55 +372,34 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
         >
           <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600 mb-2">Drag and drop files here, or click to select</p>
-          <input
-            type="file"
-            onChange={handleFileSelect}
-            className="hidden"
-            id="file-upload"
-          />
+          <input type="file" onChange={handleFileSelect} className="hidden" id="file-upload" />
           <label
             htmlFor="file-upload"
             className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600"
           >
             Select Files
           </label>
-          
+
           {/* Storage Type Selection */}
           <div className="mt-4 flex justify-center space-x-4">
             <label className="flex items-center">
-              <input
-                type="radio"
-                name="storageType"
-                value="ipfs"
-                defaultChecked
-                className="mr-2"
-              />
+              <input type="radio" name="storageType" value="ipfs" defaultChecked className="mr-2" />
               <Network className="w-4 h-4 mr-1" />
               IPFS
             </label>
             <label className="flex items-center">
-              <input
-                type="radio"
-                name="storageType"
-                value="arweave"
-                className="mr-2"
-              />
+              <input type="radio" name="storageType" value="arweave" className="mr-2" />
               <HardDrive className="w-4 h-4 mr-1" />
               Arweave
             </label>
             <label className="flex items-center">
-              <input
-                type="radio"
-                name="storageType"
-                value="hybrid"
-                className="mr-2"
-              />
+              <input type="radio" name="storageType" value="hybrid" className="mr-2" />
               <Shield className="w-4 h-4 mr-1" />
               Hybrid
             </label>
           </div>
         </div>
-        
+
         {uploading && (
           <div className="mt-4">
             <div className="flex items-center justify-between mb-2">
@@ -447,7 +433,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                   className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               {/* Filter */}
               <select
                 value={filterType}
@@ -459,22 +445,17 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                 <option value="arweave">Arweave</option>
                 <option value="hybrid">Hybrid</option>
               </select>
-              
-              <button
-                onClick={fetchStorageData}
-                className="p-2 text-gray-600 hover:text-gray-900"
-              >
+
+              <button onClick={fetchStorageData} className="p-2 text-gray-600 hover:text-gray-900">
                 <RefreshCw className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
           {filteredReferences.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No storage references found
-            </div>
+            <div className="p-8 text-center text-gray-500">No storage references found</div>
           ) : (
             filteredReferences.map((ref) => (
               <div
@@ -499,9 +480,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                         <span className="text-xs text-gray-400">
                           Created: {new Date(ref.createdAt).toLocaleDateString()}
                         </span>
-                        <span className="text-xs text-gray-400">
-                          Cost: {formatCost(ref.cost)}
-                        </span>
+                        <span className="text-xs text-gray-400">Cost: {formatCost(ref.cost)}</span>
                         <div className="flex items-center space-x-1">
                           {ref.verificationStatus ? (
                             <CheckCircle className="w-3 h-3 text-green-500" />
@@ -515,7 +494,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={(e) => {
@@ -526,7 +505,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                     >
                       {showDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -536,7 +515,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                     >
                       <Shield className="w-4 h-4" />
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -546,7 +525,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                     >
                       <RefreshCw className="w-4 h-4" />
                     </button>
-                    
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -558,12 +537,12 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Detailed Information */}
                 {showDetails && selectedStorage?.id === ref.id && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <h4 className="font-medium text-gray-900 mb-2">Storage Details</h4>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-600">Storage ID</p>
@@ -577,17 +556,19 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                           </button>
                         </div>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm text-gray-600">Redundancy Level</p>
                         <p className="font-medium">{ref.redundancyLevel}x</p>
                       </div>
-                      
+
                       {ref.ipfsRef && (
                         <div>
                           <p className="text-sm text-gray-600">IPFS CID</p>
                           <div className="flex items-center space-x-2">
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{ref.ipfsRef.cid}</code>
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {ref.ipfsRef.cid}
+                            </code>
                             <button
                               onClick={() => copyToClipboard(ref.ipfsRef.cid)}
                               className="text-gray-400 hover:text-gray-600"
@@ -605,12 +586,14 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                           </div>
                         </div>
                       )}
-                      
+
                       {ref.arweaveRef && (
                         <div>
                           <p className="text-sm text-gray-600">Arweave Transaction</p>
                           <div className="flex items-center space-x-2">
-                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">{ref.arweaveRef.transactionId}</code>
+                            <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                              {ref.arweaveRef.transactionId}
+                            </code>
                             <button
                               onClick={() => copyToClipboard(ref.arweaveRef.transactionId)}
                               className="text-gray-400 hover:text-gray-600"
@@ -628,7 +611,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                           </div>
                         </div>
                       )}
-                      
+
                       <div>
                         <p className="text-sm text-gray-600">Tags</p>
                         <div className="flex flex-wrap gap-1">
@@ -642,7 +625,7 @@ export const StorageManager: React.FC<StorageManagerProps> = ({
                           ))}
                         </div>
                       </div>
-                      
+
                       <div>
                         <p className="text-sm text-gray-600">Last Verified</p>
                         <p className="font-medium">

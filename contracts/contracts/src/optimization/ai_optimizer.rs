@@ -1,4 +1,5 @@
 use soroban_sdk::{Env, Address, Bytes, String, Vec, Map};
+extern crate alloc;
 use super::{GasAnalyzer, OptimizationReport, AutoRefactor};
 
 #[derive(Clone, Debug, PartialEq)]

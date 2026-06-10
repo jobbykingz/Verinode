@@ -16,11 +16,10 @@ const Home = () => {
     <div className="space-y-12">
       {/* Hero Section */}
       <section className="text-center py-12">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4">
-          Verinode
-        </h1>
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">Verinode</h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Web3 infrastructure for issuing and verifying cryptographic proofs of real-world events on the Stellar blockchain
+          Web3 infrastructure for issuing and verifying cryptographic proofs of real-world events on
+          the Stellar blockchain
         </p>
         <div className="flex justify-center space-x-4">
           <Link
@@ -52,23 +51,17 @@ const Home = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <CheckCircle className="h-12 w-12 text-green-600 mb-4" />
           <h3 className="text-lg font-semibold mb-2">Verifiable</h3>
-          <p className="text-gray-600">
-            On-chain verification ensures authenticity and integrity
-          </p>
+          <p className="text-gray-600">On-chain verification ensures authenticity and integrity</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <Zap className="h-12 w-12 text-yellow-600 mb-4" />
           <h3 className="text-lg font-semibold mb-2">Fast</h3>
-          <p className="text-gray-600">
-            Lightning-fast transactions on Stellar network
-          </p>
+          <p className="text-gray-600">Lightning-fast transactions on Stellar network</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <Lock className="h-12 w-12 text-red-600 mb-4" />
           <h3 className="text-lg font-semibold mb-2">Decentralized</h3>
-          <p className="text-gray-600">
-            No single point of failure with distributed verification
-          </p>
+          <p className="text-gray-600">No single point of failure with distributed verification</p>
         </div>
       </section>
 
@@ -81,18 +74,14 @@ const Home = () => {
               <span className="text-2xl font-bold text-blue-600">1</span>
             </div>
             <h3 className="text-lg font-semibold mb-2">Create Event</h3>
-            <p className="text-gray-600">
-              Document your real-world event with cryptographic proof
-            </p>
+            <p className="text-gray-600">Document your real-world event with cryptographic proof</p>
           </div>
           <div className="text-center">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-2xl font-bold text-blue-600">2</span>
             </div>
             <h3 className="text-lg font-semibold mb-2">Issue Proof</h3>
-            <p className="text-gray-600">
-              Submit proof to Stellar blockchain for permanent record
-            </p>
+            <p className="text-gray-600">Submit proof to Stellar blockchain for permanent record</p>
           </div>
           <div className="text-center">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">

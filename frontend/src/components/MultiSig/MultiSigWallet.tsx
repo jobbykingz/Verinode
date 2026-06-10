@@ -9,14 +9,14 @@ import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Progress } from '../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { 
-  Shield, 
-  Users, 
-  Settings, 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
+import {
+  Shield,
+  Users,
+  Settings,
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
   Lock,
   Unlock,
   Plus,
@@ -26,7 +26,7 @@ import {
   EyeOff,
   Copy,
   Download,
-  Upload
+  Upload,
 } from 'lucide-react';
 import { multiSigService } from '../../services/multiSigService';
 import { toast } from 'react-hot-toast';
@@ -76,10 +76,7 @@ interface Wallet {
   };
 }
 
-export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({ 
-  walletId, 
-  onWalletCreated 
-}) => {
+export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({ walletId, onWalletCreated }) => {
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
@@ -92,7 +89,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
     description: '',
     network: 'STELLAR' as 'STELLAR' | 'ETHEREUM' | 'POLYGON',
     threshold: 2,
-    signers: [{ address: '', name: '', role: 'SIGNER' as const, weight: 1 }]
+    signers: [{ address: '', name: '', role: 'SIGNER' as const, weight: 1 }],
   });
 
   // Load wallet data
@@ -118,7 +115,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
   const handleCreateWallet = async () => {
     try {
       setLoading(true);
-      
+
       // Validate form
       if (!createForm.name || createForm.signers.length < 2) {
         toast.error('Please fill all required fields and add at least 2 signers');
@@ -132,14 +129,13 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
 
       const newWallet = await multiSigService.createWallet({
         ...createForm,
-        createdBy: 'current-user' // Replace with actual user ID
+        createdBy: 'current-user', // Replace with actual user ID
       });
 
       setWallet(newWallet);
       setShowCreateForm(false);
       onWalletCreated?.(newWallet.walletId);
       toast.success('Multi-signature wallet created successfully');
-
     } catch (error) {
       toast.error('Failed to create wallet');
       console.error('Error creating wallet:', error);
@@ -149,25 +145,25 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
   };
 
   const addSigner = () => {
-    setCreateForm(prev => ({
+    setCreateForm((prev) => ({
       ...prev,
-      signers: [...prev.signers, { address: '', name: '', role: 'SIGNER', weight: 1 }]
+      signers: [...prev.signers, { address: '', name: '', role: 'SIGNER', weight: 1 }],
     }));
   };
 
   const removeSigner = (index: number) => {
-    setCreateForm(prev => ({
+    setCreateForm((prev) => ({
       ...prev,
-      signers: prev.signers.filter((_, i) => i !== index)
+      signers: prev.signers.filter((_, i) => i !== index),
     }));
   };
 
   const updateSigner = (index: number, field: string, value: any) => {
-    setCreateForm(prev => ({
+    setCreateForm((prev) => ({
       ...prev,
-      signers: prev.signers.map((signer, i) => 
-        i === index ? { ...signer, [field]: value } : signer
-      )
+      signers: prev.signers.map((signer, i) =>
+        i === index ? { ...signer, [field]: value } : signer,
+      ),
     }));
   };
 
@@ -192,7 +188,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
               <Input
                 id="name"
                 value={createForm.name}
-                onChange={(e) => setCreateForm(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Enter wallet name"
               />
             </div>
@@ -201,7 +197,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
               <Select
                 value={createForm.network}
                 onValueChange={(value: 'STELLAR' | 'ETHEREUM' | 'POLYGON') =>
-                  setCreateForm(prev => ({ ...prev, network: value }))
+                  setCreateForm((prev) => ({ ...prev, network: value }))
                 }
               >
                 <SelectTrigger>
@@ -221,7 +217,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
             <Textarea
               id="description"
               value={createForm.description}
-              onChange={(e) => setCreateForm(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="Optional description for this wallet"
               rows={3}
             />
@@ -236,21 +232,19 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
                 min="1"
                 max={createForm.signers.length}
                 value={createForm.threshold}
-                onChange={(e) => setCreateForm(prev => ({ 
-                  ...prev, 
-                  threshold: parseInt(e.target.value) || 1 
-                }))}
+                onChange={(e) =>
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    threshold: parseInt(e.target.value) || 1,
+                  }))
+                }
               />
               <p className="text-sm text-gray-500 mt-1">
                 {createForm.threshold} of {createForm.signers.length} signatures required
               </p>
             </div>
             <div className="flex items-end">
-              <Button 
-                onClick={addSigner}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={addSigner} variant="outline" className="w-full">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Signer
               </Button>
@@ -306,7 +300,9 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
                         type="number"
                         min="1"
                         value={signer.weight}
-                        onChange={(e) => updateSigner(index, 'weight', parseInt(e.target.value) || 1)}
+                        onChange={(e) =>
+                          updateSigner(index, 'weight', parseInt(e.target.value) || 1)
+                        }
                       />
                     </div>
                     {createForm.signers.length > 2 && (
@@ -326,17 +322,10 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
           </div>
 
           <div className="flex gap-4">
-            <Button 
-              onClick={handleCreateWallet}
-              disabled={loading}
-              className="flex-1"
-            >
+            <Button onClick={handleCreateWallet} disabled={loading} className="flex-1">
               {loading ? 'Creating...' : 'Create Wallet'}
             </Button>
-            <Button 
-              variant="outline"
-              onClick={() => setShowCreateForm(false)}
-            >
+            <Button variant="outline" onClick={() => setShowCreateForm(false)}>
               Cancel
             </Button>
           </div>
@@ -377,7 +366,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={wallet.state.isActive ? "default" : "secondary"}>
+              <Badge variant={wallet.state.isActive ? 'default' : 'secondary'}>
                 {wallet.state.isActive ? 'Active' : 'Inactive'}
               </Badge>
               {wallet.state.isFrozen && (
@@ -386,9 +375,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
                   Frozen
                 </Badge>
               )}
-              <Badge variant="outline">
-                {wallet.state.network}
-              </Badge>
+              <Badge variant="outline">{wallet.state.network}</Badge>
             </div>
           </div>
         </CardHeader>
@@ -413,9 +400,13 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
               <div>
                 <p className="text-sm text-gray-500">Success Rate</p>
                 <p className="text-2xl font-bold">
-                  {wallet.stats.totalTransactions > 0 
-                    ? Math.round((wallet.stats.successfulTransactions / wallet.stats.totalTransactions) * 100)
-                    : 0}%
+                  {wallet.stats.totalTransactions > 0
+                    ? Math.round(
+                        (wallet.stats.successfulTransactions / wallet.stats.totalTransactions) *
+                          100,
+                      )
+                    : 0}
+                  %
                 </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-600" />
@@ -438,7 +429,9 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500">Threshold</p>
-                <p className="text-2xl font-bold">{wallet.config.threshold}/{wallet.config.signers.length}</p>
+                <p className="text-2xl font-bold">
+                  {wallet.config.threshold}/{wallet.config.signers.length}
+                </p>
               </div>
               <Users className="h-8 w-8 text-purple-600" />
             </div>
@@ -479,10 +472,10 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
                   <div>
                     <Label>Contract Address</Label>
                     <div className="flex items-center gap-2">
-                      <Input 
-                        value={wallet.state.contractAddress} 
-                        readOnly 
-                        type={showSecrets ? "text" : "password"}
+                      <Input
+                        value={wallet.state.contractAddress}
+                        readOnly
+                        type={showSecrets ? 'text' : 'password'}
                       />
                       <Button
                         variant="outline"
@@ -542,7 +535,7 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={signer.active ? "default" : "secondary"}>
+                        <Badge variant={signer.active ? 'default' : 'secondary'}>
                           {signer.active ? 'Active' : 'Inactive'}
                         </Badge>
                         <Badge variant="outline">{signer.role}</Badge>
@@ -568,17 +561,11 @@ export const MultiSigWallet: React.FC<MultiSigWalletProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Daily Limit</Label>
-                  <Input 
-                    value={wallet.security.dailyLimit.toString()} 
-                    readOnly 
-                  />
+                  <Input value={wallet.security.dailyLimit.toString()} readOnly />
                 </div>
                 <div>
                   <Label>Single Transaction Limit</Label>
-                  <Input 
-                    value={wallet.security.singleTransactionLimit.toString()} 
-                    readOnly 
-                  />
+                  <Input value={wallet.security.singleTransactionLimit.toString()} readOnly />
                 </div>
               </div>
               <div>

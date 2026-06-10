@@ -33,7 +33,7 @@ export class VersionManager {
       return false;
     }
 
-    if (!await this.checkCompatibility(newMetadata)) {
+    if (!(await this.checkCompatibility(newMetadata))) {
       return false;
     }
 
@@ -53,7 +53,7 @@ export class VersionManager {
       current: currentVersion,
       latest: latestVersion,
       updateAvailable,
-      securityUpdate
+      securityUpdate,
     };
 
     this.versionCache.set(pluginId, versionInfo);
@@ -63,17 +63,17 @@ export class VersionManager {
   compareVersions(version1: string, version2: string): number {
     const v1Parts = version1.split('.').map(Number);
     const v2Parts = version2.split('.').map(Number);
-    
+
     const maxLength = Math.max(v1Parts.length, v2Parts.length);
-    
+
     for (let i = 0; i < maxLength; i++) {
       const v1Part = v1Parts[i] || 0;
       const v2Part = v2Parts[i] || 0;
-      
+
       if (v1Part > v2Part) return 1;
       if (v1Part < v2Part) return -1;
     }
-    
+
     return 0;
   }
 
@@ -149,17 +149,24 @@ export class VersionManager {
     }
   }
 
-  private async isSecurityUpdate(pluginId: string, currentVersion: string, latestVersion: string): Promise<boolean> {
+  private async isSecurityUpdate(
+    pluginId: string,
+    currentVersion: string,
+    latestVersion: string,
+  ): Promise<boolean> {
     try {
       const response = await fetch(`/api/plugins/${pluginId}/security-updates`);
       if (!response.ok) {
         return false;
       }
       const data = await response.json();
-      return data.securityUpdates?.some((update: any) => 
-        this.compareVersions(update.version, currentVersion) > 0 &&
-        this.compareVersions(update.version, latestVersion) <= 0
-      ) || false;
+      return (
+        data.securityUpdates?.some(
+          (update: any) =>
+            this.compareVersions(update.version, currentVersion) > 0 &&
+            this.compareVersions(update.version, latestVersion) <= 0,
+        ) || false
+      );
     } catch {
       return false;
     }
@@ -203,8 +210,11 @@ export class VersionManager {
       if (cParts[1] === 0) {
         return vParts[0] === 0 && vParts[1] === 0 && vParts[2] === cParts[2];
       }
-      return vParts[0] === 0 && vParts[1] === cParts[1] && 
-             this.compareVersions(version, constraintVersion) >= 0;
+      return (
+        vParts[0] === 0 &&
+        vParts[1] === cParts[1] &&
+        this.compareVersions(version, constraintVersion) >= 0
+      );
     }
 
     return this.compareVersions(version, constraintVersion) >= 0;
@@ -212,24 +222,24 @@ export class VersionManager {
 
   generateVersionReport(): Record<string, VersionInfo> {
     const report: Record<string, VersionInfo> = {};
-    
+
     for (const [pluginId, versionInfo] of this.versionCache.entries()) {
       report[pluginId] = { ...versionInfo };
     }
-    
+
     return report;
   }
 
   async batchCheckUpdates(pluginIds: string[]): Promise<Record<string, VersionInfo>> {
     const results: Record<string, VersionInfo> = {};
-    
+
     await Promise.all(
       pluginIds.map(async (pluginId) => {
         const currentVersion = await this.getCurrentPluginVersion(pluginId);
         results[pluginId] = await this.checkForUpdates(pluginId, currentVersion);
-      })
+      }),
     );
-    
+
     return results;
   }
 

@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { Plus, MoreHorizontal, Filter, Search, Calendar, User, Tag, ChevronDown, Settings, BarChart3, Users, MessageSquare, Clock, AlertCircle } from 'lucide-react';
+import {
+  Plus,
+  MoreHorizontal,
+  Filter,
+  Search,
+  Calendar,
+  User,
+  Tag,
+  ChevronDown,
+  Settings,
+  BarChart3,
+  Users,
+  MessageSquare,
+  Clock,
+  AlertCircle,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface Task {
@@ -51,7 +66,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
   projectId,
   onTaskClick,
   onTaskUpdate,
-  className = ''
+  className = '',
 }) => {
   const [columns, setColumns] = useState<KanbanColumn[]>([
     {
@@ -59,29 +74,29 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
       title: 'To Do',
       status: 'TODO',
       tasks: [],
-      color: 'bg-gray-500'
+      color: 'bg-gray-500',
     },
     {
       id: 'inprogress',
       title: 'In Progress',
       status: 'IN_PROGRESS',
       tasks: [],
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
     },
     {
       id: 'inreview',
       title: 'In Review',
       status: 'IN_REVIEW',
       tasks: [],
-      color: 'bg-yellow-500'
+      color: 'bg-yellow-500',
     },
     {
       id: 'completed',
       title: 'Completed',
       status: 'COMPLETED',
       tasks: [],
-      color: 'bg-green-500'
-    }
+      color: 'bg-green-500',
+    },
   ]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -115,7 +130,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
         comments: 3,
         attachments: 2,
         createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15')
+        updatedAt: new Date('2024-01-15'),
       },
       {
         id: '2',
@@ -134,7 +149,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
         comments: 5,
         attachments: 1,
         createdAt: new Date('2024-01-16'),
-        updatedAt: new Date('2024-01-17')
+        updatedAt: new Date('2024-01-17'),
       },
       {
         id: '3',
@@ -153,7 +168,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
         comments: 2,
         attachments: 4,
         createdAt: new Date('2024-01-14'),
-        updatedAt: new Date('2024-01-18')
+        updatedAt: new Date('2024-01-18'),
       },
       {
         id: '4',
@@ -171,18 +186,18 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
         comments: 8,
         attachments: 3,
         createdAt: new Date('2024-01-10'),
-        updatedAt: new Date('2024-01-16')
-      }
+        updatedAt: new Date('2024-01-16'),
+      },
     ];
 
     setTasks(mockTasks);
-    
+
     // Distribute tasks to columns
-    const updatedColumns = columns.map(column => ({
+    const updatedColumns = columns.map((column) => ({
       ...column,
-      tasks: mockTasks.filter(task => task.status === column.status)
+      tasks: mockTasks.filter((task) => task.status === column.status),
     }));
-    
+
     setColumns(updatedColumns);
     setLoading(false);
   }, []);
@@ -192,23 +207,24 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
     let filtered = tasks;
 
     if (searchQuery) {
-      filtered = filtered.filter(task => 
-        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (task) =>
+          task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          task.description.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
     if (selectedPriority !== 'all') {
-      filtered = filtered.filter(task => task.priority === selectedPriority);
+      filtered = filtered.filter((task) => task.priority === selectedPriority);
     }
 
     if (selectedAssignee !== 'all') {
-      filtered = filtered.filter(task => task.assignee?.id === selectedAssignee);
+      filtered = filtered.filter((task) => task.assignee?.id === selectedAssignee);
     }
 
     if (selectedLabels.length > 0) {
-      filtered = filtered.filter(task => 
-        selectedLabels.some(label => task.labels.includes(label))
+      filtered = filtered.filter((task) =>
+        selectedLabels.some((label) => task.labels.includes(label)),
       );
     }
 
@@ -218,15 +234,15 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
   // Update columns with filtered tasks
   useEffect(() => {
     const filtered = filteredTasks();
-    const updatedColumns = columns.map(column => ({
+    const updatedColumns = columns.map((column) => ({
       ...column,
-      tasks: filtered.filter(task => task.status === column.status)
+      tasks: filtered.filter((task) => task.status === column.status),
     }));
     setColumns(updatedColumns);
   }, [filteredTasks]);
 
   const handleDragStart = (start: any) => {
-    const task = tasks.find(t => t.id === start.draggableId);
+    const task = tasks.find((t) => t.id === start.draggableId);
     setDraggedTask(task || null);
   };
 
@@ -239,12 +255,12 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
       return;
     }
 
-    const sourceColumn = columns.find(col => col.id === source.droppableId);
-    const destinationColumn = columns.find(col => col.id === destination.droppableId);
+    const sourceColumn = columns.find((col) => col.id === source.droppableId);
+    const destinationColumn = columns.find((col) => col.id === destination.droppableId);
 
     if (!sourceColumn || !destinationColumn) return;
 
-    const task = sourceColumn.tasks.find(t => t.id === draggableId);
+    const task = sourceColumn.tasks.find((t) => t.id === draggableId);
     if (!task) return;
 
     // Remove task from source column
@@ -256,7 +272,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
     newDestinationTasks.splice(destination.index, 0, task);
 
     // Update columns
-    const newColumns = columns.map(col => {
+    const newColumns = columns.map((col) => {
       if (col.id === source.droppableId) {
         return { ...col, tasks: newSourceTasks };
       }
@@ -270,7 +286,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
 
     // Update task status
     const updatedTask = { ...task, status: destinationColumn.status };
-    setTasks(prev => prev.map(t => t.id === draggableId ? updatedTask : t));
+    setTasks((prev) => prev.map((t) => (t.id === draggableId ? updatedTask : t)));
 
     // Notify parent
     onTaskUpdate?.(draggableId, { status: destinationColumn.status });
@@ -286,21 +302,31 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'URGENT': return 'bg-red-500';
-      case 'HIGH': return 'bg-orange-500';
-      case 'MEDIUM': return 'bg-yellow-500';
-      case 'LOW': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'URGENT':
+        return 'bg-red-500';
+      case 'HIGH':
+        return 'bg-orange-500';
+      case 'MEDIUM':
+        return 'bg-yellow-500';
+      case 'LOW':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'BUG': return '🐛';
-      case 'FEATURE': return '✨';
-      case 'EPIC': return '📋';
-      case 'STORY': return '📖';
-      default: return '📝';
+      case 'BUG':
+        return '🐛';
+      case 'FEATURE':
+        return '✨';
+      case 'EPIC':
+        return '📋';
+      case 'STORY':
+        return '📖';
+      default:
+        return '📝';
     }
   };
 
@@ -311,7 +337,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
 
   const getUniqueAssignees = () => {
     const assignees = new Map();
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (task.assignee) {
         assignees.set(task.assignee.id, task.assignee);
       }
@@ -321,8 +347,8 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
 
   const getUniqueLabels = () => {
     const labels = new Set<string>();
-    tasks.forEach(task => {
-      task.labels.forEach(label => labels.add(label));
+    tasks.forEach((task) => {
+      task.labels.forEach((label) => labels.add(label));
     });
     return Array.from(labels);
   };
@@ -346,7 +372,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
             <h2 className="text-xl font-semibold">Project Board</h2>
             <span className="text-sm text-gray-500">{tasks.length} tasks</span>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -354,11 +380,11 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
             >
               <Filter className="w-5 h-5" />
             </button>
-            
+
             <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
               <BarChart3 className="w-5 h-5" />
             </button>
-            
+
             <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
               <Settings className="w-5 h-5" />
             </button>
@@ -398,7 +424,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Assignees</option>
-                {getUniqueAssignees().map(assignee => (
+                {getUniqueAssignees().map((assignee) => (
                   <option key={assignee.id} value={assignee.id}>
                     {assignee.name}
                   </option>
@@ -423,7 +449,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
                       <h3 className="font-semibold">{column.title}</h3>
                       <span className="text-sm text-gray-500">({column.tasks.length})</span>
                     </div>
-                    
+
                     <div className="flex items-center space-x-1">
                       <button className="p-1 text-gray-400 hover:text-gray-600 rounded">
                         <MoreHorizontal className="w-4 h-4" />
@@ -459,8 +485,10 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
                                     <span className="text-lg">{getTypeIcon(task.type)}</span>
                                     <h4 className="font-medium text-sm flex-1">{task.title}</h4>
                                   </div>
-                                  
-                                  <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)}`}></div>
+
+                                  <div
+                                    className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)}`}
+                                  ></div>
                                 </div>
 
                                 {/* Task Description */}
@@ -502,9 +530,11 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
                                   <div className="flex items-center space-x-2 text-xs text-gray-500">
                                     {/* Due Date */}
                                     {task.dueDate && (
-                                      <div className={`flex items-center space-x-1 ${
-                                        isOverdue(task.dueDate) ? 'text-red-500' : ''
-                                      }`}>
+                                      <div
+                                        className={`flex items-center space-x-1 ${
+                                          isOverdue(task.dueDate) ? 'text-red-500' : ''
+                                        }`}
+                                      >
                                         <Calendar className="w-3 h-3" />
                                         <span>{task.dueDate.toLocaleDateString()}</span>
                                       </div>
@@ -568,12 +598,10 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Create New Task</h3>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Task Title
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Task Title</label>
                 <input
                   type="text"
                   placeholder="Enter task title..."
@@ -582,9 +610,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
                   placeholder="Enter task description..."
                   rows={3}
@@ -594,9 +620,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Priority
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
@@ -606,9 +630,7 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Type
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                   <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <option value="TASK">Task</option>
                     <option value="BUG">Bug</option>
@@ -620,15 +642,13 @@ export const ProjectBoard: React.FC<ProjectBoardProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Column
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Column</label>
                 <select
                   value={newTaskColumn}
                   onChange={(e) => setNewTaskColumn(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  {columns.map(column => (
+                  {columns.map((column) => (
                     <option key={column.id} value={column.id}>
                       {column.title}
                     </option>

@@ -1,6 +1,5 @@
 use soroban_sdk::{Env, String, Vec, Map};
-use super::ai_optimizer::{AIOptimizationResult};
-use super::gas_analyzer::{ContractGasProfile};
+extern crate alloc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct OptimizationReport {
@@ -219,14 +218,14 @@ impl OptimizationReport {
         recommendations.sort_by(|a, b| {
             match (&a.priority, &b.priority) {
                 (Priority::Critical, Priority::Critical) => b.estimated_savings.cmp(&a.estimated_savings),
-                (Priority::Critical, _) => std::cmp::Ordering::Less,
-                (Priority::High, Priority::Critical) => std::cmp::Ordering::Greater,
+                (Priority::Critical, _) => core::cmp::Ordering::Less,
+                (Priority::High, Priority::Critical) => core::cmp::Ordering::Greater,
                 (Priority::High, Priority::High) => b.estimated_savings.cmp(&a.estimated_savings),
-                (Priority::High, _) => std::cmp::Ordering::Less,
-                (Priority::Medium, Priority::Critical | Priority::High) => std::cmp::Ordering::Greater,
+                (Priority::High, _) => core::cmp::Ordering::Less,
+                (Priority::Medium, Priority::Critical | Priority::High) => core::cmp::Ordering::Greater,
                 (Priority::Medium, Priority::Medium) => b.estimated_savings.cmp(&a.estimated_savings),
-                (Priority::Medium, _) => std::cmp::Ordering::Less,
-                (Priority::Low, _) => std::cmp::Ordering::Greater,
+                (Priority::Medium, _) => core::cmp::Ordering::Less,
+                (Priority::Low, _) => core::cmp::Ordering::Greater,
             }
         });
         
@@ -245,8 +244,8 @@ impl OptimizationReport {
         }
     }
     
-    fn categorize_suggestion(suggestion_type: &crate::optimization::AIOptimizer::SuggestionType) -> RecommendationCategory {
-        use crate::optimization::AIOptimizer::SuggestionType;
+    fn categorize_suggestion(suggestion_type: &crate::optimization::ai_optimizer::SuggestionType) -> RecommendationCategory {
+        use crate::optimization::ai_optimizer::SuggestionType;
         
         match suggestion_type {
             SuggestionType::StorageOptimization => RecommendationCategory::Storage,
@@ -260,7 +259,7 @@ impl OptimizationReport {
         }
     }
     
-    fn expand_description(suggestion: &crate::optimization::AIOptimizer::OptimizationSuggestion) -> String {
+    fn expand_description(suggestion: &crate::optimization::ai_optimizer::OptimizationSuggestion) -> String {
         format!(
             "{} This optimization can reduce gas costs by {:.1}% and has a confidence score of {:.1}%. 
             The suggested changes involve: {}",
@@ -271,8 +270,8 @@ impl OptimizationReport {
         )
     }
     
-    fn assess_complexity(suggestion_type: &crate::optimization::AIOptimizer::SuggestionType) -> Complexity {
-        use crate::optimization::AIOptimizer::SuggestionType;
+    fn assess_complexity(suggestion_type: &crate::optimization::ai_optimizer::SuggestionType) -> Complexity {
+        use crate::optimization::ai_optimizer::SuggestionType;
         
         match suggestion_type {
             SuggestionType::ConstantFolding => Complexity::Trivial,
@@ -286,11 +285,11 @@ impl OptimizationReport {
         }
     }
     
-    fn generate_code_examples(suggestion: &crate::optimization::AIOptimizer::OptimizationSuggestion) -> Vec<CodeExample> {
+    fn generate_code_examples(suggestion: &crate::optimization::ai_optimizer::OptimizationSuggestion) -> Vec<CodeExample> {
         let mut examples = Vec::new();
         
         match suggestion.suggestion_type {
-            crate::optimization::AIOptimizer::SuggestionType::StorageOptimization => {
+            crate::optimization::ai_optimizer::SuggestionType::StorageOptimization => {
                 examples.push(CodeExample {
                     language: "rust".to_string(),
                     before_code: "env.storage().instance().set(&key1, &value1);\nenv.storage().instance().set(&key2, &value2);".to_string(),
@@ -299,7 +298,7 @@ impl OptimizationReport {
                     gas_savings: 2000,
                 });
             },
-            crate::optimization::AIOptimizer::SuggestionType::LoopOptimization => {
+            crate::optimization::ai_optimizer::SuggestionType::LoopOptimization => {
                 examples.push(CodeExample {
                     language: "rust".to_string(),
                     before_code: "for i in 1..=count {\n    if let Some(proof) = env.storage().instance().get(&DataKey::Proof(i)) {\n        // process proof\n    }\n}".to_string(),
@@ -308,7 +307,7 @@ impl OptimizationReport {
                     gas_savings: 3000,
                 });
             },
-            crate::optimization::AIOptimizer::SuggestionType::MemoryOptimization => {
+            crate::optimization::ai_optimizer::SuggestionType::MemoryOptimization => {
                 examples.push(CodeExample {
                     language: "rust".to_string(),
                     before_code: "let mut results = Vec::new(&env);".to_string(),
@@ -323,20 +322,20 @@ impl OptimizationReport {
         examples
     }
     
-    fn identify_dependencies(_suggestion: &crate::optimization::AIOptimizer::OptimizationSuggestion) -> Vec<String> {
+    fn identify_dependencies(_suggestion: &crate::optimization::ai_optimizer::OptimizationSuggestion) -> Vec<String> {
         vec![
             "soroban-sdk v20.0.0".to_string(),
             "No additional dependencies required".to_string(),
         ]
     }
     
-    fn identify_testing_requirements(suggestion: &crate::optimization::AIOptimizer::OptimizationSuggestion) -> Vec<String> {
+    fn identify_testing_requirements(suggestion: &crate::optimization::ai_optimizer::OptimizationSuggestion) -> Vec<String> {
         let mut requirements = vec![
             "Unit tests for modified functions".to_string(),
             "Gas benchmarking before and after optimization".to_string(),
         ];
         
-        if matches!(suggestion.suggestion_type, crate::optimization::AIOptimizer::SuggestionType::StorageOptimization) {
+        if matches!(suggestion.suggestion_type, crate::optimization::ai_optimizer::SuggestionType::StorageOptimization) {
             requirements.push("Integration tests for storage operations".to_string());
         }
         
@@ -544,11 +543,11 @@ impl OptimizationReport {
         
         // Executive Summary
         report.push_str("## Executive Summary\n\n");
-        report.push_str(&format!("- **Total Gas Savings:** {:,} ({:.1}%)\n", 
+        report.push_str(&format!("- **Total Gas Savings:** {} ({:.1}%)\n", 
             self.optimization_result.total_savings, 
             self.optimization_result.savings_percentage));
-        report.push_str(&format!("- **Original Cost:** {:,} gas\n", self.optimization_result.original_gas_cost));
-        report.push_str(&format!("- **Optimized Cost:** {:,} gas\n", self.optimization_result.optimized_gas_cost));
+        report.push_str(&format!("- **Original Cost:** {} gas\n", self.optimization_result.original_gas_cost));
+        report.push_str(&format!("- **Optimized Cost:** {} gas\n", self.optimization_result.optimized_gas_cost));
         report.push_str(&format!("- **Risk Level:** {:?}\n", self.risk_analysis.overall_risk_level));
         report.push_str(&format!("- **Implementation Time:** {} hours\n\n", self.implementation_plan.total_estimated_time));
         
@@ -566,7 +565,7 @@ impl OptimizationReport {
         for (i, rec) in self.recommendations.iter().enumerate() {
             report.push_str(&format!("### {}. {} - {:?}\n\n", i + 1, rec.title, rec.priority));
             report.push_str(&format!("**Description:** {}\n\n", rec.description));
-            report.push_str(&format!("**Estimated Savings:** {:,} gas\n", rec.estimated_savings));
+            report.push_str(&format!("**Estimated Savings:** {} gas\n", rec.estimated_savings));
             report.push_str(&format!("**Complexity:** {:?}\n\n", rec.implementation_complexity));
             
             if !rec.code_examples.is_empty() {

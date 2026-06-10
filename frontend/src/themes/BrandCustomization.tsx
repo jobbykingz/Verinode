@@ -79,9 +79,9 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
 
   const handleExport = () => {
     const dataStr = JSON.stringify(settings, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     const exportFileDefaultName = `brand-settings-${settings.brandName.toLowerCase().replace(/\s+/g, '-')}.json`;
-    
+
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -94,7 +94,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
       if (existingStyle) {
         existingStyle.remove();
       }
-      
+
       const style = document.createElement('style');
       style.id = 'brand-custom-css';
       style.textContent = settings.customCSS;
@@ -180,7 +180,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                   className="space-y-6"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">General Brand Settings</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -257,7 +257,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                   className="space-y-6"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">Brand Colors</h3>
-                  
+
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {[
@@ -269,9 +269,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                         { key: 'text', label: 'Text Color' },
                       ].map(({ key, label }) => (
                         <div key={key} className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">
-                            {label}
-                          </label>
+                          <label className="block text-sm font-medium text-gray-700">{label}</label>
                           <div className="flex items-center gap-2">
                             <ColorPicker
                               value={settings.brandColors[key] || ''}
@@ -290,7 +288,9 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                     </div>
 
                     <div className="mt-6">
-                      <h4 className="text-md font-medium text-gray-900 mb-3">Color Palette Preview</h4>
+                      <h4 className="text-md font-medium text-gray-900 mb-3">
+                        Color Palette Preview
+                      </h4>
                       <div className="grid grid-cols-6 gap-2">
                         {Object.entries(settings.brandColors).map(([key, color]) => (
                           <div key={key} className="text-center">
@@ -314,7 +314,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                   className="space-y-6"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">Logo & Assets</h3>
-                  
+
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -336,7 +336,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                             </button>
                           </div>
                         )}
-                        
+
                         <div>
                           <input
                             ref={fileInputRef}
@@ -376,7 +376,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                             </button>
                           </div>
                         )}
-                        
+
                         <div>
                           <input
                             ref={faviconInputRef}
@@ -406,7 +406,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
                   className="space-y-6"
                 >
                   <h3 className="text-lg font-semibold text-gray-900">Advanced Settings</h3>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -456,7 +456,7 @@ export default function BrandCustomization({ onClose, onSave }: BrandCustomizati
             {previewMode && (
               <div className="w-80 border-l border-gray-200 bg-gray-50 p-4 overflow-y-auto">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Brand Preview</h3>
-                
+
                 <div className="space-y-4">
                   {settings.logo && (
                     <div className="text-center">

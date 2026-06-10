@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from 'recharts';
 
 interface PerformanceData {
   timestamp: string;
@@ -33,7 +44,7 @@ export const PerformanceMetrics: React.FC = () => {
       setLoading(true);
       const response = await fetch(`/api/analytics/performance-metrics?timeRange=${timeRange}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setStats(data.data);
       }
@@ -73,11 +84,7 @@ export const PerformanceMetrics: React.FC = () => {
   }
 
   if (!stats) {
-    return (
-      <div className="text-center text-gray-500 p-8">
-        No performance data available
-      </div>
-    );
+    return <div className="text-center text-gray-500 p-8">No performance data available</div>;
   }
 
   return (
@@ -103,7 +110,9 @@ export const PerformanceMetrics: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-              <p className={`text-2xl font-bold ${getStatusColor(stats.averageResponseTime, 'responseTime')}`}>
+              <p
+                className={`text-2xl font-bold ${getStatusColor(stats.averageResponseTime, 'responseTime')}`}
+              >
                 {stats.averageResponseTime.toFixed(0)}ms
               </p>
             </div>
@@ -117,9 +126,7 @@ export const PerformanceMetrics: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Throughput</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {stats.throughput.toFixed(0)}/s
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{stats.throughput.toFixed(0)}/s</p>
             </div>
           </div>
         </div>
@@ -145,7 +152,9 @@ export const PerformanceMetrics: React.FC = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Cache Hit Rate</p>
-              <p className={`text-2xl font-bold ${getStatusColor(stats.cacheHitRate, 'cacheHitRate')}`}>
+              <p
+                className={`text-2xl font-bold ${getStatusColor(stats.cacheHitRate, 'cacheHitRate')}`}
+              >
                 {stats.cacheHitRate.toFixed(1)}%
               </p>
             </div>
@@ -213,15 +222,20 @@ export const PerformanceMetrics: React.FC = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">Current</span>
-                <span className={`text-sm font-medium ${getStatusColor(stats.cpuUsage, 'cpuUsage')}`}>
+                <span
+                  className={`text-sm font-medium ${getStatusColor(stats.cpuUsage, 'cpuUsage')}`}
+                >
                   {stats.cpuUsage.toFixed(1)}%
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    stats.cpuUsage < 50 ? 'bg-green-500' :
-                    stats.cpuUsage < 80 ? 'bg-yellow-500' : 'bg-red-500'
+                    stats.cpuUsage < 50
+                      ? 'bg-green-500'
+                      : stats.cpuUsage < 80
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                   }`}
                   style={{ width: `${Math.min(stats.cpuUsage, 100)}%` }}
                 ></div>
@@ -241,8 +255,11 @@ export const PerformanceMetrics: React.FC = () => {
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className={`h-2 rounded-full ${
-                    stats.memoryUsage < 70 ? 'bg-green-500' :
-                    stats.memoryUsage < 85 ? 'bg-yellow-500' : 'bg-red-500'
+                    stats.memoryUsage < 70
+                      ? 'bg-green-500'
+                      : stats.memoryUsage < 85
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
                   }`}
                   style={{ width: `${Math.min(stats.memoryUsage, 100)}%` }}
                 ></div>

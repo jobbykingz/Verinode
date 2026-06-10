@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Wallet, TrendingUp, TrendingDown, RefreshCw, AlertCircle, DollarSign, Coins } from 'lucide-react';
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  AlertCircle,
+  DollarSign,
+  Coins,
+} from 'lucide-react';
 import { useFreighter } from '../../hooks/useFreighter';
 import toast from 'react-hot-toast';
 
@@ -30,15 +38,9 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
   showPercentageChange = false,
   refreshInterval = 30000, // 30 seconds
   compact = false,
-  large = false
+  large = false,
 }) => {
-  const {
-    isConnected,
-    account,
-    balance,
-    isLoadingBalance,
-    refreshBalance
-  } = useFreighter();
+  const { isConnected, account, balance, isLoadingBalance, refreshBalance } = useFreighter();
 
   const [historicalBalances, setHistoricalBalances] = useState<HistoricalBalance[]>([]);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
@@ -47,17 +49,18 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
 
   // Mock price data - in a real app, this would come from a price API
   const mockPrices: Record<string, number> = {
-    'XLM': 0.089,
-    'USD': 1.0,
-    'EUR': 1.08,
-    'BTC': 43250.0,
-    'ETH': 2280.0
+    XLM: 0.089,
+    USD: 1.0,
+    EUR: 1.08,
+    BTC: 43250.0,
+    ETH: 2280.0,
   };
 
   useEffect(() => {
     // Initialize token prices
     setTokenPrices(mockPrices);
   }, []);
+
 
   useEffect(() => {
     if (!isConnected || !balance) return;
@@ -66,10 +69,10 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
     const currentBalance = parseFloat(balance.native) || 0;
     const newEntry: HistoricalBalance = {
       timestamp: Date.now(),
-      balance: currentBalance
+      balance: currentBalance,
     };
 
-    setHistoricalBalances(prev => {
+    setHistoricalBalances((prev) => {
       const updated = [...prev, newEntry];
       // Keep only last 100 entries
       return updated.slice(-100);
@@ -105,17 +108,17 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
     try {
       const num = parseFloat(balance);
       if (isNaN(num)) return '0';
-      
+
       if (num === 0) return '0';
-      
+
       // For very small numbers, show more decimals
       if (num < 0.001) {
         return num.toFixed(7);
       }
-      
+
       return num.toLocaleString(undefined, {
         minimumFractionDigits: 0,
-        maximumFractionDigits: decimals
+        maximumFractionDigits: decimals,
       });
     } catch {
       return '0';
@@ -126,12 +129,12 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
     try {
       const num = parseFloat(balance) * price;
       if (isNaN(num)) return '$0.00';
-      
+
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       }).format(num);
     } catch {
       return '$0.00';
@@ -140,12 +143,12 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
 
   const getPercentageChange = (): number | null => {
     if (historicalBalances.length < 2) return null;
-    
+
     const current = historicalBalances[historicalBalances.length - 1].balance;
     const previous = historicalBalances[historicalBalances.length - 2].balance;
-    
+
     if (previous === 0) return null;
-    
+
     return ((current - previous) / previous) * 100;
   };
 
@@ -158,7 +161,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
     tokens.push({
       code: 'XLM',
       balance: balance.native,
-      usdValue: tokenPrices['XLM'] ? parseFloat(balance.native) * tokenPrices['XLM'] : undefined
+      usdValue: tokenPrices['XLM'] ? parseFloat(balance.native) * tokenPrices['XLM'] : undefined,
     });
 
     // Token balances
@@ -167,7 +170,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
         tokens.push({
           code,
           balance: bal,
-          usdValue: tokenPrices[code] ? parseFloat(bal) * tokenPrices[code] : undefined
+          usdValue: tokenPrices[code] ? parseFloat(bal) * tokenPrices[code] : undefined,
         });
       });
     }
@@ -211,7 +214,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
               )}
             </div>
           </div>
-          
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || isLoadingBalance}
@@ -245,7 +248,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
               )}
             </div>
           </div>
-          
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing || isLoadingBalance}
@@ -263,7 +266,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
           <p className={`font-bold text-gray-900 ${large ? 'text-3xl' : 'text-2xl'}`}>
             {totalUSD > 0 ? formatUSDValue(totalUSD.toString(), 1) : '$0.00'}
           </p>
-          
+
           {showPercentageChange && percentageChange !== null && (
             <div className="flex items-center justify-center mt-2 space-x-1">
               {percentageChange >= 0 ? (
@@ -271,10 +274,13 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
               ) : (
                 <TrendingDown className="w-4 h-4 text-red-600" />
               )}
-              <span className={`text-sm font-medium ${
-                percentageChange >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {percentageChange >= 0 ? '+' : ''}{percentageChange.toFixed(2)}%
+              <span
+                className={`text-sm font-medium ${
+                  percentageChange >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
+                {percentageChange >= 0 ? '+' : ''}
+                {percentageChange.toFixed(2)}%
               </span>
             </div>
           )}
@@ -297,14 +303,21 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
         ) : tokens.length > 0 ? (
           <div className="space-y-4">
             {tokens.map((token) => (
-              <div key={token.code} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={token.code}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    token.code === 'XLM' ? 'bg-blue-100' : 'bg-gray-100'
-                  }`}>
-                    <Coins className={`w-4 h-4 ${
-                      token.code === 'XLM' ? 'text-blue-600' : 'text-gray-600'
-                    }`} />
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                      token.code === 'XLM' ? 'bg-blue-100' : 'bg-gray-100'
+                    }`}
+                  >
+                    <Coins
+                      className={`w-4 h-4 ${
+                        token.code === 'XLM' ? 'text-blue-600' : 'text-gray-600'
+                      }`}
+                    />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{token.code}</p>
@@ -315,7 +328,7 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
                     )}
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   <p className={`font-medium text-gray-900 ${large ? 'text-lg' : ''}`}>
                     {formatBalance(token.balance)}
@@ -340,7 +353,8 @@ const BalanceDisplay: React.FC<BalanceDisplayProps> = ({
         {account && (
           <div className="mt-6 p-3 bg-blue-50 rounded-lg">
             <p className="text-xs text-blue-800">
-              <strong>Account:</strong> {account.publicKey.slice(0, 10)}...{account.publicKey.slice(-10)}
+              <strong>Account:</strong> {account.publicKey.slice(0, 10)}...
+              {account.publicKey.slice(-10)}
             </p>
           </div>
         )}

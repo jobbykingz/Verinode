@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const AdvancedFilters = ({ 
-  filters = {}, 
-  onFilterChange, 
-  onApply,
-  onCancel,
-  show = true
-}) => {
+const AdvancedFilters = ({ filters = {}, onFilterChange, onApply, onCancel, show = true }) => {
   const [localFilters, setLocalFilters] = useState({
     category: '',
     status: '',
@@ -16,16 +10,16 @@ const AdvancedFilters = ({
     dateFrom: '',
     dateTo: '',
     tags: [],
-    type: '' // proof, template, user
+    type: '', // proof, template, user
   });
 
   const [tagInput, setTagInput] = useState('');
 
   // Initialize filters
   useEffect(() => {
-    setLocalFilters(prev => ({
+    setLocalFilters((prev) => ({
       ...prev,
-      ...filters
+      ...filters,
     }));
   }, [filters]);
 
@@ -36,7 +30,7 @@ const AdvancedFilters = ({
     { value: 'credential', label: 'Credentials' },
     { value: 'document', label: 'Document Verification' },
     { value: 'transaction', label: 'Transaction Proofs' },
-    { value: 'custom', label: 'Custom Templates' }
+    { value: 'custom', label: 'Custom Templates' },
   ];
 
   // Status options
@@ -44,7 +38,7 @@ const AdvancedFilters = ({
     { value: '', label: 'All Statuses' },
     { value: 'verified', label: 'Verified' },
     { value: 'pending', label: 'Pending' },
-    { value: 'rejected', label: 'Rejected' }
+    { value: 'rejected', label: 'Rejected' },
   ];
 
   // Type options
@@ -52,13 +46,13 @@ const AdvancedFilters = ({
     { value: '', label: 'All Types' },
     { value: 'proof', label: 'Proofs' },
     { value: 'template', label: 'Templates' },
-    { value: 'user', label: 'Users' }
+    { value: 'user', label: 'Users' },
   ];
 
   const handleFilterChange = (field, value) => {
-    setLocalFilters(prev => ({
+    setLocalFilters((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -70,7 +64,10 @@ const AdvancedFilters = ({
   };
 
   const handleRemoveTag = (tagToRemove) => {
-    handleFilterChange('tags', localFilters.tags.filter(tag => tag !== tagToRemove));
+    handleFilterChange(
+      'tags',
+      localFilters.tags.filter((tag) => tag !== tagToRemove),
+    );
   };
 
   const handleApply = () => {
@@ -79,9 +76,9 @@ const AdvancedFilters = ({
       Object.entries(localFilters).filter(([key, value]) => {
         if (key === 'tags') return value.length > 0;
         return value !== '' && value !== null && value !== undefined;
-      })
+      }),
     );
-    
+
     onFilterChange(cleanedFilters);
     if (onApply) onApply(cleanedFilters);
   };
@@ -96,9 +93,9 @@ const AdvancedFilters = ({
       dateFrom: '',
       dateTo: '',
       tags: [],
-      type: ''
+      type: '',
     };
-    
+
     setLocalFilters(clearedFilters);
     onFilterChange(clearedFilters);
   };
@@ -121,22 +118,25 @@ const AdvancedFilters = ({
             aria-label="Close advanced filters"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         {/* Type Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Search Type
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Search Type</label>
           <select
             value={localFilters.type}
             onChange={(e) => handleFilterChange('type', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            {types.map(option => (
+            {types.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -146,15 +146,13 @@ const AdvancedFilters = ({
 
         {/* Category Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Category
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
           <select
             value={localFilters.category}
             onChange={(e) => handleFilterChange('category', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            {categories.map(option => (
+            {categories.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -164,15 +162,13 @@ const AdvancedFilters = ({
 
         {/* Status Filter (for proofs) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Status
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
           <select
             value={localFilters.status}
             onChange={(e) => handleFilterChange('status', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            {statuses.map(option => (
+            {statuses.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -182,9 +178,7 @@ const AdvancedFilters = ({
 
         {/* Rating Filter */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Minimum Rating
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Minimum Rating</label>
           <select
             value={localFilters.minRating}
             onChange={(e) => handleFilterChange('minRating', e.target.value)}
@@ -201,9 +195,7 @@ const AdvancedFilters = ({
 
         {/* Price Range (for templates) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Price Range (XLM)
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Price Range (XLM)</label>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <input
@@ -232,9 +224,7 @@ const AdvancedFilters = ({
 
         {/* Date Range */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Date Range
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <input
@@ -257,14 +247,12 @@ const AdvancedFilters = ({
 
         {/* Tags */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Tags
-          </label>
-          
+          <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+
           {/* Selected Tags */}
           {localFilters.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
-              {localFilters.tags.map(tag => (
+              {localFilters.tags.map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"

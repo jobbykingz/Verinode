@@ -29,7 +29,7 @@ const Marketplace = () => {
       purchaseCount: 156,
       creator: 'user123',
       createdAt: '2024-01-15T10:30:00Z',
-      version: '2.1.0'
+      version: '2.1.0',
     },
     {
       _id: '2',
@@ -44,14 +44,14 @@ const Marketplace = () => {
       purchaseCount: 89,
       creator: 'user456',
       createdAt: '2024-01-10T14:20:00Z',
-      version: '1.3.2'
+      version: '1.3.2',
     },
     {
       _id: '3',
       title: 'Document Authenticity Checker',
       description: 'Verify the authenticity of important documents and certificates',
       content: 'Template content for document verification...',
-      price: 12.50,
+      price: 12.5,
       category: 'document',
       tags: ['document', 'authenticity', 'verification'],
       averageRating: 4.7,
@@ -59,8 +59,8 @@ const Marketplace = () => {
       purchaseCount: 203,
       creator: 'user789',
       createdAt: '2024-01-05T09:15:00Z',
-      version: '3.0.1'
-    }
+      version: '3.0.1',
+    },
   ];
 
   const mockCategories = [
@@ -68,53 +68,52 @@ const Marketplace = () => {
     { id: 'credential', name: 'Credentials' },
     { id: 'document', name: 'Document Verification' },
     { id: 'transaction', name: 'Transaction Proofs' },
-    { id: 'custom', name: 'Custom Templates' }
+    { id: 'custom', name: 'Custom Templates' },
   ];
 
   // Simulate API calls with mock data
   const fetchTemplates = async (search, filterParams = {}) => {
     // In a real implementation, this would be an API call
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-    
+    await new Promise((resolve) => setTimeout(resolve, 800)); // Simulate network delay
+
     let filtered = [...mockTemplates];
-    
+
     // Apply search filter
     if (search) {
-      filtered = filtered.filter(template => 
-        template.title.toLowerCase().includes(search.toLowerCase()) ||
-        template.description.toLowerCase().includes(search.toLowerCase()) ||
-        template.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
+      filtered = filtered.filter(
+        (template) =>
+          template.title.toLowerCase().includes(search.toLowerCase()) ||
+          template.description.toLowerCase().includes(search.toLowerCase()) ||
+          template.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase())),
       );
     }
-    
+
     // Apply other filters
     if (filterParams.category) {
-      filtered = filtered.filter(t => t.category === filterParams.category);
+      filtered = filtered.filter((t) => t.category === filterParams.category);
     }
-    
+
     if (filterParams.minPrice !== undefined) {
-      filtered = filtered.filter(t => t.price >= filterParams.minPrice);
+      filtered = filtered.filter((t) => t.price >= filterParams.minPrice);
     }
-    
+
     if (filterParams.maxPrice !== undefined) {
-      filtered = filtered.filter(t => t.price <= filterParams.maxPrice);
+      filtered = filtered.filter((t) => t.price <= filterParams.maxPrice);
     }
-    
+
     if (filterParams.minRating !== undefined) {
-      filtered = filtered.filter(t => t.averageRating >= filterParams.minRating);
+      filtered = filtered.filter((t) => t.averageRating >= filterParams.minRating);
     }
-    
+
     if (filterParams.tags && filterParams.tags.length > 0) {
-      filtered = filtered.filter(t => 
-        filterParams.tags.some(tag => t.tags.includes(tag))
-      );
+      filtered = filtered.filter((t) => filterParams.tags.some((tag) => t.tags.includes(tag)));
     }
-    
+
     return filtered;
   };
 
   const createTemplate = async (templateData) => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     const newTemplate = {
       ...templateData,
       _id: Date.now().toString(),
@@ -123,37 +122,37 @@ const Marketplace = () => {
       purchaseCount: 0,
       creator: 'current-user',
       createdAt: new Date().toISOString(),
-      version: '1.0.0'
+      version: '1.0.0',
     };
     return newTemplate;
   };
 
   const purchaseTemplate = async (templateId) => {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    return { 
-      success: true, 
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return {
+      success: true,
       transactionId: `tx_${Date.now()}`,
-      message: 'Template purchased successfully'
+      message: 'Template purchased successfully',
     };
   };
 
   const rateTemplate = async ({ templateId, rating, review }) => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return { 
-      success: true, 
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return {
+      success: true,
       message: 'Rating submitted successfully',
-      rating: { templateId, rating, review, createdAt: new Date().toISOString() }
+      rating: { templateId, rating, review, createdAt: new Date().toISOString() },
     };
   };
 
   // React Query hooks
-  const { data: templates = [], isLoading, refetch } = useQuery(
-    ['templates', searchQuery, filters],
-    () => fetchTemplates(searchQuery, filters),
-    {
-      keepPreviousData: true
-    }
-  );
+  const {
+    data: templates = [],
+    isLoading,
+    refetch,
+  } = useQuery(['templates', searchQuery, filters], () => fetchTemplates(searchQuery, filters), {
+    keepPreviousData: true,
+  });
 
   const createTemplateMutation = useMutation(createTemplate, {
     onSuccess: (newTemplate) => {
@@ -163,7 +162,7 @@ const Marketplace = () => {
     },
     onError: (error) => {
       toast.error('Failed to create template');
-    }
+    },
   });
 
   const purchaseTemplateMutation = useMutation(purchaseTemplate, {
@@ -174,7 +173,7 @@ const Marketplace = () => {
     },
     onError: (error) => {
       toast.error('Failed to purchase template');
-    }
+    },
   });
 
   const rateTemplateMutation = useMutation(rateTemplate, {
@@ -186,7 +185,7 @@ const Marketplace = () => {
     },
     onError: (error) => {
       toast.error('Failed to submit rating');
-    }
+    },
   });
 
   // Handler functions
@@ -246,7 +245,7 @@ const Marketplace = () => {
       });
       rateTemplateMutation.mutate({
         templateId: selectedTemplate._id,
-        ...ratingData
+        ...ratingData,
       });
     }
   };
@@ -261,7 +260,7 @@ const Marketplace = () => {
             isLoading={createTemplateMutation.isLoading}
           />
         );
-      
+
       case 'preview':
         return (
           <TemplatePreview
@@ -274,7 +273,7 @@ const Marketplace = () => {
             onRate={() => handleTemplateRate(selectedTemplate)}
           />
         );
-      
+
       case 'rate':
         return (
           <div className="max-w-2xl mx-auto">
@@ -288,7 +287,7 @@ const Marketplace = () => {
             />
           </div>
         );
-      
+
       case 'browse':
       default:
         return (
@@ -336,9 +335,7 @@ const Marketplace = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {renderView()}
-      </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">{renderView()}</div>
     </div>
   );
 };

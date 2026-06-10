@@ -25,8 +25,8 @@ const IssueProof = () => {
         body: JSON.stringify({
           eventData,
           hash,
-          issuerAddress: 'mock-stellar-address'
-        })
+          issuerAddress: 'mock-stellar-address',
+        }),
       });
 
       if (response.ok) {
@@ -61,13 +61,11 @@ const IssueProof = () => {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Issue Cryptographic Proof</h1>
-      
+
       <div className="bg-white p-8 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Event Data
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Event Data</label>
             <textarea
               value={eventData}
               onChange={(e) => setEventData(e.target.value)}

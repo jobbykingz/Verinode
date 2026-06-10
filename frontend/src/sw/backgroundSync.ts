@@ -28,14 +28,14 @@ class BackgroundSyncManager {
   async init(): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, 1);
-      
+
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
         this.loadSyncQueue();
         resolve();
       };
-      
+
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains(this.storeName)) {
@@ -48,12 +48,12 @@ class BackgroundSyncManager {
 
   private async loadSyncQueue(): Promise<void> {
     if (!this.db) return;
-    
+
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readonly');
       const store = transaction.objectStore(this.storeName);
       const request = store.getAll();
-      
+
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.syncQueue = request.result || [];
@@ -63,18 +63,20 @@ class BackgroundSyncManager {
     });
   }
 
-  async addToSyncQueue(item: Omit<SyncQueueItem, 'id' | 'timestamp' | 'retryCount'>): Promise<void> {
+  async addToSyncQueue(
+    item: Omit<SyncQueueItem, 'id' | 'timestamp' | 'retryCount'>,
+  ): Promise<void> {
     const syncItem: SyncQueueItem = {
       ...item,
       id: crypto.randomUUID(),
       timestamp: Date.now(),
       retryCount: 0,
-      maxRetries: 3
+      maxRetries: 3,
     };
 
     this.syncQueue.push(syncItem);
     await this.saveSyncQueue();
-    
+
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
@@ -90,19 +92,19 @@ class BackgroundSyncManager {
 
   private async saveSyncQueue(): Promise<void> {
     if (!this.db) return;
-    
+
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([this.storeName], 'readwrite');
       const store = transaction.objectStore(this.storeName);
-      
+
       // Clear existing items
       store.clear();
-      
+
       // Add all items from queue
-      this.syncQueue.forEach(item => {
+      this.syncQueue.forEach((item) => {
         store.add(item);
       });
-      
+
       transaction.onerror = () => reject(transaction.error);
       transaction.oncomplete = () => resolve();
     });
@@ -115,7 +117,7 @@ class BackgroundSyncManager {
     if (!online) return;
 
     const itemsToProcess = [...this.syncQueue];
-    
+
     for (const item of itemsToProcess) {
       try {
         await this.syncItem(item);
@@ -123,7 +125,7 @@ class BackgroundSyncManager {
       } catch (error) {
         console.error('Sync failed for item:', item.id, error);
         item.retryCount++;
-        
+
         if (item.retryCount >= item.maxRetries) {
           console.error('Max retries exceeded for item:', item.id);
           this.removeFromSyncQueue(item.id);
@@ -143,9 +145,9 @@ class BackgroundSyncManager {
       method: item.method,
       headers: {
         'Content-Type': 'application/json',
-        ...item.headers
+        ...item.headers,
       },
-      body: item.body
+      body: item.body,
     });
 
     if (!response.ok) {
@@ -156,7 +158,7 @@ class BackgroundSyncManager {
   }
 
   private removeFromSyncQueue(id: string): void {
-    this.syncQueue = this.syncQueue.filter(item => item.id !== id);
+    this.syncQueue = this.syncQueue.filter((item) => item.id !== id);
     this.saveSyncQueue();
   }
 
@@ -167,8 +169,8 @@ class BackgroundSyncManager {
 
   getSyncQueueStatus(): { pending: number; failed: number } {
     return {
-      pending: this.syncQueue.filter(item => item.retryCount === 0).length,
-      failed: this.syncQueue.filter(item => item.retryCount > 0).length
+      pending: this.syncQueue.filter((item) => item.retryCount === 0).length,
+      failed: this.syncQueue.filter((item) => item.retryCount > 0).length,
     };
   }
 

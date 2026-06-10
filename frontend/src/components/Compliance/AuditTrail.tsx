@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Calendar, 
-  User, 
-  Shield, 
+import {
+  Search,
+  Filter,
+  Download,
+  Calendar,
+  User,
+  Shield,
   AlertTriangle,
   CheckCircle,
   Clock,
-  Eye
+  Eye,
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -46,7 +46,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
     eventType: '',
     startDate: '',
     endDate: '',
-    limit: 50
+    limit: 50,
   });
   const [exportFormat, setExportFormat] = useState('JSON');
 
@@ -58,10 +58,10 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
     try {
       setLoading(true);
       const params: any = { ...filters };
-      
+
       if (resourceId) params.resourceId = resourceId;
       if (userId) params.userId = userId;
-      
+
       const response = await axios.get('/api/compliance/audit-trail', { params });
       setEvents(response.data.auditTrail);
       setError(null);
@@ -82,7 +82,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
 
       const response = await axios.get('/api/compliance/export', {
         params,
-        responseType: 'blob'
+        responseType: 'blob',
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -99,7 +99,8 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
 
   const getEventIcon = (eventType: string) => {
     if (eventType.includes('PROOF')) return <Shield className="h-4 w-4" />;
-    if (eventType.includes('PRIVACY') || eventType.includes('CONSENT')) return <Eye className="h-4 w-4" />;
+    if (eventType.includes('PRIVACY') || eventType.includes('CONSENT'))
+      return <Eye className="h-4 w-4" />;
     if (eventType.includes('SECURITY')) return <AlertTriangle className="h-4 w-4" />;
     return <Clock className="h-4 w-4" />;
   };
@@ -155,7 +156,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
           <select
             value={filters.eventType}
-            onChange={(e) => setFilters({...filters, eventType: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, eventType: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">All Events</option>
@@ -173,7 +174,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
           <input
             type="date"
             value={filters.startDate}
-            onChange={(e) => setFilters({...filters, startDate: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -183,7 +184,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
           <input
             type="date"
             value={filters.endDate}
-            onChange={(e) => setFilters({...filters, endDate: e.target.value})}
+            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -192,7 +193,7 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">Limit</label>
           <select
             value={filters.limit}
-            onChange={(e) => setFilters({...filters, limit: parseInt(e.target.value)})}
+            onChange={(e) => setFilters({ ...filters, limit: parseInt(e.target.value) })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value={25}>25</option>
@@ -263,14 +264,18 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
                       <div className="font-medium">{event.resource.name}</div>
                       <div className="text-gray-500">{event.resource.id}</div>
                     </div>
-                  ) : 'N/A'}
+                  ) : (
+                    'N/A'
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    event.status === 'SUCCESS' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.status === 'SUCCESS'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {event.status === 'SUCCESS' ? (
                       <CheckCircle className="h-3 w-3 mr-1" />
                     ) : (
@@ -280,13 +285,15 @@ const AuditTrail: React.FC<AuditTrailProps> = ({ resourceId, userId }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    event.compliance.classification === 'RESTRICTED' 
-                      ? 'bg-red-100 text-red-800' 
-                      : event.compliance.classification === 'CONFIDENTIAL'
-                      ? 'bg-orange-100 text-orange-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      event.compliance.classification === 'RESTRICTED'
+                        ? 'bg-red-100 text-red-800'
+                        : event.compliance.classification === 'CONFIDENTIAL'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-green-100 text-green-800'
+                    }`}
+                  >
                     {event.compliance.classification}
                   </span>
                 </td>

@@ -88,8 +88,8 @@ class AccessibilityService {
       testElement.style.left = '-9999px';
       document.body.appendChild(testElement);
 
-      const hasScreenReader = window.speechSynthesis && 
-        window.speechSynthesis.getVoices().length > 0;
+      const hasScreenReader =
+        window.speechSynthesis && window.speechSynthesis.getVoices().length > 0;
 
       document.body.removeChild(testElement);
       return hasScreenReader;
@@ -110,17 +110,17 @@ class AccessibilityService {
 
   private applyPreferences(): void {
     const root = document.documentElement;
-    
+
     // Apply CSS classes based on preferences
     root.classList.toggle('high-contrast', this.preferences.highContrast);
     root.classList.toggle('reduced-motion', this.preferences.reducedMotion);
     root.classList.toggle('large-text', this.preferences.largeText);
     root.classList.toggle('focus-visible', this.preferences.focusVisible);
     root.classList.toggle('keyboard-nav', this.preferences.keyboardNavigation);
-    
+
     // Apply font size
     root.setAttribute('data-font-size', this.preferences.fontSize);
-    
+
     // Apply color blind mode
     root.setAttribute('data-color-blind', this.preferences.colorBlindMode);
 
@@ -135,8 +135,9 @@ class AccessibilityService {
     skipLink.id = 'skip-to-main';
     skipLink.href = '#main-content';
     skipLink.textContent = 'Skip to main content';
-    skipLink.className = 'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded';
-    
+    skipLink.className =
+      'sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded';
+
     document.body.insertBefore(skipLink, document.body.firstChild);
   }
 
@@ -159,9 +160,9 @@ class AccessibilityService {
   private setupFocusTrap(): void {
     const trapFocus = (element: HTMLElement) => {
       const focusableElements = element.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
       ) as NodeListOf<HTMLElement>;
-      
+
       const firstElement = focusableElements[0];
       const lastElement = focusableElements[focusableElements.length - 1];
 
@@ -226,7 +227,7 @@ class AccessibilityService {
   private handleEscapeKey(): void {
     // Close any open modals or menus
     const modals = document.querySelectorAll('[role="dialog"][aria-hidden="false"]');
-    modals.forEach(modal => {
+    modals.forEach((modal) => {
       (modal as HTMLElement).setAttribute('aria-hidden', 'true');
     });
   }
@@ -240,21 +241,21 @@ class AccessibilityService {
   // Public API methods
   public updatePreference<K extends keyof AccessibilityPreferences>(
     key: K,
-    value: AccessibilityPreferences[K]
+    value: AccessibilityPreferences[K],
   ): void {
     this.preferences[key] = value;
     this.savePreferences();
     this.applyPreferences();
-    
+
     // Emit change event
     const event = new CustomEvent('accessibilityPreferenceChanged', {
-      detail: { key, value }
+      detail: { key, value },
     });
     document.dispatchEvent(event);
   }
 
   public getPreference<K extends keyof AccessibilityPreferences>(
-    key: K
+    key: K,
   ): AccessibilityPreferences[K] {
     return this.preferences[key];
   }
@@ -277,7 +278,7 @@ class AccessibilityService {
     const announcement: AriaAnnouncement = {
       message,
       priority,
-      timeout: 5000
+      timeout: 5000,
     };
 
     this.announcementQueue.push(announcement);
@@ -293,7 +294,7 @@ class AccessibilityService {
     const liveRegion = document.getElementById(`aria-live-${announcement.priority}`);
     if (liveRegion) {
       liveRegion.textContent = announcement.message;
-      
+
       setTimeout(() => {
         liveRegion.textContent = '';
         this.isProcessingQueue = false;
@@ -348,7 +349,10 @@ class AccessibilityService {
     const textElements = document.querySelectorAll('body *');
     // This would need a more sophisticated implementation in production
     // For now, just check if high contrast is enabled when needed
-    if (this.preferences.highContrast && !document.documentElement.classList.contains('high-contrast')) {
+    if (
+      this.preferences.highContrast &&
+      !document.documentElement.classList.contains('high-contrast')
+    ) {
       issues.push('High contrast mode not properly applied');
       score -= 15;
     }
@@ -385,12 +389,12 @@ class AccessibilityService {
       timestamp: new Date().toISOString(),
       preferences: this.preferences,
       compliance,
-      recommendations
+      recommendations,
     };
   }
 
   public destroy(): void {
-    this.observers.forEach(observer => observer.disconnect());
+    this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
   }
 }

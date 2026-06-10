@@ -59,17 +59,13 @@ function App() {
         <KeyboardNavigation enableShortcuts={true} showHelp={true} />
         <VoiceCommands showIndicator={true} />
         <HighContrast showToggle={true} colorBlindSupport={true} />
-        
+
         <div className="min-h-screen bg-gray-50">
           <a href="#main-content" className="skip-link">
             Skip to main content
           </a>
           <Navbar />
-          <main
-            id="main-content"
-            className="container mx-auto px-4 py-8"
-            aria-label="Main content"
-          >
+          <main id="main-content" className="container mx-auto px-4 py-8" aria-label="Main content">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/issue" element={<IssueProof />} />

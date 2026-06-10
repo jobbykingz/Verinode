@@ -18,21 +18,31 @@ export const useCollaboration = (proofId: string, initialData: any) => {
     });
   }, []);
 
-  const updateDocument = useCallback((diff: any) => {
-    // Optimistic UI Update
-    setDocumentState((prev: any) => ({ ...prev, ...diff }));
-    const newVersion = version + 1;
-    setVersion(newVersion);
-    
-    // Dispatch
-    collabService.sendEdit(proofId, diff, version);
-  }, [proofId, version]);
+  const updateDocument = useCallback(
+    (diff: any) => {
+      // Optimistic UI Update
+      setDocumentState((prev: any) => ({ ...prev, ...diff }));
+      const newVersion = version + 1;
+      setVersion(newVersion);
 
-  const setCursor = useCallback((fieldId: string, position: number) => {
-    collabService.sendCursor(proofId, fieldId, position);
-  }, [proofId]);
+      // Dispatch
+      collabService.sendEdit(proofId, diff, version);
+    },
+    [proofId, version],
+  );
+
+  const setCursor = useCallback(
+    (fieldId: string, position: number) => {
+      collabService.sendCursor(proofId, fieldId, position);
+    },
+    [proofId],
+  );
 
   return {
-    documentState, updateDocument, setCursor, conflictMsg, version
+    documentState,
+    updateDocument,
+    setCursor,
+    conflictMsg,
+    version,
   };
 };

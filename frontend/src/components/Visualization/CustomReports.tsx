@@ -99,15 +99,19 @@ const CustomReports: React.FC<CustomReportsProps> = ({
           fill: true,
           tension: 0.4,
         },
-        ...(type === 'line' ? [{
-          label: 'Dataset 2',
-          data: data2,
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          borderColor: 'rgba(16, 185, 129, 1)',
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-        }] : []),
+        ...(type === 'line'
+          ? [
+              {
+                label: 'Dataset 2',
+                data: data2,
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+              },
+            ]
+          : []),
       ],
     };
   };
@@ -124,10 +128,11 @@ const CustomReports: React.FC<CustomReportsProps> = ({
       },
       position: { x: 0, y: 0 },
       size: { width: 400, height: 300 },
-      data: type === 'chart' || type === 'bar' || type === 'pie' ? generateMockChartData(type) : null,
+      data:
+        type === 'chart' || type === 'bar' || type === 'pie' ? generateMockChartData(type) : null,
     };
 
-    setCurrentTemplate(prev => ({
+    setCurrentTemplate((prev) => ({
       ...prev,
       widgets: [...prev.widgets, newWidget],
       updatedAt: new Date().toISOString(),
@@ -136,20 +141,18 @@ const CustomReports: React.FC<CustomReportsProps> = ({
   };
 
   const removeWidget = (widgetId: string) => {
-    setCurrentTemplate(prev => ({
+    setCurrentTemplate((prev) => ({
       ...prev,
-      widgets: prev.widgets.filter(w => w.id !== widgetId),
+      widgets: prev.widgets.filter((w) => w.id !== widgetId),
       updatedAt: new Date().toISOString(),
     }));
     setSelectedWidget(null);
   };
 
   const updateWidget = (widgetId: string, updates: Partial<ReportWidget>) => {
-    setCurrentTemplate(prev => ({
+    setCurrentTemplate((prev) => ({
       ...prev,
-      widgets: prev.widgets.map(w => 
-        w.id === widgetId ? { ...w, ...updates } : w
-      ),
+      widgets: prev.widgets.map((w) => (w.id === widgetId ? { ...w, ...updates } : w)),
       updatedAt: new Date().toISOString(),
     }));
   };
@@ -161,7 +164,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    setCurrentTemplate(prev => ({
+    setCurrentTemplate((prev) => ({
       ...prev,
       widgets: items,
       updatedAt: new Date().toISOString(),
@@ -184,7 +187,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
             className="w-full h-full"
           />
         );
-      
+
       case 'metric':
         return (
           <div className="flex items-center justify-center h-full">
@@ -194,7 +197,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
             </div>
           </div>
         );
-      
+
       case 'table':
         return (
           <div className="overflow-auto h-full">
@@ -207,7 +210,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {[1, 2, 3, 4, 5].map(i => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <tr key={i} className="border-b">
                     <td className="p-2">Data {i}A</td>
                     <td className="p-2">Data {i}B</td>
@@ -218,19 +221,24 @@ const CustomReports: React.FC<CustomReportsProps> = ({
             </table>
           </div>
         );
-      
+
       case 'text':
         return (
           <div className="p-4 h-full">
             <h3 className="font-semibold mb-2">{widget.title}</h3>
             <p className="text-sm text-gray-600">
-              This is a text widget. You can add descriptions, notes, or any other text content here.
+              This is a text widget. You can add descriptions, notes, or any other text content
+              here.
             </p>
           </div>
         );
-      
+
       default:
-        return <div className="flex items-center justify-center h-full text-gray-500">Unknown Widget Type</div>;
+        return (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Unknown Widget Type
+          </div>
+        );
     }
   };
 
@@ -253,12 +261,12 @@ const CustomReports: React.FC<CustomReportsProps> = ({
             <input
               type="text"
               value={currentTemplate.name}
-              onChange={(e) => setCurrentTemplate(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setCurrentTemplate((prev) => ({ ...prev, name: e.target.value }))}
               className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             />
           )}
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           {!isEditing ? (
             <button
@@ -293,19 +301,19 @@ const CustomReports: React.FC<CustomReportsProps> = ({
               </button>
             </>
           )}
-          
+
           <button
             onClick={() => setPreviewMode(!previewMode)}
             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-              previewMode 
-                ? 'bg-purple-500 text-white' 
+              previewMode
+                ? 'bg-purple-500 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
             }`}
           >
             <Eye className="w-4 h-4" />
             {previewMode ? 'Exit Preview' : 'Preview'}
           </button>
-          
+
           <button className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center gap-2 text-gray-700 dark:text-gray-300">
             <Download className="w-4 h-4" />
             Export
@@ -324,7 +332,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
           >
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add Widget</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {widgetTypes.map(widgetType => (
+              {widgetTypes.map((widgetType) => (
                 <button
                   key={widgetType.type}
                   onClick={() => addWidget(widgetType.type)}
@@ -332,7 +340,9 @@ const CustomReports: React.FC<CustomReportsProps> = ({
                 >
                   <div className="flex flex-col items-center gap-2">
                     {widgetType.icon}
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{widgetType.label}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {widgetType.label}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -367,11 +377,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="widgets" direction="vertical">
               {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="space-y-4"
-                >
+                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
                   {currentTemplate.widgets.map((widget, index) => (
                     <Draggable
                       key={widget.id}
@@ -418,7 +424,7 @@ const CustomReports: React.FC<CustomReportsProps> = ({
                               </button>
                             </div>
                           )}
-                          
+
                           <div className="h-full">
                             <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                               {widget.title}
@@ -445,7 +451,9 @@ const CustomReports: React.FC<CustomReportsProps> = ({
           transition={{ duration: 0.5, delay: 0.2 }}
           className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6"
         >
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Report Information</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Report Information
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
               <span className="font-medium text-gray-600 dark:text-gray-400">Name:</span>

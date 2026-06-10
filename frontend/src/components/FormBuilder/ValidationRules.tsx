@@ -1,16 +1,6 @@
 import React, { useState } from 'react';
 import { FormField, ValidationRule, ValidationRuleConfig } from '../../types/formBuilder';
-import { 
-  Plus, 
-  X, 
-  Check, 
-  AlertCircle, 
-  Settings,
-  Eye,
-  EyeOff,
-  Copy,
-  Trash2
-} from 'lucide-react';
+import { Plus, X, Check, AlertCircle, Settings, Eye, EyeOff, Copy, Trash2 } from 'lucide-react';
 
 interface ValidationRulesProps {
   field: FormField;
@@ -110,14 +100,14 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
   ];
 
   const getAvailableRules = () => {
-    return validationRuleTypes.filter(rule => 
-      rule.applicableFieldTypes.includes('*') || 
-      rule.applicableFieldTypes.includes(field.type)
+    return validationRuleTypes.filter(
+      (rule) =>
+        rule.applicableFieldTypes.includes('*') || rule.applicableFieldTypes.includes(field.type),
     );
   };
 
   const addValidationRule = (ruleType: ValidationRule) => {
-    const ruleConfig = validationRuleTypes.find(r => r.type === ruleType);
+    const ruleConfig = validationRuleTypes.find((r) => r.type === ruleType);
     if (!ruleConfig) return;
 
     const newRule: ValidationRuleConfig = {
@@ -137,8 +127,8 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
   };
 
   const updateValidationRule = (index: number, updates: Partial<ValidationRuleConfig>) => {
-    const updatedRules = field.validationRules.map((rule, i) => 
-      i === index ? { ...rule, ...updates } : rule
+    const updatedRules = field.validationRules.map((rule, i) =>
+      i === index ? { ...rule, ...updates } : rule,
     );
     onUpdate(updatedRules);
   };
@@ -177,30 +167,34 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
             type="number"
             min="1"
             value={rule.value || ''}
-            onChange={(e) => updateValidationRule(index, { 
-              value: parseInt(e.target.value) || 1,
-              message: getDefaultErrorMessage(rule.type, parseInt(e.target.value) || 1)
-            })}
+            onChange={(e) =>
+              updateValidationRule(index, {
+                value: parseInt(e.target.value) || 1,
+                message: getDefaultErrorMessage(rule.type, parseInt(e.target.value) || 1),
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter length"
           />
         );
-      
+
       case 'min':
       case 'max':
         return (
           <input
             type="number"
             value={rule.value || ''}
-            onChange={(e) => updateValidationRule(index, { 
-              value: parseFloat(e.target.value) || 0,
-              message: getDefaultErrorMessage(rule.type, parseFloat(e.target.value) || 0)
-            })}
+            onChange={(e) =>
+              updateValidationRule(index, {
+                value: parseFloat(e.target.value) || 0,
+                message: getDefaultErrorMessage(rule.type, parseFloat(e.target.value) || 0),
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="Enter value"
           />
         );
-      
+
       case 'pattern':
         return (
           <div className="space-y-2">
@@ -216,7 +210,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
             </div>
           </div>
         );
-      
+
       case 'custom':
         return (
           <div className="space-y-2">
@@ -228,12 +222,12 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
               placeholder="// Return true if valid, false if invalid&#10;// Available variables: value, formData&#10;return value.length > 0;"
             />
             <div className="text-xs text-gray-500">
-              Custom JavaScript function. Return true for valid, false for invalid.
-              Variables: value (current field value), formData (all form data)
+              Custom JavaScript function. Return true for valid, false for invalid. Variables: value
+              (current field value), formData (all form data)
             </div>
           </div>
         );
-      
+
       default:
         return null;
     }
@@ -245,7 +239,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
       ...ruleToDuplicate,
       message: `${ruleToDuplicate.message} (Copy)`,
     };
-    
+
     const updatedRules = [...field.validationRules];
     updatedRules.splice(index + 1, 0, duplicatedRule);
     onUpdate(updatedRules);
@@ -279,7 +273,7 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
                     </span>
                   )}
                 </div>
-                
+
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => duplicateRule(index)}
@@ -322,12 +316,12 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
       {/* Add New Rule */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium text-gray-700">Add Validation Rule</h4>
-        
+
         {showAdvanced ? (
           <div className="grid grid-cols-2 gap-2">
             {getAvailableRules().map((ruleType) => {
-              const isAdded = field.validationRules.some(rule => rule.type === ruleType.type);
-              
+              const isAdded = field.validationRules.some((rule) => rule.type === ruleType.type);
+
               return (
                 <button
                   key={ruleType.type}
@@ -343,42 +337,38 @@ const ValidationRules: React.FC<ValidationRulesProps> = ({ field, onUpdate }) =>
                     <AlertCircle className="w-4 h-4 text-gray-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900">
-                      {ruleType.label}
-                    </div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {ruleType.description}
-                    </div>
+                    <div className="text-sm font-medium text-gray-900">{ruleType.label}</div>
+                    <div className="text-xs text-gray-500 truncate">{ruleType.description}</div>
                   </div>
-                  {isAdded && (
-                    <Check className="w-4 h-4 text-green-600" />
-                  )}
+                  {isAdded && <Check className="w-4 h-4 text-green-600" />}
                 </button>
               );
             })}
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {getAvailableRules().slice(0, 4).map((ruleType) => {
-              const isAdded = field.validationRules.some(rule => rule.type === ruleType.type);
-              
-              return (
-                <button
-                  key={ruleType.type}
-                  onClick={() => !isAdded && addValidationRule(ruleType.type)}
-                  disabled={isAdded}
-                  className={`px-3 py-2 text-sm border rounded-lg transition-colors ${
-                    isAdded
-                      ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-50'
-                      : 'bg-white border-gray-300 hover:border-blue-300 hover:bg-blue-50'
-                  }`}
-                >
-                  {ruleType.label}
-                  {isAdded && <Check className="w-3 h-3 inline ml-1 text-green-600" />}
-                </button>
-              );
-            })}
-            
+            {getAvailableRules()
+              .slice(0, 4)
+              .map((ruleType) => {
+                const isAdded = field.validationRules.some((rule) => rule.type === ruleType.type);
+
+                return (
+                  <button
+                    key={ruleType.type}
+                    onClick={() => !isAdded && addValidationRule(ruleType.type)}
+                    disabled={isAdded}
+                    className={`px-3 py-2 text-sm border rounded-lg transition-colors ${
+                      isAdded
+                        ? 'bg-gray-100 border-gray-200 cursor-not-allowed opacity-50'
+                        : 'bg-white border-gray-300 hover:border-blue-300 hover:bg-blue-50'
+                    }`}
+                  >
+                    {ruleType.label}
+                    {isAdded && <Check className="w-3 h-3 inline ml-1 text-green-600" />}
+                  </button>
+                );
+              })}
+
             {getAvailableRules().length > 4 && (
               <button
                 onClick={() => setShowAdvanced(true)}

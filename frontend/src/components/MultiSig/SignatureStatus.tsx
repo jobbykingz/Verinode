@@ -4,12 +4,12 @@ import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Progress } from '../ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Users, 
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Users,
   Activity,
   TrendingUp,
   TrendingDown,
@@ -21,7 +21,7 @@ import {
   RefreshCw,
   Download,
   Filter,
-  Search
+  Search,
 } from 'lucide-react';
 import { multiSigService } from '../../services/multiSigService';
 import { toast } from 'react-hot-toast';
@@ -69,9 +69,9 @@ interface RecentRequest {
   priority: string;
 }
 
-export const SignatureStatus: React.FC<SignatureStatusProps> = ({ 
-  walletId, 
-  refreshInterval = 30000 
+export const SignatureStatus: React.FC<SignatureStatusProps> = ({
+  walletId,
+  refreshInterval = 30000,
 }) => {
   const [stats, setStats] = useState<SignatureStats | null>(null);
   const [suspiciousPatterns, setSuspiciousPatterns] = useState<SuspiciousPattern[]>([]);
@@ -92,13 +92,13 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
   const loadData = async () => {
     try {
       setLoading(true);
-      
+
       if (walletId) {
         const [statsData, patternsData] = await Promise.all([
           multiSigService.getSignatureStats(walletId),
-          multiSigService.detectSuspiciousPatterns(walletId)
+          multiSigService.detectSuspiciousPatterns(walletId),
         ]);
-        
+
         setStats(statsData);
         setSuspiciousPatterns(patternsData);
       }
@@ -112,7 +112,7 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
           status: 'PENDING',
           createdAt: new Date().toISOString(),
           threshold: { current: 2, required: 3 },
-          priority: 'MEDIUM'
+          priority: 'MEDIUM',
         },
         {
           requestId: 'req_2',
@@ -121,10 +121,9 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
           status: 'APPROVED',
           createdAt: new Date(Date.now() - 3600000).toISOString(),
           threshold: { current: 3, required: 3 },
-          priority: 'HIGH'
-        }
+          priority: 'HIGH',
+        },
       ]);
-
     } catch (error) {
       toast.error('Failed to load signature status');
       console.error('Error loading data:', error);
@@ -135,50 +134,74 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'yellow';
-      case 'APPROVED': return 'green';
-      case 'REJECTED': return 'red';
-      case 'EXPIRED': return 'gray';
-      case 'EXECUTED': return 'blue';
-      case 'FAILED': return 'red';
-      default: return 'gray';
+      case 'PENDING':
+        return 'yellow';
+      case 'APPROVED':
+        return 'green';
+      case 'REJECTED':
+        return 'red';
+      case 'EXPIRED':
+        return 'gray';
+      case 'EXECUTED':
+        return 'blue';
+      case 'FAILED':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'PENDING': return <Clock className="h-4 w-4" />;
-      case 'APPROVED': return <CheckCircle className="h-4 w-4" />;
-      case 'REJECTED': return <XCircle className="h-4 w-4" />;
-      case 'EXPIRED': return <Timer className="h-4 w-4" />;
-      case 'EXECUTED': return <Shield className="h-4 w-4" />;
-      case 'FAILED': return <AlertTriangle className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
+      case 'PENDING':
+        return <Clock className="h-4 w-4" />;
+      case 'APPROVED':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'REJECTED':
+        return <XCircle className="h-4 w-4" />;
+      case 'EXPIRED':
+        return <Timer className="h-4 w-4" />;
+      case 'EXECUTED':
+        return <Shield className="h-4 w-4" />;
+      case 'FAILED':
+        return <AlertTriangle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'LOW': return 'secondary';
-      case 'MEDIUM': return 'default';
-      case 'HIGH': return 'destructive';
-      default: return 'secondary';
+      case 'LOW':
+        return 'secondary';
+      case 'MEDIUM':
+        return 'default';
+      case 'HIGH':
+        return 'destructive';
+      default:
+        return 'secondary';
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'LOW': return 'secondary';
-      case 'MEDIUM': return 'default';
-      case 'HIGH': return 'destructive';
-      case 'CRITICAL': return 'destructive';
-      default: return 'default';
+      case 'LOW':
+        return 'secondary';
+      case 'MEDIUM':
+        return 'default';
+      case 'HIGH':
+        return 'destructive';
+      case 'CRITICAL':
+        return 'destructive';
+      default:
+        return 'default';
     }
   };
 
-  const filteredRequests = recentRequests.filter(request => {
-    const matchesSearch = request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.requestId.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredRequests = recentRequests.filter((request) => {
+    const matchesSearch =
+      request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request.requestId.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || request.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
@@ -208,12 +231,7 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
               Signature Status Dashboard
             </CardTitle>
             <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadData}
-                disabled={loading}
-              >
+              <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               </Button>
               <Button variant="outline" size="sm">
@@ -244,9 +262,10 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                 <div>
                   <p className="text-sm text-gray-500">Success Rate</p>
                   <p className="text-2xl font-bold">
-                    {stats.totalRequests > 0 
+                    {stats.totalRequests > 0
                       ? Math.round((stats.executedRequests / stats.totalRequests) * 100)
-                      : 0}%
+                      : 0}
+                    %
                   </p>
                 </div>
                 {stats.executedRequests > 0 ? (
@@ -307,15 +326,21 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                       <div className="text-sm text-gray-500">Total</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-yellow-600">{stats.pendingRequests}</div>
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {stats.pendingRequests}
+                      </div>
                       <div className="text-sm text-gray-500">Pending</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">{stats.approvedRequests}</div>
+                      <div className="text-2xl font-bold text-green-600">
+                        {stats.approvedRequests}
+                      </div>
                       <div className="text-sm text-gray-500">Approved</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">{stats.executedRequests}</div>
+                      <div className="text-2xl font-bold text-blue-600">
+                        {stats.executedRequests}
+                      </div>
                       <div className="text-sm text-gray-500">Executed</div>
                     </div>
                     <div className="text-center">
@@ -334,14 +359,18 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Average Signatures per Request</span>
-                      <span className="text-sm text-gray-500">{stats.averageSignaturesPerRequest.toFixed(1)}</span>
+                      <span className="text-sm text-gray-500">
+                        {stats.averageSignaturesPerRequest.toFixed(1)}
+                      </span>
                     </div>
                     <Progress value={(stats.averageSignaturesPerRequest / 5) * 100} />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Average Confirmation Time</span>
-                      <span className="text-sm text-gray-500">{Math.round(stats.averageConfirmationTime / 60)} minutes</span>
+                      <span className="text-sm text-gray-500">
+                        {Math.round(stats.averageConfirmationTime / 60)} minutes
+                      </span>
                     </div>
                     <Progress value={Math.min((stats.averageConfirmationTime / 3600) * 100, 100)} />
                   </div>
@@ -399,7 +428,8 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                           <div>
                             <h4 className="font-semibold">{request.title}</h4>
                             <p className="text-sm text-gray-500">
-                              {request.type.replace('_', '')} • {new Date(request.createdAt).toLocaleString()}
+                              {request.type.replace('_', '')} •{' '}
+                              {new Date(request.createdAt).toLocaleString()}
                             </p>
                           </div>
                         </div>
@@ -407,9 +437,7 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                           <Badge variant={getPriorityColor(request.priority)}>
                             {request.priority}
                           </Badge>
-                          <Badge variant={getStatusColor(request.status)}>
-                            {request.status}
-                          </Badge>
+                          <Badge variant={getStatusColor(request.status)}>{request.status}</Badge>
                           <div className="text-sm text-gray-500">
                             {request.threshold.current}/{request.threshold.required}
                           </div>
@@ -453,16 +481,22 @@ export const SignatureStatus: React.FC<SignatureStatusProps> = ({
                           <div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-sm font-medium">Participation Rate</span>
-                              <span className="text-sm text-gray-500">{Math.round(signer.participationRate * 100)}%</span>
+                              <span className="text-sm text-gray-500">
+                                {Math.round(signer.participationRate * 100)}%
+                              </span>
                             </div>
                             <Progress value={signer.participationRate * 100} />
                           </div>
                           <div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-sm font-medium">Avg Response Time</span>
-                              <span className="text-sm text-gray-500">{Math.round(signer.averageResponseTime / 60)}m</span>
+                              <span className="text-sm text-gray-500">
+                                {Math.round(signer.averageResponseTime / 60)}m
+                              </span>
                             </div>
-                            <Progress value={Math.min((signer.averageResponseTime / 3600) * 100, 100)} />
+                            <Progress
+                              value={Math.min((signer.averageResponseTime / 3600) * 100, 100)}
+                            />
                           </div>
                         </div>
                       </Card>

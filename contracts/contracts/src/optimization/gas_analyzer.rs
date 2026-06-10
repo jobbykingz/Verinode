@@ -1,5 +1,5 @@
 use soroban_sdk::{Env, String, Vec, Map};
-use std::collections::HashMap;
+extern crate alloc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GasAnalysis {
@@ -81,7 +81,7 @@ pub struct GasBenchmark {
     pub version: String,
     pub timestamp: u64,
     pub total_gas_cost: u64,
-    pub function_costs: HashMap<String, u64>,
+    pub function_costs: Vec<(String, u64)>,
     pub optimization_savings: u64,
 }
 
@@ -510,14 +510,14 @@ impl GasAnalyzer {
         report.push_str("# Gas Analysis Report\n\n");
         report.push_str(&format!("Contract: {}\n", profile.contract_name));
         report.push_str(&format!("Total Functions: {}\n", profile.total_functions));
-        report.push_str(&format!("Total Gas Cost: {:,}\n", profile.total_gas_cost));
+        report.push_str(&format!("Total Gas Cost: {}\n", profile.total_gas_cost));
         report.push_str(&format!("Average Gas Cost: {:.2}\n", profile.average_gas_cost));
         report.push_str(&format!("Efficiency Score: {:.2}/100\n\n", profile.gas_efficiency_score));
         
         report.push_str("## Function Analysis\n\n");
         for analysis in &profile.function_analyses {
             report.push_str(&format!("### {}\n", analysis.function_name));
-            report.push_str(&format!("- Gas Cost: {:,}\n", analysis.total_gas_cost));
+            report.push_str(&format!("- Gas Cost: {}\n", analysis.total_gas_cost));
             report.push_str(&format!("- Complexity Score: {:.2}\n", analysis.complexity_score));
             report.push_str(&format!("- Est. Execution Time: {}s\n", analysis.execution_time_estimate));
             report.push_str(&format!("- Optimization Opportunities: {}\n", analysis.optimization_opportunities.len()));
@@ -527,7 +527,7 @@ impl GasAnalyzer {
         report.push_str("## Global Optimization Opportunities\n\n");
         for (i, opportunity) in profile.global_optimizations.iter().enumerate() {
             report.push_str(&format!("{}. {}\n", i + 1, opportunity.description));
-            report.push_str(&format!("   - Potential Savings: {:,} gas\n", opportunity.potential_savings));
+            report.push_str(&format!("   - Potential Savings: {} gas\n", opportunity.potential_savings));
             report.push_str(&format!("   - Difficulty: {:?}\n\n", opportunity.difficulty));
         }
         

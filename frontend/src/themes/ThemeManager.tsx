@@ -364,7 +364,7 @@ export function useThemeManager() {
 
 function applyThemeToDOM(theme: Theme) {
   const root = document.documentElement;
-  
+
   Object.entries(theme.colors).forEach(([key, value]) => {
     root.style.setProperty(`--color-${key}`, value);
   });

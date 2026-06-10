@@ -37,7 +37,7 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
     pendingActions: 0,
     lastSyncTime: null,
     isSyncing: false,
-    error: null
+    error: null,
   });
 
   // Initialize IndexedDB
@@ -50,7 +50,7 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         if (!db.objectStoreNames.contains(STORE_NAME)) {
           const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
           store.createIndex('type', 'type', { unique: false });
@@ -79,71 +79,80 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
   }, [initDB]);
 
   // Add action to queue
-  const queueAction = useCallback(async (action: Omit<OfflineAction, 'id' | 'timestamp' | 'retryCount'>): Promise<void> => {
-    try {
-      const db = await initDB();
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
+  const queueAction = useCallback(
+    async (action: Omit<OfflineAction, 'id' | 'timestamp' | 'retryCount'>): Promise<void> => {
+      try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
 
-      const offlineAction: OfflineAction = {
-        ...action,
-        id: generateId(),
-        timestamp: Date.now(),
-        retryCount: 0
-      };
-
-      const request = store.add(offlineAction);
-
-      return new Promise((resolve, reject) => {
-        request.onsuccess = () => {
-          console.log('Action queued for offline sync:', offlineAction.id);
-          resolve();
+        const offlineAction: OfflineAction = {
+          ...action,
+          id: generateId(),
+          timestamp: Date.now(),
+          retryCount: 0,
         };
-        request.onerror = () => reject(request.error);
-      });
-    } catch (error) {
-      console.error('Failed to queue action:', error);
-      throw error;
-    }
-  }, [initDB]);
+
+        const request = store.add(offlineAction);
+
+        return new Promise((resolve, reject) => {
+          request.onsuccess = () => {
+            console.log('Action queued for offline sync:', offlineAction.id);
+            resolve();
+          };
+          request.onerror = () => reject(request.error);
+        });
+      } catch (error) {
+        console.error('Failed to queue action:', error);
+        throw error;
+      }
+    },
+    [initDB],
+  );
 
   // Remove action from queue
-  const removeAction = useCallback(async (id: string): Promise<void> => {
-    try {
-      const db = await initDB();
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      const request = store.delete(id);
+  const removeAction = useCallback(
+    async (id: string): Promise<void> => {
+      try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(id);
 
-      return new Promise((resolve, reject) => {
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject(request.error);
-      });
-    } catch (error) {
-      console.error('Failed to remove action:', error);
-      throw error;
-    }
-  }, [initDB]);
+        return new Promise((resolve, reject) => {
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+      } catch (error) {
+        console.error('Failed to remove action:', error);
+        throw error;
+      }
+    },
+    [initDB],
+  );
 
   // Update action retry count
-  const updateRetryCount = useCallback(async (id: string, retryCount: number): Promise<void> => {
-    try {
-      const db = await initDB();
-      const transaction = db.transaction([STORE_NAME], 'readwrite');
-      const store = transaction.objectStore(STORE_NAME);
-      
-      const getRequest = store.get(id);
-      getRequest.onsuccess = () => {
-        const action = getRequest.result;
-        if (action) {
-          action.retryCount = retryCount;
-          store.put(action);
-        }
-      };
-    } catch (error) {
-      console.error('Failed to update retry count:', error);
-    }
-  }, [initDB]);
+  const updateRetryCount = useCallback(
+    async (id: string, retryCount: number): Promise<void> => {
+      try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+
+        const getRequest = store.get(id);
+        getRequest.onsuccess = () => {
+          const action = getRequest.result;
+          if (action) {
+            action.retryCount = retryCount;
+            store.put(action);
+          }
+        };
+      } catch (error) {
+        console.error('Failed to update retry count:', error);
+      }
+    },
+    [initDB],
+  );
 
   // Sync all pending actions
   const syncActions = useCallback(async (): Promise<void> => {
@@ -152,11 +161,11 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
       return;
     }
 
-    setSyncStatus(prev => ({ ...prev, isSyncing: true, error: null }));
+    setSyncStatus((prev) => ({ ...prev, isSyncing: true, error: null }));
 
     try {
       const actions = await getQueuedActions();
-      
+
       for (const action of actions) {
         try {
           await executeAction(action);
@@ -164,10 +173,10 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
           console.log('Synced action:', action.id);
         } catch (error) {
           console.error('Failed to sync action:', action.id, error);
-          
+
           // Update retry count
           await updateRetryCount(action.id, action.retryCount + 1);
-          
+
           // Remove action if it has failed too many times
           if (action.retryCount >= 3) {
             await removeAction(action.id);
@@ -177,19 +186,18 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
       }
 
       const remainingActions = await getQueuedActions();
-      setSyncStatus(prev => ({
+      setSyncStatus((prev) => ({
         ...prev,
         isSyncing: false,
         pendingActions: remainingActions.length,
-        lastSyncTime: Date.now()
+        lastSyncTime: Date.now(),
       }));
-
     } catch (error) {
       console.error('Sync failed:', error);
-      setSyncStatus(prev => ({
+      setSyncStatus((prev) => ({
         ...prev,
         isSyncing: false,
-        error: error.message
+        error: error.message,
       }));
     }
   }, [getQueuedActions, removeAction, updateRetryCount]);
@@ -200,8 +208,8 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
       method: action.method,
       headers: {
         'Content-Type': 'application/json',
-        ...action.headers
-      }
+        ...action.headers,
+      },
     };
 
     if (action.data && (action.method === 'POST' || action.method === 'PUT')) {
@@ -242,12 +250,12 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
       const db = await initDB();
       const transaction = db.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
-      
+
       // Reset retry count for all actions
       const request = store.getAll();
       request.onsuccess = () => {
         const actions = request.result || [];
-        actions.forEach(action => {
+        actions.forEach((action) => {
           action.retryCount = 0;
           store.put(action);
         });
@@ -264,9 +272,9 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
   const updatePendingCount = useCallback(async () => {
     try {
       const actions = await getQueuedActions();
-      setSyncStatus(prev => ({
+      setSyncStatus((prev) => ({
         ...prev,
-        pendingActions: actions.length
+        pendingActions: actions.length,
       }));
     } catch (error) {
       console.error('Failed to update pending count:', error);
@@ -276,12 +284,12 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
   // Listen for online/offline events
   useEffect(() => {
     const handleOnline = () => {
-      setSyncStatus(prev => ({ ...prev, isOnline: true }));
+      setSyncStatus((prev) => ({ ...prev, isOnline: true }));
       syncActions(); // Auto-sync when coming back online
     };
 
     const handleOffline = () => {
-      setSyncStatus(prev => ({ ...prev, isOnline: false }));
+      setSyncStatus((prev) => ({ ...prev, isOnline: false }));
     };
 
     window.addEventListener('online', handleOnline);
@@ -296,13 +304,13 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
   // Initialize and update pending count
   useEffect(() => {
     updatePendingCount();
-    
+
     // Load last sync time from localStorage
     const lastSync = localStorage.getItem('last-sync-time');
     if (lastSync) {
-      setSyncStatus(prev => ({
+      setSyncStatus((prev) => ({
         ...prev,
-        lastSyncTime: parseInt(lastSync)
+        lastSyncTime: parseInt(lastSync),
       }));
     }
   }, [updatePendingCount]);
@@ -320,7 +328,7 @@ const useOfflineSync = (): UseOfflineSyncReturn => {
     syncActions,
     clearQueue,
     getQueuedActions,
-    retryFailedActions
+    retryFailedActions,
   };
 };
 

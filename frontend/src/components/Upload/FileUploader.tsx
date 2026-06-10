@@ -69,15 +69,15 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   const [selectedFile, setSelectedFile] = useState<UploadFile | null>(null);
   const [showQueue, setShowQueue] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const fileInputRef = useRef<any>(null);
-  
+
   const uploadConfig = { ...DEFAULT_UPLOAD_CONFIG, ...config };
   const dragConfig = { ...DEFAULT_DRAG_DROP_CONFIG, ...dragDropConfig };
   const previewConfigFinal = { ...DEFAULT_PREVIEW_CONFIG, ...previewConfig };
-  
+
   const {
     files,
     progress,
@@ -130,79 +130,91 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   }, [isDragActive]);
 
   // Handle file selection
-  const handleFileSelection = useCallback(async (selectedFiles: File[]) => {
-    try {
-      // Validate files
-      const validationResults = await validateFiles(selectedFiles, {
-        maxSize: uploadConfig.maxFileSize,
-        allowedTypes: uploadConfig.allowedTypes,
-        blockedTypes: uploadConfig.blockedTypes,
-        maxFiles: uploadConfig.maxFiles,
-        enableVirusScanning: uploadConfig.enableVirusScanning,
-        enableContentValidation: uploadConfig.enableValidation,
-      });
+  const handleFileSelection = useCallback(
+    async (selectedFiles: File[]) => {
+      try {
+        // Validate files
+        const validationResults = await validateFiles(selectedFiles, {
+          maxSize: uploadConfig.maxFileSize,
+          allowedTypes: uploadConfig.allowedTypes,
+          blockedTypes: uploadConfig.blockedTypes,
+          maxFiles: uploadConfig.maxFiles,
+          enableVirusScanning: uploadConfig.enableVirusScanning,
+          enableContentValidation: uploadConfig.enableValidation,
+        });
 
-      const validFiles = validationResults.filter(result => result.isValid);
-      const invalidFiles = validationResults.filter(result => !result.isValid);
+        const validFiles = validationResults.filter((result) => result.isValid);
+        const invalidFiles = validationResults.filter((result) => !result.isValid);
 
-      // Show errors for invalid files
-      if (invalidFiles.length > 0) {
-        const errorMessages = invalidFiles.map(result => 
-          result.errors.map(error => error.message).join(', ')
-        ).join('\n');
-        
-        Alert.alert('File Validation Error', errorMessages);
-      }
+        // Show errors for invalid files
+        if (invalidFiles.length > 0) {
+          const errorMessages = invalidFiles
+            .map((result) => result.errors.map((error) => error.message).join(', '))
+            .join('\n');
 
-      if (validFiles.length === 0) {
-        return;
-      }
+          Alert.alert('File Validation Error', errorMessages);
+        }
 
-      // Process valid files
-      const processedFiles = await Promise.all(
-        validFiles.map(async (result) => {
-          const file = result.file;
-          
-          // Generate thumbnails if enabled
-          let thumbnail = undefined;
-          if (previewConfigFinal.generateThumbnails && file.type.startsWith('image/')) {
-            thumbnail = await generateThumbnails(file, previewConfigFinal);
-          }
+        if (validFiles.length === 0) {
+          return;
+        }
 
-          // Extract metadata if enabled
-          let metadata = undefined;
-          if (uploadConfig.enableMetadataExtraction) {
-            metadata = await extractMetadata(file);
-          }
+        // Process valid files
+        const processedFiles = await Promise.all(
+          validFiles.map(async (result) => {
+            const file = result.file;
 
-          return {
-            file,
-            thumbnail,
-            metadata,
+            // Generate thumbnails if enabled
+            let thumbnail = undefined;
+            if (previewConfigFinal.generateThumbnails && file.type.startsWith('image/')) {
+              thumbnail = await generateThumbnails(file, previewConfigFinal);
+            }
+
+            // Extract metadata if enabled
+            let metadata = undefined;
+            if (uploadConfig.enableMetadataExtraction) {
+              metadata = await extractMetadata(file);
+            }
+
+            return {
+              file,
+              thumbnail,
+              metadata,
+            };
+          }),
+        );
+
+        onFilesSelected?.(processedFiles.map((p) => p.file));
+
+        // Start upload if auto-start is enabled
+        if (uploadConfig.autoStart) {
+          const uploadOptions: UploadOptions = {
+            files: processedFiles.map((p) => p.file),
+            config: uploadConfig,
+            onStart: onUploadStart,
+            onProgress: onUploadProgress,
+            onComplete: onUploadComplete,
+            onError: onUploadError,
+            onQueueComplete: (queue) => onQueueComplete?.(queue.files),
           };
-        })
-      );
-
-      onFilesSelected?.(processedFiles.map(p => p.file));
-      
-      // Start upload if auto-start is enabled
-      if (uploadConfig.autoStart) {
-        const uploadOptions: UploadOptions = {
-          files: processedFiles.map(p => p.file),
-          config: uploadConfig,
-          onStart: onUploadStart,
-          onProgress: onUploadProgress,
-          onComplete: onUploadComplete,
-          onError: onUploadError,
-          onQueueComplete: (queue) => onQueueComplete?.(queue.files),
-        };
-        await upload(uploadOptions);
+          await upload(uploadOptions);
+        }
+      } catch (error) {
+        console.error('Error processing files:', error);
+        Alert.alert('Error', 'Failed to process files');
       }
-    } catch (error) {
-      console.error('Error processing files:', error);
-      Alert.alert('Error', 'Failed to process files');
-    }
-  }, [uploadConfig, previewConfigFinal, onFilesSelected, onUploadStart, onUploadProgress, onUploadComplete, onUploadError, onQueueComplete]);
+    },
+    [
+      uploadConfig,
+      previewConfigFinal,
+      onFilesSelected,
+      onUploadStart,
+      onUploadProgress,
+      onUploadComplete,
+      onUploadError,
+      onQueueComplete,
+    ],
+  );
 
   // Document picker
   const handleDocumentPicker = useCallback(async () => {
@@ -212,15 +224,15 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         allowMultiSelection: dragConfig.multiple,
         quality: 1,
       });
-      
-      const files = result.map(file => ({
+
+      const files = result.map((file) => ({
         uri: file.uri,
         name: file.name,
         type: file.type,
         size: file.size || 0,
         lastModified: Date.now(),
       }));
-      
+
       await handleFileSelection(files);
     } catch (error) {
       if (DocumentPicker.isCancel(error)) {
@@ -241,16 +253,16 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         quality: 1,
         includeExtra: true,
       });
-      
+
       if (result.assets) {
-        const files = result.assets.map(asset => ({
+        const files = result.assets.map((asset) => ({
           uri: asset.uri,
           name: asset.fileName || `image_${Date.now()}`,
           type: asset.type || 'image/jpeg',
           size: asset.fileSize || 0,
           lastModified: asset.timestamp || Date.now(),
         }));
-        
+
         await handleFileSelection(files);
       }
     } catch (error) {
@@ -276,41 +288,59 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
     }
   }, [disabled, dragConfig]);
 
-  const handleDrop = useCallback((e: any) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    
-    if (disabled || !dragConfig.enabled) {
-      return;
-    }
+  const handleDrop = useCallback(
+    (e: any) => {
+      e.preventDefault();
+      setIsDragActive(false);
 
-    const droppedFiles = Array.from(e.dataTransfer?.files || []);
-    
-    if (droppedFiles.length > 0) {
-      handleFileSelection(droppedFiles);
-    }
-  }, [disabled, dragConfig, handleFileSelection]);
+      if (disabled || !dragConfig.enabled) {
+        return;
+      }
+
+      const droppedFiles = Array.from(e.dataTransfer?.files || []);
+
+      if (droppedFiles.length > 0) {
+        handleFileSelection(droppedFiles);
+      }
+    },
+    [disabled, dragConfig, handleFileSelection],
+  );
 
   // File management
-  const handleRemoveFile = useCallback((fileId: string) => {
-    remove(fileId);
-  }, [remove]);
+  const handleRemoveFile = useCallback(
+    (fileId: string) => {
+      remove(fileId);
+    },
+    [remove],
+  );
 
-  const handleRetryFile = useCallback((fileId: string) => {
-    retry(fileId);
-  }, [retry]);
+  const handleRetryFile = useCallback(
+    (fileId: string) => {
+      retry(fileId);
+    },
+    [retry],
+  );
 
-  const handlePauseFile = useCallback((fileId: string) => {
-    pause();
-  }, [pause]);
+  const handlePauseFile = useCallback(
+    (fileId: string) => {
+      pause();
+    },
+    [pause],
+  );
 
-  const handleResumeFile = useCallback((fileId: string) => {
-    resume();
-  }, [resume]);
+  const handleResumeFile = useCallback(
+    (fileId: string) => {
+      resume();
+    },
+    [resume],
+  );
 
-  const handleCancelFile = useCallback((fileId: string) => {
-    cancel();
-  }, [cancel]);
+  const handleCancelFile = useCallback(
+    (fileId: string) => {
+      cancel();
+    },
+    [cancel],
+  );
 
   const handlePreviewFile = useCallback((file: UploadFile) => {
     setSelectedFile(file);
@@ -320,7 +350,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   // Queue management
   const handleStartUpload = useCallback(async () => {
     const uploadOptions: UploadOptions = {
-      files: files.map(f => f.file),
+      files: files.map((f) => f.file),
       config: uploadConfig,
       onStart: onUploadStart,
       onProgress: onUploadProgress,
@@ -329,7 +359,15 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       onQueueComplete: (queue) => onQueueComplete?.(queue.files),
     };
     await upload(uploadOptions);
-  }, [files, uploadConfig, onUploadStart, onUploadProgress, onUploadComplete, onUploadError, onQueueComplete]);
+  }, [
+    files,
+    uploadConfig,
+    onUploadStart,
+    onUploadProgress,
+    onUploadComplete,
+    onUploadError,
+    onQueueComplete,
+  ]);
 
   // Render methods
   const renderDragDropArea = () => {
@@ -354,17 +392,15 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             <Text style={styles.dragText}>Drop files here</Text>
           </View>
         )}
-        
+
         <View style={styles.uploadArea}>
           <Icon name="cloud-upload" size={64} color="#6C5CE7" />
           <Text style={styles.uploadTitle}>
             {dragConfig.multiple ? 'Drag & drop files here' : 'Drag & drop file here'}
           </Text>
-          <Text style={styles.uploadSubtitle}>
-            or click to browse
-          </Text>
+          <Text style={styles.uploadSubtitle}>or click to browse</Text>
         </View>
-        
+
         <TouchableOpacity
           style={styles.browseButton}
           onPress={() => setShowFilePicker(true)}
@@ -390,81 +426,57 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           </Text>
           <View style={styles.fileListActions}>
             {!isUploading && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={handleStartUpload}
-              >
+              <TouchableOpacity style={styles.actionButton} onPress={handleStartUpload}>
                 <Icon name="play-arrow" size={16} color="#6C5CE7" />
                 <Text style={styles.actionButtonText}>Start</Text>
               </TouchableOpacity>
             )}
-            
+
             {isUploading && !isPaused && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={pauseAll}
-              >
+              <TouchableOpacity style={styles.actionButton} onPress={pauseAll}>
                 <Icon name="pause" size={16} color="#FFA500" />
                 <Text style={styles.actionButtonText}>Pause</Text>
               </TouchableOpacity>
             )}
-            
+
             {isUploading && isPaused && (
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={resumeAll}
-              >
+              <TouchableOpacity style={styles.actionButton} onPress={resumeAll}>
                 <Icon name="play-arrow" size={16} color="#6BCF7F" />
                 <Text style={styles.actionButtonText}>Resume</Text>
               </TouchableOpacity>
             )}
-            
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => setShowQueue(true)}
-            >
+
+            <TouchableOpacity style={styles.actionButton} onPress={() => setShowQueue(true)}>
               <Icon name="list" size={16} color="#7F8C8D" />
               <Text style={styles.actionButtonText}>Queue</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={clear}
-            >
+
+            <TouchableOpacity style={styles.actionButton} onPress={clear}>
               <Icon name="clear" size={16} color="#FF6B6B" />
               <Text style={styles.actionButtonText}>Clear</Text>
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <ScrollView style={styles.fileItems}>
           {files.map((file) => (
             <View key={file.id} style={styles.fileItem}>
-              <TouchableOpacity
-                style={styles.filePreview}
-                onPress={() => handlePreviewFile(file)}
-              >
+              <TouchableOpacity style={styles.filePreview} onPress={() => handlePreviewFile(file)}>
                 {file.thumbnail ? (
                   <Image source={{ uri: file.thumbnail }} style={styles.fileThumbnail} />
                 ) : (
                   <View style={styles.fileIcon}>
-                    <Icon
-                      name={getFileIcon(file.type)}
-                      size={32}
-                      color="#7F8C8D"
-                    />
+                    <Icon name={getFileIcon(file.type)} size={32} color="#7F8C8D" />
                   </View>
                 )}
               </TouchableOpacity>
-              
+
               <View style={styles.fileInfo}>
                 <Text style={styles.fileName} numberOfLines={1}>
                   {file.name}
                 </Text>
-                <Text style={styles.fileSize}>
-                  {formatFileSize(file.size)}
-                </Text>
-                
+                <Text style={styles.fileSize}>{formatFileSize(file.size)}</Text>
+
                 <UploadProgress
                   file={file}
                   compact={true}
@@ -474,18 +486,18 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                   onRetry={() => handleRetryFile(file.id)}
                 />
               </View>
-              
+
               <View style={styles.fileActions}>
                 {file.status.state === 'completed' && (
                   <Icon name="check-circle" size={24} color="#6BCF7F" />
                 )}
-                
+
                 {file.status.state === 'failed' && (
                   <TouchableOpacity onPress={() => handleRetryFile(file.id)}>
                     <Icon name="refresh" size={24} color="#FFA500" />
                   </TouchableOpacity>
                 )}
-                
+
                 {(file.status.state === 'pending' || file.status.state === 'uploading') && (
                   <TouchableOpacity onPress={() => handleRemoveFile(file.id)}>
                     <Icon name="close" size={24} color="#FF6B6B" />
@@ -510,37 +522,24 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
         <View style={styles.filePickerModal}>
           <View style={styles.filePickerHeader}>
             <Text style={styles.filePickerTitle}>Select Files</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowFilePicker(false)}
-            >
+            <TouchableOpacity style={styles.closeButton} onPress={() => setShowFilePicker(false)}>
               <Icon name="close" size={24} color="#34495E" />
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.filePickerOptions}>
-            <TouchableOpacity
-              style={styles.filePickerOption}
-              onPress={handleDocumentPicker}
-            >
+            <TouchableOpacity style={styles.filePickerOption} onPress={handleDocumentPicker}>
               <Icon name="description" size={32} color="#6C5CE7" />
               <Text style={styles.filePickerOptionText}>Documents</Text>
-              <Text style={styles.filePickerOptionSubtext}>
-                PDF, Word, Excel, etc.
-              </Text>
+              <Text style={styles.filePickerOptionSubtext}>PDF, Word, Excel, etc.</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.filePickerOption}
-              onPress={handleImagePicker}
-            >
+
+            <TouchableOpacity style={styles.filePickerOption} onPress={handleImagePicker}>
               <Icon name="image" size={32} color="#4ECDC4" />
               <Text style={styles.filePickerOptionText}>Images</Text>
-              <Text style={styles.filePickerOptionSubtext}>
-                Photos and images
-              </Text>
+              <Text style={styles.filePickerOptionSubtext}>Photos and images</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.filePickerOption}
               onPress={() => {
@@ -550,9 +549,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             >
               <Icon name="camera-alt" size={32} color="#FFA500" />
               <Text style={styles.filePickerOptionText}>Camera</Text>
-              <Text style={styles.filePickerOptionSubtext}>
-                Take photo or video
-              </Text>
+              <Text style={styles.filePickerOptionSubtext}>Take photo or video</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -606,7 +603,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
       {renderFilePickerModal()}
       {renderPreviewModal()}
       {renderQueueModal()}
-      
+
       {/* Hidden file input for web compatibility */}
       <input
         ref={fileInputRef}
@@ -641,11 +638,11 @@ const getFileIcon = (mimeType: string): string => {
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
