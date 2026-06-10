@@ -1,5 +1,4 @@
 #![no_std]
-#[macro_use] extern crate alloc;
 #[cfg(test)]
 mod test;
 mod privacyVerification;

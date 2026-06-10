@@ -1,5 +1,5 @@
 #![no_std]
-#[macro_use] extern crate alloc;
+use alloc::string::ToString;
 
 use soroban_sdk::{
     contract, contractimpl, contracttype, 
