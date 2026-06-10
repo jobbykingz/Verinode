@@ -96,9 +96,10 @@ export class MonitoringService {
     };
     
     this.startMetricsCollection();
+  }
+
   recordMetric(name: string, value: number, tags?: Record<string, string>): void {
     console.log(`[METRIC] ${name}: ${value}`, tags || {});
-  }
   }
 
   private getDefaultSystemMetrics(): SystemMetrics {
