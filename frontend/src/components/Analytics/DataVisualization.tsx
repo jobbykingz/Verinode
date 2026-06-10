@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ScatterChart, Scatter } from 'recharts';
-import { BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, Activity, Settings, Download, RefreshCw, Maximize2, Grid3x3 } from 'lucide-react';
+import { BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, Activity, Settings, Download, RefreshCw, Maximize2, LayoutGrid } from 'lucide-react';
 
 interface DataPoint {
   name: string;
@@ -320,7 +320,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({
                 className={`p-2 rounded ${visualizationConfig.type === 'scatter' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
                 title="Scatter plot"
               >
-                <Grid3x3 className="w-4 h-4" />
+                <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
             

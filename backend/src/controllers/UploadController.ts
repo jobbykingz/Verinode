@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import path from 'path';
+import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { getUploadService } from './UploadService';
 import { getFileProcessor } from './FileProcessor';
@@ -115,7 +116,7 @@ export class UploadController {
     res: Response
   ): Promise<void> {
     try {
-      const { fileId, fileName, fileSize, mimeType, totalChunks, metadata = req.body;
+      const { fileId, fileName, fileSize, mimeType, totalChunks, metadata } = req.body;
       
       // Validate request
       const validation = this.validateUploadRequest(fileSize, mimeType, fileName);
@@ -704,11 +705,11 @@ export class UploadController {
   createSecurityMiddleware() {
     return (req: Request, res, next) => {
       // Add security headers
-      res.setHeader('X-Content-Type-Options: nosniff');
-      res.setHeader('X-Frame-Options: 'DENY');
-      res.setHeader('X-XSS-Protection: '1; mode=block');
-      res.setHeader('Referrer-Policy': 'no-referrer');
-      res.setHeader('Content-Security-Policy': "default-src 'self'");
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '1; mode=block');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      res.setHeader('Content-Security-Policy', "default-src 'self'");
       
       next();
     };

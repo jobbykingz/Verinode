@@ -1,4 +1,4 @@
-import { EventAggregator } from './EventAggregator.ts';
+import { EventAggregator } from './EventAggregator';
 
 export class MetricsCalculator {
   private static instance: MetricsCalculator;

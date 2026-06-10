@@ -13,7 +13,7 @@ import {
   BarChart3,
   PieChart,
   LineChart,
-  Grid3X3,
+  LayoutGrid,
   Calendar,
   Filter,
   Move,
@@ -54,9 +54,9 @@ const widgetTypes = [
   { type: 'chart', icon: <LineChart className="w-4 h-4" />, label: 'Line Chart' },
   { type: 'bar', icon: <BarChart3 className="w-4 h-4" />, label: 'Bar Chart' },
   { type: 'pie', icon: <PieChart className="w-4 h-4" />, label: 'Pie Chart' },
-  { type: 'metric', icon: <Grid3X3 className="w-4 h-4" />, label: 'Metric Card' },
+  { type: 'metric', icon: <LayoutGrid className="w-4 h-4" />, label: 'Metric Card' },
   { type: 'table', icon: <FileText className="w-4 h-4" />, label: 'Data Table' },
-  { type: 'heatmap', icon: <Grid3X3 className="w-4 h-4" />, label: 'Heat Map' },
+  { type: 'heatmap', icon: <LayoutGrid className="w-4 h-4" />, label: 'Heat Map' },
 ];
 
 const CustomReports: React.FC<CustomReportsProps> = ({

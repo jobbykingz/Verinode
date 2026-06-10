@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { EncryptedData } from './HomomorphicEncryption';
+import { EncryptedData } from '../encryption/HomomorphicEncryption';
 
 export class EncryptionUtils {
   private static readonly ALGORITHM = 'aes-256-gcm';

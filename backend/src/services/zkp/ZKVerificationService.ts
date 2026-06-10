@@ -672,8 +672,8 @@ export class ZKVerificationService extends EventEmitter {
       failedVerifications: 0,
       averageVerificationTime: 0,
       totalGasUsed: 0,
-      verificationsByType: {},
-      verificationsByCircuit: {},
+      verificationsByType: {} as Record<ZKProofType, number>,
+      verificationsByCircuit: {} as Record<string, number>,
       successRate: 0,
       peakConcurrentVerifications: 0,
     };

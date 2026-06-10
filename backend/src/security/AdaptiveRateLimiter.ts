@@ -1,5 +1,5 @@
-import { getRedisClient } from '../config/redis.ts';
-import { ThreatDetector } from './ThreatDetector.ts';
+import { getRedisClient } from '../config/redis';
+import { ThreatDetector } from './ThreatDetector';
 
 export class AdaptiveRateLimiter {
   private static instance: AdaptiveRateLimiter;

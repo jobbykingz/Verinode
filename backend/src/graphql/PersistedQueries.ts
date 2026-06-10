@@ -1,5 +1,5 @@
 import { createHash } from 'crypto';
-import { getRedisClient } from '../config/redis.ts';
+import { getRedisClient } from '../config/redis';
 
 export class PersistedQueries {
   private static instance: PersistedQueries;

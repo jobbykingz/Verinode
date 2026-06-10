@@ -5,7 +5,7 @@ import ProofMetrics from '../components/Visualization/ProofMetrics';
 import TrendAnalysis from '../components/Visualization/TrendAnalysis';
 import HeatMap from '../components/Visualization/HeatMap';
 import CustomReports from '../components/Visualization/CustomReports';
-import { BarChart3, TrendingUp, Activity, Grid3X3, FileText, Home } from 'lucide-react';
+import { BarChart3, TrendingUp, Activity, LayoutGrid, FileText, Home } from 'lucide-react';
 
 type TabType = 'overview' | 'proofs' | 'trends' | 'heatmap' | 'reports';
 
@@ -16,7 +16,7 @@ const VisualizationDashboard: React.FC = () => {
     { id: 'overview' as TabType, label: 'Analytics Overview', icon: <BarChart3 className="w-4 h-4" /> },
     { id: 'proofs' as TabType, label: 'Proof Metrics', icon: <Activity className="w-4 h-4" /> },
     { id: 'trends' as TabType, label: 'Trend Analysis', icon: <TrendingUp className="w-4 h-4" /> },
-    { id: 'heatmap' as TabType, label: 'Usage Heat Map', icon: <Grid3X3 className="w-4 h-4" /> },
+    { id: 'heatmap' as TabType, label: 'Usage Heat Map', icon: <LayoutGrid className="w-4 h-4" /> },
     { id: 'reports' as TabType, label: 'Custom Reports', icon: <FileText className="w-4 h-4" /> },
   ];
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import * as d3 from 'd3';
-import { Calendar, Filter, Download, Maximize2, Grid3X3 } from 'lucide-react';
+import { Calendar, Filter, Download, Maximize2, LayoutGrid } from 'lucide-react';
 
 interface HeatMapData {
   x: string;

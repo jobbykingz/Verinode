@@ -834,7 +834,7 @@ export class ContractSecurityService {
         priority || 1
       );
 
-      const operation = this.timeLock.get_operation(&operationId);
+      const operation = this.timeLock.get_operation(operationId);
       return {
         operationId,
         unlockTime: operation?.unlock_time || 0
@@ -853,7 +853,7 @@ export class ContractSecurityService {
         throw new BadRequestException('Insufficient permissions to execute time lock operation');
       }
 
-      const result = this.timeLock.execute_operation(&operationId, executor);
+      const result = this.timeLock.execute_operation(operationId, executor);
 
       // Log the execution
       await this.securityAudit.log_event(

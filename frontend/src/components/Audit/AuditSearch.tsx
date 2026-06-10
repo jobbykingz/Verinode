@@ -198,7 +198,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
 
   // Get severity color
   const getSeverityColor = (severity: AuditSeverity) => {
-    return auditService.getSeverityColor(severity);
+    return AuditService.getSeverityColor(severity);
   };
 
   // Get status color
@@ -298,7 +298,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                         <SelectContent>
                           {Object.values(AuditEventType).map((type) => (
                             <SelectItem key={type} value={type}>
-                              {auditService.getEventTypeLabel(type)}
+                              {AuditService.getEventTypeLabel(type)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -319,7 +319,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                         <SelectContent>
                           {Object.values(AuditSeverity).map((severity) => (
                             <SelectItem key={severity} value={severity}>
-                              {auditService.getSeverityLabel(severity)}
+                              {AuditService.getSeverityLabel(severity)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -470,7 +470,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                             }}
                           />
                           <Label htmlFor={eventType} className="text-sm">
-                            {auditService.getEventTypeLabel(eventType)}
+                            {AuditService.getEventTypeLabel(eventType)}
                           </Label>
                         </div>
                       ))}
@@ -704,7 +704,7 @@ export const AuditSearch: React.FC<AuditSearchProps> = ({
                       <div className="flex items-center space-x-4 text-xs text-gray-500">
                         <span className="flex items-center">
                           <Clock className="h-3 w-3 mr-1" />
-                          {auditService.formatTimestamp(event.timestamp)}
+                          {AuditService.formatTimestamp(event.timestamp)}
                         </span>
                         {event.ipAddress && (
                           <span className="flex items-center">

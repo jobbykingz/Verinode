@@ -655,66 +655,66 @@ export class ValidationService extends EventEmitter {
   // Default validator implementations
 
   private validateExecutableContent = async (buffer: Buffer): Promise<ContentValidationResult> => {
-  const result: ContentValidationResult = {
-    isValid: true,
-    errors: [],
-    warnings: [],
-    contentType: this.detectContentType(buffer),
-    contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
-    metadata: {},
+    const result: ContentValidationResult = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      contentType: this.detectContentType(buffer),
+      contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
+      metadata: {},
+    };
+    
+    // Check for executable signatures
+    const executableSignatures = [
+      '7f45b5', // ELF
+      '4d5a900', // MS-DOS executable
+      '4d5a002', // PE
+      'cafebabe', // Java class
+      'feedface', // Mach-O binary
+      'cafebabe', // Mach-O universal binary
+      '7f45b5', // ELF
+    ];
+    
+    const header = buffer.slice(0, 4).toString('hex');
+    
+    if (executableSignatures.includes(header)) {
+      result.isValid = false;
+      result.errors.push({
+        type: 'content',
+        message: 'Executable file detected',
+        field: 'content',
+        value: 'Executable content found',
+      });
+    }
+    
+    return result;
   };
-  
-  // Check for executable signatures
-  const executableSignatures = [
-    '7f45b5', // ELF
-    '4d5a900', // MS-DOS executable
-    '4d5a002', // PE
-    'cafebabe', // Java class
-    'feedface', // Mach-O binary
-    'cafebabe', // Mach-O universal binary
-    '7f45b5', // ELF
-  ];
-  
-  const header = buffer.slice(0, 4).toString('hex');
-  
-  if (executableSignatures.includes(header)) {
-    result.isValid = false;
-    result.errors.push({
-      type: 'content',
-      message: 'Executable file detected',
-      field: 'content',
-      value: 'Executable content found',
-    });
-  }
-  
-  return result;
-};
 
-private validateScriptContent = async (buffer: Buffer): Promise<ContentValidationResult> => {
-  const result: ContentValidationResult = {
-    isValid: true,
-    errors: [],
-    warnings: [],
-    contentType: this.detectContentType(buffer),
-    contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
-    metadata: {},
-  };
-  
-  // Check for script signatures
-  const scriptSignatures = [
-    '%PDF', // PDF with JavaScript
-    '<script', // HTML script tag
-    'javascript:', // JavaScript code
-    'eval(', // eval function
-    'Function(', // Function constructor
-    'document.cookie', // Cookie access
-    'localStorage.', // LocalStorage access
-    'sessionStorage.', // SessionStorage access
-  ];
-  
-  const content = buffer.toString('utf8', 0, 1024); // Check first 1KB
-  
-  for (const signature of scriptSignatures) {
+  private validateScriptContent = async (buffer: Buffer): Promise<ContentValidationResult> => {
+    const result: ContentValidationResult = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      contentType: this.detectContentType(buffer),
+      contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
+      metadata: {},
+    };
+    
+    // Check for script signatures
+    const scriptSignatures = [
+      '%PDF', // PDF with JavaScript
+      '<script', // HTML script tag
+      'javascript:', // JavaScript code
+      'eval(', // eval function
+      'Function(', // Function constructor
+      'document.cookie', // Cookie access
+      'localStorage.', // LocalStorage access
+      'sessionStorage.', // SessionStorage access
+    ];
+    
+    const content = buffer.toString('utf8', 0, 1024); // Check first 1KB
+    
+    for (const signature of scriptSignatures) {
       if (content.includes(signature)) {
         result.isValid = false;
         result.errors.push({
@@ -726,132 +726,120 @@ private validateScriptContent = async (buffer: Buffer): Promise<ContentValidatio
         break;
       }
     }
-  
-  return result;
-};
-
-private validateMalwareContent = async (buffer: Buffer): Promise<ContentValidationResult> => {
-  const result: ContentValidationResult = {
-    isValid: true,
-    errors: [],
-    warnings: [],
-    contentType: this.detectContentType(buffer),
-    contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
-    metadata: {},
+    
+    return result;
   };
-  
-  // Check for known malware patterns
-  const malwarePatterns = [
-    /eval\s*\(/gi,
-    /document\.write\s*\(/gi,
-    /window\.location\s*=/gi,
-    /XMLHttpRequest\s*=/gi,
-    /ActiveXObject\s*=/gi,
-    /CreateObject\s*=/gi,
-    /setTimeout\s*\(/gi,
-    /setInterval\s*\(/gi,
-  ];
-  
-  const content = buffer.toString('utf8');
-  
-  for (const pattern of malwarePatterns) {
-    if (pattern.test(content)) {
-      result.isValid = false;
-      result.errors.push({
-        type: 'content',
-        message: 'Suspicious code pattern detected',
-        field: 'content',
-        value: pattern.source,
-      });
+
+  private validateMalwareContent = async (buffer: Buffer): Promise<ContentValidationResult> => {
+    const result: ContentValidationResult = {
+      isValid: true,
+      errors: [],
+      warnings: [],
+      contentType: this.detectContentType(buffer),
+      contentHash: crypto.createHash('sha256').update(buffer).digest('hex'),
+      metadata: {},
+    };
+    
+    // Check for known malware patterns
+    const malwarePatterns = [
+      /eval\s*\(/gi,
+      /document\.write\s*\(/gi,
+      /window\.location\s*=/gi,
+      /XMLHttpRequest\s*=/gi,
+      /ActiveXObject\s*=/gi,
+      /CreateObject\s*=/gi,
+      /setTimeout\s*\(/gi,
+      /setInterval\s*\(/gi,
+    ];
+    
+    const content = buffer.toString('utf8');
+    
+    for (const pattern of malwarePatterns) {
+      if (pattern.test(content)) {
+        result.isValid = false;
+        result.errors.push({
+          type: 'content',
+          message: 'Suspicious code pattern detected',
+          field: 'content',
+          value: pattern.source,
+        });
+      }
     }
-  }
-  
-  return result;
-};
+    
+    return result;
+  };
 
-private validateFileNameCharacters = (fileName: string): boolean => {
-  // Check for invalid characters
-  const invalidChars = /[<>:"/\\|?*\x00-\x1f]/;
-  return !invalidChars.test(fileName);
-};
+  private validateFileNameCharacters = (fileName: string): boolean => {
+    // Check for invalid characters
+    const invalidChars = /[<>:"/\\|?*\x00-\x1f]/;
+    return !invalidChars.test(fileName);
+  };
 
-private validateReservedNames = (fileName: string): boolean => {
-  // Check for reserved names (Windows)
-  const reservedNames = [
-    'CON', 'PRN', 'AUX', 'NUL',
-    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
-    'CLOCK$',
-  ];
-  
-  const baseName = fileName.split('.')[0].toUpperCase();
-  return !reservedNames.includes(baseName);
-};
+  private validateReservedNames = (fileName: string): boolean => {
+    // Check for reserved names (Windows)
+    const reservedNames = [
+      'CON', 'PRN', 'AUX', 'NUL',
+      'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
+      'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9',
+      'CLOCK$',
+    ];
+    
+    const baseName = fileName.split('.')[0].toUpperCase();
+    return !reservedNames.includes(baseName);
+  };
 
-private validatePathTraversal = (filePath: string): boolean => {
-  // Check for path traversal patterns
-  const traversalPatterns = [
-    '../',
-    '..\\',
-    '..\\',
-    '../../',
-    '..\\..\\',
-  ];
-  
-  return !traversalPatterns.some(pattern => filePath.includes(pattern));
-};
+  private validatePathTraversal = (filePath: string): boolean => {
+    // Check for path traversal patterns
+    const traversalPatterns = [
+      '../',
+      '..\\',
+      '../../',
+      '..\\..\\',
+    ];
+    
+    return !traversalPatterns.some(pattern => filePath.includes(pattern));
+  };
 
-private validateAbsolutePath = (filePath: string): boolean => {
-  // Check if path is absolute
-  return path.isAbsolute(filePath);
-};
+  private validateAbsolutePath = (filePath: string): boolean => {
+    // Check if path is absolute
+    return path.isAbsolute(filePath);
+  };
 
-private validatePathTraversal = (filePath: string): boolean => {
-  // Check for path traversal patterns
-  const traversalPatterns = [
-    '../',
-    '..\\',
-    '../../',
-    '..\\..\\',
-  ];
-  
-  return !traversalPatterns.some(pattern => filePath.includes(pattern));
-};
+  private validateZipBomb = (buffer: Buffer): boolean => {
+    // Check for ZIP bomb signatures
+    const zipBombSignatures = [
+      '504b030', // ZIP file signature
+    ];
+    
+    const header = buffer.slice(0, 4).toString('hex');
+    
+    if (!zipBombSignatures.includes(header)) {
+      return true; // Not a ZIP file
+    }
+    
+    // Check for excessive file count in ZIP
+    try {
+      // This would require parsing the ZIP file structure
+      // For now, check file size
+      const maxZipSize = 100 * 1024 * 1024; // 100MB
+      return buffer.length <= maxZipSize;
+    } catch (error) {
+      return false;
+    }
+  };
 
-private validateZipBomb = (buffer: Buffer): boolean => {
-  // Check for ZIP bomb signatures
-  const zipBombSignatures = [
-    '504b030', // ZIP file signature
-  ];
-  
-  const header = buffer.slice(0, 4).toString('hex');
-  
-  if (!zipBombSignatures.includes(header)) {
-    return true; // Not a ZIP file
-  }
-  
-  // Check for excessive file count in ZIP
-  try {
-    // This would require parsing the ZIP file structure
-    // For now, check file size
-    const maxZipSize = 100 * 1024 * 1024; // 100MB
-    return buffer.length <= maxZipSize;
-  } catch (error) {
-    return false;
-  }
-};
-
-private validateSuspiciousExif = (buffer: Buffer): boolean => {
-  // Check for suspicious EXIF data
-  try {
-    // This would require parsing EXIF data
-    // For now, check file size
-    const maxExifSize = 64 * 1024; // 64KB
-    return buffer.length <= maxExifSize;
-  } catch (error) {
-    return false;
-  }
-};
+  private validateSuspiciousExif = (buffer: Buffer): boolean => {
+    // Check for suspicious EXIF data
+    try {
+      // This would require parsing EXIF data
+      // For now, check file size
+      const maxExifSize = 64 * 1024; // 64KB
+      return buffer.length <= maxExifSize;
+    } catch (error) {
+      return false;
+    }
+  };
+}
 
 // Export singleton instance
 let validationService: ValidationService | null = null;

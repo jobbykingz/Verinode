@@ -1,6 +1,6 @@
-import { StreamProcessor } from '../analytics/StreamProcessor.ts';
-import { EventAggregator } from '../analytics/EventAggregator.ts';
-import { MetricsCalculator } from '../analytics/MetricsCalculator.ts';
+import { StreamProcessor } from '../analytics/StreamProcessor';
+import { EventAggregator } from '../analytics/EventAggregator';
+import { MetricsCalculator } from '../analytics/MetricsCalculator';
 
 export class AnalyticsService {
   private static instance: AnalyticsService;

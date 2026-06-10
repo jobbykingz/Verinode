@@ -1,5 +1,5 @@
 import { createHash, createSign } from 'crypto';
-import AuditLog, { IAuditLog, EventType } from '../models/AuditLog.ts';
+import AuditLog, { IAuditLog, EventType } from '../models/AuditLog';
 import { v4 as uuidv4 } from 'uuid';
 
 export class AuditLogger {

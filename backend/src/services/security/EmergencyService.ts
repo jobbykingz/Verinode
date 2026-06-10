@@ -163,7 +163,7 @@ export class EmergencyService extends EventEmitter {
 
       // Log the emergency request
       await this.securityAudit.log_event(
-        AuditEventType::EmergencyAction,
+        AuditEventType.EmergencyAction,
         this.mapSeverity(severity),
         `Emergency request created: ${type}`,
         requestedBy,
@@ -236,8 +236,8 @@ export class EmergencyService extends EventEmitter {
 
       // Log the approval
       await this.securityAudit.log_event(
-        AuditEventType::EmergencyAction,
-        SeverityLevel::High,
+        AuditEventType.EmergencyAction,
+        SeverityLevel.High,
         `Emergency request approved: ${requestId}`,
         approvedBy,
         request.contractAddress,
@@ -316,8 +316,8 @@ export class EmergencyService extends EventEmitter {
 
       // Log the execution
       await this.securityAudit.log_event(
-        AuditEventType::EmergencyAction,
-        SeverityLevel::Critical,
+        AuditEventType.EmergencyAction,
+        SeverityLevel.Critical,
         `Emergency request executed: ${requestId}`,
         executor,
         request.contractAddress,
@@ -390,7 +390,7 @@ export class EmergencyService extends EventEmitter {
       
       await this.emergencyPause.create_emergency_action(
         actionId,
-        EmergencyActionType::ContractUpgrade, // Using as contract pause
+        EmergencyActionType.ContractUpgrade, // Using as contract pause
         request.contractAddress,
         Buffer.from('pause'), // Simplified pause data
         executor,
@@ -399,8 +399,8 @@ export class EmergencyService extends EventEmitter {
 
       // For critical emergencies, auto-approve and execute
       if (request.severity === 'Critical') {
-        await this.emergencyPause.approve_emergency_action(&actionId, executor);
-        const action = this.emergencyPause.execute_emergency_action(&actionId, executor);
+        await this.emergencyPause.approve_emergency_action(actionId, executor);
+        const action = this.emergencyPause.execute_emergency_action(actionId, executor);
         this.activeEmergencyActions.set(actionId, action);
       }
 
@@ -439,7 +439,7 @@ export class EmergencyService extends EventEmitter {
         targetAddress,
         BigInt(amount),
         Buffer.from('emergency_withdraw'),
-        TransactionType::EmergencyWithdraw,
+        TransactionType.EmergencyWithdraw,
         undefined,
         undefined,
         new Map(Object.entries(request.metadata)),
@@ -491,7 +491,7 @@ export class EmergencyService extends EventEmitter {
       
       await this.emergencyPause.create_emergency_action(
         actionId,
-        EmergencyActionType::AccountFreeze,
+        EmergencyActionType.AccountFreeze,
         targetAccount,
         Buffer.from('freeze'),
         executor,
@@ -532,7 +532,7 @@ export class EmergencyService extends EventEmitter {
       
       await this.emergencyPause.create_emergency_action(
         actionId,
-        EmergencyActionType::TokenFreeze,
+        EmergencyActionType.TokenFreeze,
         tokenAddress,
         Buffer.from('token_freeze'),
         executor,
@@ -574,7 +574,7 @@ export class EmergencyService extends EventEmitter {
       
       await this.timeLock.create_time_lock(
         operationId,
-        OperationType::ContractUpgrade,
+        OperationType.ContractUpgrade,
         contractAddress,
         Buffer.from(newImplementation),
         executor,
@@ -619,16 +619,16 @@ export class EmergencyService extends EventEmitter {
 
       switch (responseAction) {
         case 'pause':
-          actionType = EmergencyActionType::ContractUpgrade;
+          actionType = EmergencyActionType.ContractUpgrade;
           break;
         case 'freeze':
-          actionType = EmergencyActionType::TokenFreeze;
+          actionType = EmergencyActionType.TokenFreeze;
           break;
         case 'withdraw':
-          actionType = EmergencyActionType::EmergencyWithdraw;
+          actionType = EmergencyActionType.EmergencyWithdraw;
           break;
         default:
-          actionType = EmergencyActionType::Custom(responseAction);
+          actionType = EmergencyActionType.Custom(responseAction);
       }
 
       await this.emergencyPause.create_emergency_action(
@@ -697,8 +697,8 @@ export class EmergencyService extends EventEmitter {
       this.emergencyPause.resume(executor);
 
       await this.securityAudit.log_event(
-        AuditEventType::EmergencyAction,
-        SeverityLevel::High,
+        AuditEventType.EmergencyAction,
+        SeverityLevel.High,
         'Emergency resume executed',
         executor,
         null,
@@ -734,8 +734,8 @@ export class EmergencyService extends EventEmitter {
       this.emergencyPause.update_config(newConfig, updater);
 
       await this.securityAudit.log_event(
-        AuditEventType::ConfigurationChange,
-        SeverityLevel::High,
+        AuditEventType.ConfigurationChange,
+        SeverityLevel.High,
         'Emergency configuration updated',
         updater,
         null,
@@ -802,19 +802,19 @@ export class EmergencyService extends EventEmitter {
 
   private mapSeverity(severity: 'Low' | 'Medium' | 'High' | 'Critical'): SeverityLevel {
     switch (severity) {
-      case 'Low': return SeverityLevel::Low;
-      case 'Medium': return SeverityLevel::Medium;
-      case 'High': return SeverityLevel::High;
-      case 'Critical': return SeverityLevel::Critical;
+      case 'Low': return SeverityLevel.Low;
+      case 'Medium': return SeverityLevel.Medium;
+      case 'High': return SeverityLevel.High;
+      case 'Critical': return SeverityLevel.Critical;
     }
   }
 
   private mapEmergencyLevel(severity: 'Low' | 'Medium' | 'High' | 'Critical'): EmergencyLevel {
     switch (severity) {
-      case 'Low': return EmergencyLevel::Low;
-      case 'Medium': return EmergencyLevel::Medium;
-      case 'High': return EmergencyLevel::High;
-      case 'Critical': return EmergencyLevel::Critical;
+      case 'Low': return EmergencyLevel.Low;
+      case 'Medium': return EmergencyLevel.Medium;
+      case 'High': return EmergencyLevel.High;
+      case 'Critical': return EmergencyLevel.Critical;
     }
   }
 

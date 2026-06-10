@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import { ZKProof, ZKProofType, ZKProofStatus } from '../../models/ZKProof';
-import { ZKCircuit } from '../zkp/ZKVerificationService';
+import { ZKCircuit } from '../../models/ZKProof';
 import { WinstonLogger } from '../../utils/logger';
 
 export interface ZKProofGenerationRequest {

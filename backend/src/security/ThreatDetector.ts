@@ -1,5 +1,5 @@
-import ThreatPattern, { IThreatPattern } from '../models/ThreatPattern.ts';
-import { getRedisClient } from '../config/redis.ts';
+import ThreatPattern, { IThreatPattern } from '../models/ThreatPattern';
+import { getRedisClient } from '../config/redis';
 
 export class ThreatDetector {
   private static instance: ThreatDetector;

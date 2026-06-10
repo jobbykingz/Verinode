@@ -1,4 +1,4 @@
-import { getRedisClient } from '../config/redis.ts';
+import { getRedisClient } from '../config/redis';
 
 export class ResponseCache {
   private static instance: ResponseCache;

@@ -44,7 +44,7 @@ import {
   XCircle,
   AlertCircle,
 } from 'lucide-react';
-import { auditService, AuditLog, ServiceStatistics, MonitoringAlert, AuditAnalytics } from '../../services/auditService';
+import { auditService, AuditService, AuditLog, ServiceStatistics, MonitoringAlert, AuditAnalytics } from '../../services/auditService';
 import { AuditSeverity, AuditStatus, AuditEventType } from '../../services/auditService';
 
 /**
@@ -168,8 +168,8 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
     }
 
     return {
-      fromDate: auditService.formatDate(fromDate),
-      toDate: auditService.formatDate(now)
+      fromDate: AuditService.formatDate(fromDate),
+      toDate: AuditService.formatDate(now)
     };
   };
 
@@ -403,7 +403,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                           <p className="font-medium">{alert.title}</p>
                           <p className="text-sm text-gray-600">{alert.message}</p>
                           <p className="text-xs text-gray-500">
-                            {auditService.formatTimestamp(alert.timestamp)}
+                            {AuditService.formatTimestamp(alert.timestamp)}
                           </p>
                         </div>
                       </div>
@@ -452,7 +452,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                         </div>
                       </div>
                       <p className="text-sm text-gray-500">
-                        {auditService.formatTimestamp(user.lastActivity)}
+                        {AuditService.formatTimestamp(user.lastActivity)}
                       </p>
                     </div>
                   ))}
@@ -472,12 +472,12 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis 
                       dataKey="eventType" 
-                      tickFormatter={(value) => auditService.truncateText(value, 10)}
+                      tickFormatter={(value) => AuditService.truncateText(value, 10)}
                     />
                     <YAxis />
                     <Tooltip 
                       formatter={(value, name) => [value, 'Count']}
-                      labelFormatter={(value) => auditService.getEventTypeLabel(value as AuditEventType)}
+                      labelFormatter={(value) => AuditService.getEventTypeLabel(value as AuditEventType)}
                     />
                     <Bar dataKey="count" fill="#3b82f6" />
                   </BarChart>
@@ -546,7 +546,7 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                           <p className="font-medium">{alert.title}</p>
                           <p className="text-sm text-gray-600">{alert.message}</p>
                           <p className="text-xs text-gray-500">
-                            {auditService.formatTimestamp(alert.timestamp)}
+                            {AuditService.formatTimestamp(alert.timestamp)}
                           </p>
                         </div>
                       </div>
@@ -593,14 +593,14 @@ export const AuditDashboard: React.FC<AuditDashboardProps> = ({ className, onNav
                           {event.resourceType} - {event.userId || 'System'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {auditService.formatTimestamp(event.timestamp)}
+                          {AuditService.formatTimestamp(event.timestamp)}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Badge variant="outline">{event.eventType}</Badge>
                       <Badge 
-                        style={{ backgroundColor: auditService.getSeverityColor(event.severity) }}
+                        style={{ backgroundColor: AuditService.getSeverityColor(event.severity) }}
                         className="text-white"
                       >
                         {event.severity}

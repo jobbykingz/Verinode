@@ -1,5 +1,5 @@
-import { AdaptiveRateLimiter } from '../security/AdaptiveRateLimiter.ts';
-import { ThreatDetector } from '../security/ThreatDetector.ts';
+import { AdaptiveRateLimiter } from '../security/AdaptiveRateLimiter';
+import { ThreatDetector } from '../security/ThreatDetector';
 
 export class RateLimitingService {
   private static instance: RateLimitingService;

@@ -119,7 +119,7 @@ const SnapshotSchema = new Schema<ISnapshot>({
 });
 
 // Compound indexes for optimal query performance
-SnapshotSchema.index({ aggregateId: 1, isActive: 1, snapshotMetadata.sequenceNumber: -1 });
+SnapshotSchema.index({ aggregateId: 1, isActive: 1, 'snapshotMetadata.sequenceNumber': -1 });
 SnapshotSchema.index({ aggregateType: 1, aggregateId: 1, isActive: 1 });
 SnapshotSchema.index({ isActive: 1, expiresAt: 1 });
 SnapshotSchema.index({ 'snapshotMetadata.lastEventTimestamp': -1 });

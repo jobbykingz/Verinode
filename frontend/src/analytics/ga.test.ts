@@ -1,3 +1,4 @@
+export {};
 describe('GA analytics wrapper', () => {
   const originalEnv = process.env;
 

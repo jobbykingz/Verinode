@@ -1,4 +1,4 @@
-import AuditLog, { IAuditLog } from '../models/AuditLog.ts';
+import AuditLog, { IAuditLog } from '../models/AuditLog';
 
 export class ForensicAnalyzer {
   private static instance: ForensicAnalyzer;

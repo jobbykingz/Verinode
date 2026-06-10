@@ -36,8 +36,8 @@ export const ScreenReader: React.FC<ScreenReaderProps> = ({
   } = useAccessibility();
   
   const [announcementQueue, setAnnouncementQueue] = useState<Announcement[]>([]);
-  const politeRegionRef = useRef<HTMLDivElement>(null);
-  const assertiveRegionRef = useRef<HTMLDivElement>(null);
+  const politeRegionRef = useRef<HTMLDivElement | null>(null);
+  const assertiveRegionRef = useRef<HTMLDivElement | null>(null);
   const [isDetected, setIsDetected] = useState(false);
 
   // Auto-detect screen reader

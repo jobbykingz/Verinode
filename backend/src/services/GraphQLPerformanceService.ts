@@ -1,6 +1,6 @@
-import { QueryOptimizer } from '../graphql/QueryOptimizer.ts';
-import { PersistedQueries } from '../graphql/PersistedQueries.ts';
-import { ResponseCache } from '../graphql/ResponseCache.ts';
+import { QueryOptimizer } from '../graphql/QueryOptimizer';
+import { PersistedQueries } from '../graphql/PersistedQueries';
+import { ResponseCache } from '../graphql/ResponseCache';
 import { parse, DocumentNode } from 'graphql';
 
 export class GraphQLPerformanceService {
