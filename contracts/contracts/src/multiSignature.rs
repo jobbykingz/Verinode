@@ -39,7 +39,7 @@ impl MultiSignatureContract {
             .unwrap_or_else(|| Vec::new(&env));
 
         // Check if signer already exists
-        if signers.contains(&signer) {
+        if signers.contains_key(&signer) {
             return Err("Signer already exists".into());
         }
 
@@ -94,7 +94,7 @@ impl MultiSignatureContract {
             .get(&Symbol::new(&b"signers"))
             .unwrap_or_else(|| Vec::new(&env));
 
-        if !signers.contains(&env.invoker()) {
+        if !signers.contains_key(&env.invoker()) {
             return Err("Not an authorized signer".into());
         }
 
@@ -134,7 +134,7 @@ impl MultiSignatureContract {
             .get(&Symbol::new(&b"signers"))
             .unwrap_or_else(|| Vec::new(&env));
 
-        if !signers.contains(&env.invoker()) {
+        if !signers.contains_key(&env.invoker()) {
             return Err("Not an authorized signer".into());
         }
 

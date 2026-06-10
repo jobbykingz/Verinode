@@ -247,7 +247,7 @@ impl CustomTemplateContract {
                 let template_tags = template.tags;
                 let mut has_tag = false;
                 for tag in tag_list.iter() {
-                    if template_tags.contains(tag) {
+                    if template_tags.contains_key(tag) {
                         has_tag = true;
                         break;
                     }
@@ -465,7 +465,7 @@ impl CustomTemplateContract {
         // Validate field IDs are unique
         let mut field_ids = Vec::new(&e);
         for field in template.fields.iter() {
-            if field_ids.contains(&field.id) {
+            if field_ids.contains_key(&field.id) {
                 return false;
             }
             field_ids.push_back(field.id.clone());
@@ -540,7 +540,7 @@ impl CustomTemplateContract {
                 if let Some(ref pattern) = field.pattern {
                     // In a real implementation, you'd use regex matching
                     // This is a simplified check
-                    if !value.contains(pattern.as_str()) {
+                    if !value.contains_key(pattern.as_str()) {
                         return false;
                     }
                 }
@@ -552,7 +552,7 @@ impl CustomTemplateContract {
 
     /// Helper function to validate email
     fn is_valid_email(email: &String) -> bool {
-        email.contains("@") && email.contains(".")
+        email.contains_key("@") && email.contains_key(".")
     }
 
     /// Helper function to validate URL

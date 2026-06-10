@@ -220,7 +220,7 @@ impl ZKProofContract {
             .get(&verified_key)
             .unwrap_or_else(|| Vec::new(env));
         
-        verified_proofs.contains(&proof_id)
+        verified_proofs.contains_key(&proof_id)
     }
 }
 

@@ -62,6 +62,7 @@ export interface ITask extends Document {
     affectedVersion?: string;
     fixedVersion?: string;
   };
+  addHistory(action: string, field: string, oldValue: any, newValue: any, author: string): void;
   createdAt: Date;
   updatedAt: Date;
 }

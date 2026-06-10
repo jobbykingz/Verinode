@@ -113,7 +113,7 @@ impl PrivacyVerification {
 
         // Verify disclosed fields match policy
         for field in disclosure_policy.disclosed_fields.iter() {
-            if !disclosed_data.contains(field.clone()) {
+            if !disclosed_data.contains_key(field.clone()) {
                 return false;
             }
         }
@@ -331,7 +331,7 @@ impl PrivacyVerification {
         ]);
 
         for field in essential_fields.iter() {
-            if proof_data.contains(field.clone()) {
+            if proof_data.contains_key(field.clone()) {
                 filtered_data.set(field.clone(), proof_data.get(field.clone()).unwrap());
             }
         }
@@ -339,7 +339,7 @@ impl PrivacyVerification {
         // Add additional fields based on requester permissions
         if privacy_settings.visibility == 1 || 
            Self::is_allowed_viewer(e, privacy_settings.allowed_viewers, requester, Vec::from_array(&e, [0])) {
-            if proof_data.contains(String::from_str(&e, "hash")) {
+            if proof_data.contains_key(String::from_str(&e, "hash")) {
                 filtered_data.set(String::from_str(&e, "hash"), proof_data.get(String::from_str(&e, "hash")).unwrap());
             }
         }

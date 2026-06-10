@@ -423,4 +423,5 @@ export const logger = {
   error: (msg: string, ...args: any[]) => console.error(`[ERROR] ${msg}`, ...args),
   warn: (msg: string, ...args: any[]) => console.warn(`[WARN] ${msg}`, ...args),
   debug: (msg: string, ...args: any[]) => console.debug(`[DEBUG] ${msg}`, ...args),
+  recordMetric: (name: string, value: number, tags?: Record<string, string>) => console.log(`[METRIC] ${name}: ${value}`, tags || {}),
 };

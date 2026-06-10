@@ -36,6 +36,11 @@ export interface IProject extends Document {
     lastActivity: Date;
   };
   createdAt: Date;
+  isMember(userId: string): boolean;
+  getUserRole(userId: string): string | null;
+  addMember(userId: string, role?: string): void;
+  removeMember(userId: string): void;
+  updateStatistics(): Promise<void>;
   updatedAt: Date;
 }
 

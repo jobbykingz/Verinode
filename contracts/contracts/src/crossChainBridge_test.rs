@@ -16,9 +16,9 @@ fn test_initialize() {
     
     let supported_chains = contract.get_supported_chains();
     assert_eq!(supported_chains.len(), 3);
-    assert!(supported_chains.contains(&1u32)); // Ethereum
-    assert!(supported_chains.contains(&137u32)); // Polygon
-    assert!(supported_chains.contains(&56u32)); // BSC
+    assert!(supported_chains.contains_key(&1u32)); // Ethereum
+    assert!(supported_chains.contains_key(&137u32)); // Polygon
+    assert!(supported_chains.contains_key(&56u32)); // BSC
 }
 
 #[test]

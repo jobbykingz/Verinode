@@ -108,7 +108,7 @@ impl CrossChainBridge {
         
         // Verify chains are supported
         let supported_chains = Self::get_supported_chains(env.clone());
-        if !supported_chains.contains(&source_chain) || !supported_chains.contains(&target_chain) {
+        if !supported_chains.contains_key(&source_chain) || !supported_chains.contains_key(&target_chain) {
             panic!("Unsupported chain");
         }
         
